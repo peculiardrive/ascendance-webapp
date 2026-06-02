@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1080" role="img" aria-label="Merchants of the Ivory Towers book cover">
+  <defs>
+    <linearGradient id="b2" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#11161d"/>
+      <stop offset="0.5" stop-color="#2d5d62"/>
+      <stop offset="1" stop-color="#e0d5b5"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="1080" fill="url(#b2)"/>
+  <path d="M148 792h424M190 792V300h340v492M246 792V386m114 406V266m114 526V386" stroke="#f6efdf" stroke-width="26" stroke-linecap="round"/>
+  <path d="M210 270 360 170l150 100H210Z" fill="#f6efdf" opacity=".88"/>
+  <text x="360" y="850" text-anchor="middle" font-family="Georgia, serif" font-size="44" fill="#fff9eb">ASCENDANCE</text>
+  <text x="360" y="914" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#fff9eb">Book Two</text>
+  <text x="360" y="984" text-anchor="middle" font-family="Georgia, serif" font-size="44" fill="#fff9eb">Merchants of the Ivory Towers</text>
+</svg>

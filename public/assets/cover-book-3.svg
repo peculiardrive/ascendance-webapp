@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1080" role="img" aria-label="Rhapsodies of the Coming Regent book cover">
+  <defs>
+    <linearGradient id="b3" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#151116"/>
+      <stop offset="0.48" stop-color="#29424d"/>
+      <stop offset="1" stop-color="#c7a24d"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="1080" fill="url(#b3)"/>
+  <path d="M174 364c92-140 280-140 372 0-68-36-304-36-372 0Z" fill="#f4e6c4"/>
+  <path d="M236 366 360 198l124 168M246 364v334m228-334v334M206 700h308" fill="none" stroke="#f4e6c4" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="360" cy="184" r="34" fill="#f4e6c4"/>
+  <text x="360" y="796" text-anchor="middle" font-family="Georgia, serif" font-size="44" fill="#fff7e6">ASCENDANCE</text>
+  <text x="360" y="860" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#fff7e6">Book Three</text>
+  <text x="360" y="930" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#fff7e6">Rhapsodies of the</text>
+  <text x="360" y="984" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#fff7e6">Coming Regent</text>
+</svg>
