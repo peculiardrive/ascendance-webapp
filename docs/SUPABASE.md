@@ -6,6 +6,25 @@ Supabase organization:
 https://supabase.com/dashboard/org/kiyycwzywfcdfptotnwk
 ```
 
+Supabase project:
+
+```text
+Ascendance Trilogy
+https://supabase.com/dashboard/project/bszaqbfrbmuhlwavpvrz
+```
+
+Project ref:
+
+```text
+bszaqbfrbmuhlwavpvrz
+```
+
+Region:
+
+```text
+eu-west-1
+```
+
 ## 1. Create Or Select A Project
 
 In the Supabase organization dashboard:
@@ -31,11 +50,11 @@ For Vercel/serverless Prisma usage, use:
 - `DATABASE_URL`: Transaction pooler connection string, usually port `6543`
 - `DIRECT_URL`: Session pooler or direct connection string, usually port `5432`
 
-Recommended:
+Recommended for this project:
 
 ```text
-DATABASE_URL="postgresql://postgres.PROJECT_REF:YOUR_PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.PROJECT_REF:YOUR_PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres"
+DATABASE_URL="postgresql://postgres.bszaqbfrbmuhlwavpvrz:YOUR_PASSWORD@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.bszaqbfrbmuhlwavpvrz:YOUR_PASSWORD@aws-0-eu-west-1.pooler.supabase.com:5432/postgres"
 ```
 
 Supabase's Prisma guide recommends using the pooler for serverless deployments and a direct/session connection for migrations. Transaction pooling on port `6543` should use `pgbouncer=true` so Prisma does not rely on prepared statements.
