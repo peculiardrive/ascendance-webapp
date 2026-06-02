@@ -104,13 +104,30 @@ export default function Home() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         email: formData.get("email"),
-        fullName: formData.get("fullName")
+        fullName: formData.get("fullName"),
+        password: formData.get("password")
       })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
     setUser(data.user);
     notify("Verification code: 123456");
+  }
+
+  async function login(formData) {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: formData.get("email"),
+        password: formData.get("password")
+      })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    setUser(data.user);
+    notify("Welcome back.");
+    await refreshState(data.user.id);
   }
 
   async function verifyEmail(formData) {
@@ -243,7 +260,7 @@ export default function Home() {
     <>
       <Splash />
       {!user || !isOnboarded ? (
-        <AuthView user={user} onSignup={signup} onVerify={verifyEmail} onProfile={updateProfile} />
+        <AuthView user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onProfile={updateProfile} />
       ) : (
         <AppShell view={view} setView={setView}>
           {view === "home" && (
@@ -295,20 +312,37 @@ function Splash() {
   );
 }
 
-function AuthView({ user, onSignup, onVerify, onProfile }) {
+function AuthView({ user, onSignup, onLogin, onVerify, onProfile }) {
   const step = user?.onboardingStep || "signin";
+  const [mode, setMode] = useState("signup");
+
   return (
     <main className="auth-page">
       <section className="auth-panel">
         <p className="eyebrow">Ascendance WebApp</p>
-        <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Community Identity" : "Enter Ascendance"}</h1>
-        <p>{step === "signin" ? "Create your account or continue reading." : "Complete this step to continue into the trilogy."}</p>
+        <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Community Identity" : mode === "login" ? "Welcome Back" : "Enter Ascendance"}</h1>
+        <p>{step === "signin" ? "Create your reader account or log in to continue reading." : "Complete this step to continue into the trilogy."}</p>
         {step === "signin" && (
-          <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid">
-            <label>Email<input name="email" type="email" placeholder="reader@example.com" required /></label>
-            <label>Full name<input name="fullName" placeholder="Your name" required /></label>
-            <button className="primary-btn">Continue with Email</button>
-          </form>
+          <>
+            <div className="auth-switch" role="tablist" aria-label="Authentication mode">
+              <button type="button" className={mode === "signup" ? "is-active" : ""} onClick={() => setMode("signup")}>Sign up</button>
+              <button type="button" className={mode === "login" ? "is-active" : ""} onClick={() => setMode("login")}>Log in</button>
+            </div>
+            {mode === "signup" ? (
+              <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid">
+                <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
+                <label>Full name<input name="fullName" placeholder="Your name" autoComplete="name" required /></label>
+                <label>Password<input name="password" type="password" placeholder="Minimum 8 characters" autoComplete="new-password" minLength={8} required /></label>
+                <button className="primary-btn">Create Account</button>
+              </form>
+            ) : (
+              <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
+                <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
+                <label>Password<input name="password" type="password" placeholder="Your password" autoComplete="current-password" required /></label>
+                <button className="primary-btn">Log In</button>
+              </form>
+            )}
+          </>
         )}
         {step === "verify" && (
           <form onSubmit={(event) => { event.preventDefault(); onVerify(new FormData(event.currentTarget)); }} className="form-grid">
