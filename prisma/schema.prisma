@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String            @id @default(cuid()) @map("user_id")
+  fullName         String            @map("full_name")
+  username         String?           @unique
+  email            String            @unique
+  phone            String?
+  countryCode      String            @default("NG") @map("country_code")
+  passwordHash     String?           @map("password_hash")
+  profileImage     String?           @map("profile_image")
+  avatar           String?
+  emailVerified    Boolean           @default(false) @map("email_verified")
+  signupMethod     String            @default("email") @map("signup_method")
+  onboardingStep   String            @default("verify") @map("onboarding_step")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  lastLogin        DateTime?         @map("last_login")
+  purchases        Purchase[]
+  readingProgress  ReadingProgress[]
+  sentGifts        Gift[]            @relation("GiftSender")
+  redeemedGifts    Gift[]            @relation("GiftRedeemer")
+  communityPosts   CommunityPost[]
+  comments         Comment[]
+  likes            PostLike[]
+
+  @@map("users")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid()) @map("admin_id")
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
+model Book {
+  id                 String            @id @default(cuid()) @map("book_id")
+  title              String
+  subtitle           String?
+  author             String
+  coverImage         String?           @map("cover_image")
+  blurb              String?
+  bookOrder          Int               @map("book_order")
+  price              Decimal           @default(0) @db.Decimal(12, 2)
+  status             String            @default("Draft")
+  freePreviewEnabled Boolean           @default(false) @map("free_preview_enabled")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  sections           Section[]
+  chapters           Chapter[]
+  purchases          Purchase[]
+  readingProgress    ReadingProgress[]
+  communityPosts     CommunityPost[]
+
+  @@index([bookOrder])
+  @@map("books")
+}
+
+model Section {
+  id              String            @id @default(cuid()) @map("section_id")
+  bookId          String            @map("book_id")
+  title           String
+  subtitle        String?
+  orderNumber     Int               @map("order_number")
+  price           Decimal           @default(0) @db.Decimal(12, 2)
+  status          String            @default("Draft")
+  ttsEnabled      Boolean           @default(true) @map("tts_enabled")
+  ttsVoice        String?           @map("tts_voice")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapters        Chapter[]
+  purchases       Purchase[]
+  readingProgress ReadingProgress[]
+
+  @@index([bookId, orderNumber])
+  @@map("sections")
+}
+
+model Chapter {
+  id              String            @id @default(cuid()) @map("chapter_id")
+  bookId          String            @map("book_id")
+  sectionId       String?           @map("section_id")
+  chapterTitle    String            @map("chapter_title")
+  chapterSubtitle String?           @map("chapter_subtitle")
+  chapterNumber   Int?              @map("chapter_number")
+  content         Json              @default("[]")
+  orderNumber     Int               @map("order_number")
+  isPreview       Boolean           @default(false) @map("is_preview")
+  status          String            @default("Draft")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  section         Section?          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  readingProgress ReadingProgress[]
+
+  @@index([bookId, orderNumber])
+  @@map("chapters")
+}
+
+model Purchase {
+  id               String   @id @default(cuid()) @map("purchase_id")
+  userId           String   @map("user_id")
+  productType      String   @map("product_type")
+  bookId           String?  @map("book_id")
+  sectionId        String?  @map("section_id")
+  amount           Decimal  @db.Decimal(12, 2)
+  paymentReference String   @unique @map("payment_reference")
+  paymentGateway   String   @map("payment_gateway")
+  paymentStatus    String   @map("payment_status")
+  createdAt        DateTime @default(now()) @map("created_at")
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book             Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  section          Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("purchases")
+}
+
+model ReadingProgress {
+  id                  String   @id @default(cuid()) @map("progress_id")
+  userId              String   @map("user_id")
+  bookId              String   @map("book_id")
+  sectionId           String?  @map("section_id")
+  chapterId           String   @map("chapter_id")
+  scrollPosition      Int      @default(0) @map("scroll_position")
+  percentageCompleted Decimal  @default(0) @map("percentage_completed") @db.Decimal(5, 2)
+  deviceType          String?  @map("device_type")
+  lastReadAt          DateTime @default(now()) @map("last_read_at")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book                Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  section             Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  chapter             Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@index([userId])
+  @@map("reading_progress")
+}
+
+model Gift {
+  id               String    @id @default(cuid()) @map("gift_id")
+  senderUserId     String    @map("sender_user_id")
+  recipientEmail   String    @map("recipient_email")
+  accessCode       String    @unique @map("access_code")
+  giftPackage      String    @map("gift_package")
+  paymentReference String?   @map("payment_reference")
+  status           String    @default("Generated")
+  redeemedByUserId String?   @map("redeemed_by_user_id")
+  redeemedAt       DateTime? @map("redeemed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  sender           User      @relation("GiftSender", fields: [senderUserId], references: [id], onDelete: Cascade)
+  redeemedBy       User?     @relation("GiftRedeemer", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([senderUserId])
+  @@index([recipientEmail])
+  @@map("gifts")
+}
+
+model CommunityPost {
+  id            String     @id @default(cuid()) @map("post_id")
+  userId        String     @map("user_id")
+  bookId        String?    @map("book_id")
+  content       String
+  image         String?
+  likesCount    Int        @default(0) @map("likes_count")
+  commentsCount Int        @default(0) @map("comments_count")
+  status        String     @default("Visible")
+  pinned        Boolean    @default(false)
+  createdAt     DateTime   @default(now()) @map("created_at")
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book          Book?      @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  comments      Comment[]
+  likes         PostLike[]
+
+  @@index([createdAt])
+  @@map("community_posts")
+}
+
+model Comment {
+  id        String        @id @default(cuid()) @map("comment_id")
+  postId    String        @map("post_id")
+  userId    String        @map("user_id")
+  comment   String
+  createdAt DateTime      @default(now()) @map("created_at")
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model PostLike {
+  postId    String        @map("post_id")
+  userId    String        @map("user_id")
+  createdAt DateTime      @default(now()) @map("created_at")
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@map("post_likes")
+}

@@ -33,6 +33,8 @@ See:
 
 - `docs/API.md`
 - `db/schema.sql`
+- `docs/SUPABASE.md`
+- `prisma/schema.prisma`
 
 ## Next Production Step
 

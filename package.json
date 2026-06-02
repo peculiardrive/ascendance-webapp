@@ -9,15 +9,22 @@
     "start": "next start --hostname 127.0.0.1 --port 3000",
     "check": "next lint",
     "legacy:start": "node server.mjs",
-    "legacy:smoke": "node scripts/smoke-api.mjs"
+    "legacy:smoke": "node scripts/smoke-api.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.9.0",
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
-    "eslint-config-next": "^15.3.0"
+    "eslint-config-next": "^15.3.0",
+    "prisma": "^6.9.0"
   }
 }
