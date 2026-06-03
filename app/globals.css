@@ -198,6 +198,12 @@ p {
   color: #94152c;
 }
 
+.pill-btn.is-active {
+  border-color: #b01834;
+  background: #fff1f1;
+  color: #94152c;
+}
+
 .main {
   width: min(1160px, 100%);
   margin: 0 auto;
@@ -271,6 +277,8 @@ p {
 .stat-card,
 .form-panel,
 .admin-panel,
+.admin-login-panel,
+.moderation-card,
 .chapter-row,
 .auth-panel,
 .profile-summary {
@@ -303,6 +311,8 @@ p {
 .stat-card,
 .form-panel,
 .admin-panel,
+.admin-login-panel,
+.moderation-card,
 .profile-summary {
   padding: 14px;
 }
@@ -333,6 +343,81 @@ p {
   gap: 8px;
   color: var(--muted);
   font-size: 0.88rem;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #19151a;
+  color: #fff9ed;
+  font-weight: 900;
+}
+
+.community-post,
+.moderation-card {
+  display: grid;
+  gap: 12px;
+}
+
+.action-wrap {
+  flex-wrap: wrap;
+}
+
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.comment-list {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.comment-item {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.comment-item p {
+  margin: 0;
+}
+
+.comment-item.is-admin {
+  border-color: rgba(176, 24, 52, 0.35);
+  background: #fff1f1;
+}
+
+.comment-item.nested {
+  margin-left: 24px;
+  background: #ffffff;
+}
+
+.comment-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.community-post.is-reported,
+.moderation-card.is-reported {
+  border-color: #d2a94f;
+  box-shadow: 0 0 0 3px rgba(210, 169, 79, 0.16);
 }
 
 .progress-track {
@@ -512,8 +597,23 @@ textarea {
   gap: 8px;
 }
 
+.admin-login-panel {
+  width: min(460px, 100%);
+  margin: 48px auto 0;
+  padding: 18px;
+}
+
 .admin-heading h1 {
   font-size: 2.2rem;
+}
+
+.admin-session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
 }
 
 .stat-card strong {

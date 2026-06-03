@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { defaultState } from "@/lib/seed";
 
 const STORAGE_KEY = "ascendance_next_user";
+const ADMIN_STORAGE_KEY = "ascendance_next_admin";
 
 function currency(amount) {
   return new Intl.NumberFormat("en-NG", {
@@ -38,6 +39,7 @@ export default function Home() {
   const [ready, setReady] = useState(false);
   const [view, setView] = useState("auth");
   const [user, setUser] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [books, setBooks] = useState(defaultState.books);
   const [posts, setPosts] = useState(defaultState.posts);
   const [purchases, setPurchases] = useState([]);
@@ -62,7 +64,9 @@ export default function Home() {
 
   useEffect(() => {
     const savedUser = localStorage.getItem(STORAGE_KEY);
+    const savedAdmin = localStorage.getItem(ADMIN_STORAGE_KEY);
     if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedAdmin) setAdmin(JSON.parse(savedAdmin));
     refreshState(savedUser ? JSON.parse(savedUser).id : null).finally(() => {
       setReady(true);
       setTimeout(() => document.querySelector(".splash")?.classList.add("is-hidden"), 1100);
@@ -74,6 +78,10 @@ export default function Home() {
     if (user && !isOnboarded) setView("auth");
     if (user && isOnboarded && view === "auth") setView("home");
   }, [user, isOnboarded, view]);
+
+  useEffect(() => {
+    if (admin) localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(admin));
+  }, [admin]);
 
   async function refreshState(userId = user?.id) {
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
@@ -216,6 +224,62 @@ export default function Home() {
     await refreshState(user.id);
   }
 
+  async function communityAction(payload) {
+    const response = await fetch("/api/community/posts", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-user-id": user?.id || "" },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    await refreshState(user?.id);
+    return data;
+  }
+
+  async function likePost(postId) {
+    await communityAction({ action: "like", postId });
+  }
+
+  async function commentOnPost(postId, comment, parentId = null) {
+    if (!comment.trim()) return;
+    await communityAction({ action: "comment", postId, comment, parentId });
+    notify("Comment posted.");
+  }
+
+  async function reportPost(postId) {
+    await communityAction({ action: "report", postId, reason: "Reader report" });
+    notify("Post reported for moderation.");
+  }
+
+  async function moderatePost(postId, status) {
+    await communityAction({ action: "moderate", postId, status });
+    notify(`Post marked ${status}.`);
+  }
+
+  async function adminReply(postId, comment) {
+    if (!comment.trim()) return;
+    await communityAction({ action: "admin-reply", postId, comment });
+    notify("Admin reply posted.");
+  }
+
+  async function sharePost(post, platform = "native") {
+    const text = `"${post.content}" - ${post.username} on Ascendance`;
+    const url = window.location.origin;
+    if (platform === "native" && navigator.share) {
+      await navigator.share({ title: "Ascendance review", text, url });
+      return;
+    }
+    const encodedText = encodeURIComponent(`${text} ${url}`);
+    const encodedUrl = encodeURIComponent(url);
+    const targets = {
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      x: `https://twitter.com/intent/tweet?text=${encodedText}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
+    };
+    window.open(targets[platform] || targets.x, "_blank", "noopener,noreferrer");
+  }
+
   async function sendGift(formData) {
     const response = await fetch("/api/gifts", {
       method: "POST",
@@ -226,6 +290,27 @@ export default function Home() {
     if (!data.ok) return notify(data.error);
     notify(`Gift code generated: ${data.gift.accessCode}`);
     await refreshState(user.id);
+  }
+
+  async function adminLogin(formData) {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: formData.get("email"),
+        password: formData.get("password")
+      })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    setAdmin(data.admin);
+    notify("Admin login successful.");
+  }
+
+  function adminLogout() {
+    localStorage.removeItem(ADMIN_STORAGE_KEY);
+    setAdmin(null);
+    notify("Admin logged out.");
   }
 
   function toggleAutoScroll() {
@@ -290,10 +375,32 @@ export default function Home() {
               onRead={openChapter}
             />
           )}
-          {view === "community" && <CommunityView posts={posts} onPost={createPost} />}
+          {view === "community" && (
+            <CommunityView
+              posts={posts}
+              user={user}
+              onPost={createPost}
+              onLike={likePost}
+              onComment={commentOnPost}
+              onReport={reportPost}
+              onShare={sharePost}
+            />
+          )}
           {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} />}
           {view === "profile" && <ProfileView user={user} progress={progress} purchases={purchases} onProfile={updateProfile} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setUser(null); setView("auth"); }} />}
-          {view === "admin" && <AdminView books={books} posts={posts} purchases={purchases} gifts={gifts} />}
+          {view === "admin" && (
+            <AdminGate
+              admin={admin}
+              books={books}
+              posts={posts}
+              purchases={purchases}
+              gifts={gifts}
+              onLogin={adminLogin}
+              onLogout={adminLogout}
+              onModeratePost={moderatePost}
+              onAdminReply={adminReply}
+            />
+          )}
         </AppShell>
       )}
       <Toast message={toast} />
@@ -539,23 +646,121 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
   );
 }
 
-function CommunityView({ posts, onPost }) {
+function CommunityView({ posts, user, onPost, onLike, onComment, onReport, onShare }) {
+  const [sort, setSort] = useState("recent");
+  const [replyTo, setReplyTo] = useState(null);
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (sort === "popular") return (b.comments?.length || 0) + (b.likes || 0) - ((a.comments?.length || 0) + (a.likes || 0));
+    if (sort === "liked") return (b.likes || 0) - (a.likes || 0);
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
     <div className="content-stack">
       <section className="form-panel">
-        <h2>Community</h2>
+        <div className="section-heading">
+          <div>
+            <h2>Community</h2>
+            <p>Reader reviews, replies, sharing, and moderation signals.</p>
+          </div>
+        </div>
         <form onSubmit={(event) => { event.preventDefault(); onPost(new FormData(event.currentTarget)); event.currentTarget.reset(); }} className="form-grid">
           <label>Your review<textarea name="content" placeholder="Write your review" required /></label>
           <button className="primary-btn">Post Review</button>
         </form>
       </section>
-      {posts.map((post) => (
-        <article className="post-card" key={post.id}>
-          <div className="chapter-meta"><span>{post.pinned ? "Pinned" : "Review"}</span><span>{post.country}</span></div>
-          <h3>{post.username}</h3>
-          <p>{post.content}</p>
-          <div className="inline-actions"><button className="ghost-btn">Like {post.likes}</button><button className="ghost-btn">Share</button></div>
-        </article>
+      <div className="segmented">
+        {[
+          ["recent", "Recent"],
+          ["popular", "Popular"],
+          ["liked", "Most liked"]
+        ].map(([key, label]) => (
+          <button key={key} className={`pill-btn ${sort === key ? "is-active" : ""}`} onClick={() => setSort(key)}>{label}</button>
+        ))}
+      </div>
+      {sortedPosts.map((post) => {
+        const liked = post.likedBy?.includes(user.id);
+        const comments = post.comments || [];
+        const rootComments = comments.filter((comment) => !comment.parentId);
+        return (
+          <article className={`post-card community-post ${post.reported ? "is-reported" : ""}`} key={post.id}>
+            <div className="post-author">
+              <div className="avatar">{post.avatar || post.username?.slice(0, 1) || "A"}</div>
+              <div>
+                <div className="chapter-meta">
+                  <span>{post.pinned ? "Pinned review" : "Reader review"}</span>
+                  <span>{post.country}</span>
+                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  {post.reported && <span>Reported</span>}
+                </div>
+                <h3>{post.username}</h3>
+              </div>
+            </div>
+            <p>{post.content}</p>
+            <div className="inline-actions action-wrap">
+              <button className="ghost-btn" onClick={() => onLike(post.id)}>{liked ? "Unlike" : "Like"} {post.likes || 0}</button>
+              <button className="ghost-btn" onClick={() => setReplyTo(replyTo === post.id ? null : post.id)}>Comment {comments.length}</button>
+              <button className="ghost-btn" onClick={() => onShare(post, "native")}>Share</button>
+              <button className="ghost-btn" onClick={() => onReport(post.id)}>Report</button>
+            </div>
+            <div className="share-row">
+              {["whatsapp", "facebook", "x", "linkedin"].map((platform) => (
+                <button key={platform} className="pill-btn" onClick={() => onShare(post, platform)}>{platform}</button>
+              ))}
+            </div>
+            {replyTo === post.id && <CommentForm label="Add comment" onSubmit={(text) => { onComment(post.id, text); setReplyTo(null); }} />}
+            {rootComments.length > 0 && (
+              <div className="comment-list">
+                {rootComments.map((comment) => (
+                  <CommunityComment
+                    key={comment.id || comment.text}
+                    comment={comment}
+                    replies={comments.filter((reply) => reply.parentId === comment.id)}
+                    onReply={(text) => onComment(post.id, text, comment.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function CommentForm({ label, onSubmit }) {
+  return (
+    <form onSubmit={(event) => {
+      event.preventDefault();
+      onSubmit(new FormData(event.currentTarget).get("comment") || "");
+      event.currentTarget.reset();
+    }} className="comment-form">
+      <input name="comment" placeholder={label} required />
+      <button className="primary-btn">Send</button>
+    </form>
+  );
+}
+
+function CommunityComment({ comment, replies, onReply }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`comment-item ${comment.isAdmin ? "is-admin" : ""}`}>
+      <div className="post-author">
+        <div className="avatar">{comment.avatar || comment.user?.slice(0, 1) || "A"}</div>
+        <div>
+          <div className="chapter-meta"><span>{comment.isAdmin ? "Admin reply" : "Reader comment"}</span><span>{comment.country}</span></div>
+          <strong>{comment.user}</strong>
+        </div>
+      </div>
+      <p>{comment.text}</p>
+      <button className="ghost-btn" onClick={() => setOpen(!open)}>Reply</button>
+      {open && <CommentForm label="Write a reply" onSubmit={(text) => { onReply(text); setOpen(false); }} />}
+      {replies.map((reply) => (
+        <div className={`comment-item nested ${reply.isAdmin ? "is-admin" : ""}`} key={reply.id || reply.text}>
+          <div className="chapter-meta"><span>{reply.isAdmin ? "Admin reply" : "Reply"}</span><span>{reply.country}</span></div>
+          <strong>{reply.user}</strong>
+          <p>{reply.text}</p>
+        </div>
       ))}
     </div>
   );
@@ -607,13 +812,48 @@ function ProfileView({ user, progress, purchases, onProfile, onLogout }) {
   );
 }
 
-function AdminView({ books, posts, purchases, gifts }) {
+function AdminGate({ admin, books, posts, purchases, gifts, onLogin, onLogout, onModeratePost, onAdminReply }) {
+  if (!admin) {
+    return (
+      <div className="content-stack">
+        <section className="admin-login-panel">
+          <p className="eyebrow">Admin backend</p>
+          <h1>Admin Login</h1>
+          <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
+            <label>Email<input name="email" type="email" placeholder="admin@example.com" autoComplete="email" required /></label>
+            <label>Password<input name="password" type="password" placeholder="Admin password" autoComplete="current-password" required /></label>
+            <button className="primary-btn">Open Dashboard</button>
+          </form>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <AdminView
+      admin={admin}
+      books={books}
+      posts={posts}
+      purchases={purchases}
+      gifts={gifts}
+      onLogout={onLogout}
+      onModeratePost={onModeratePost}
+      onAdminReply={onAdminReply}
+    />
+  );
+}
+
+function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModeratePost, onAdminReply }) {
   const revenue = purchases.reduce((sum, purchase) => sum + Number(purchase.amount || 0), 0);
   return (
     <div className="content-stack">
       <div className="admin-heading">
         <p className="eyebrow">Admin backend</p>
         <h1>Dashboard</h1>
+        <div className="admin-session">
+          <span>{admin.name} · {admin.role}</span>
+          <button className="ghost-btn" onClick={onLogout}>Admin Logout</button>
+        </div>
       </div>
       <div className="grid dashboard-grid">
         <article className="stat-card"><strong>{books.length}</strong><span>Books</span></article>
@@ -625,6 +865,44 @@ function AdminView({ books, posts, purchases, gifts }) {
       <section className="admin-panel">
         <h2>Manage Books</h2>
         {books.map((book) => <p key={book.id}>{book.subtitle}: {book.title} · {currency(book.price)} · {book.status}</p>)}
+      </section>
+      <section className="admin-panel">
+        <div className="section-heading">
+          <div>
+            <h2>Community Management</h2>
+            <p>Moderate reader reviews, answer publicly, and watch reported posts.</p>
+          </div>
+        </div>
+        <div className="content-stack">
+          {posts.map((post) => (
+            <article className={`moderation-card ${post.reported ? "is-reported" : ""}`} key={post.id}>
+              <div>
+                <div className="chapter-meta">
+                  <span>{post.status}</span>
+                  <span>{post.country}</span>
+                  <span>{post.likes || 0} likes</span>
+                  <span>{post.comments?.length || 0} comments</span>
+                  {post.reported && <span>{post.reports?.length || 1} report</span>}
+                </div>
+                <h3>{post.username}</h3>
+                <p>{post.content}</p>
+              </div>
+              <form onSubmit={(event) => {
+                event.preventDefault();
+                onAdminReply(post.id, new FormData(event.currentTarget).get("comment") || "");
+                event.currentTarget.reset();
+              }} className="comment-form">
+                <input name="comment" placeholder="Reply as admin" />
+                <button className="primary-btn">Reply</button>
+              </form>
+              <div className="inline-actions action-wrap">
+                <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Visible")}>Approve</button>
+                <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Hidden")}>Hide</button>
+                <button className="danger-btn" onClick={() => onModeratePost(post.id, "Deleted")}>Delete</button>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );
