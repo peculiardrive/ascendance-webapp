@@ -454,16 +454,32 @@ function Splash({ hidden = false }) {
 }
 
 function TrailerIntro({ onEnter }) {
+  const [videoReady, setVideoReady] = useState(false);
+
   return (
     <main className="trailer-page">
-      <section className="trailer-stage">
-        <video className="trailer-video" autoPlay muted loop playsInline poster="/assets/cover-book-1.svg">
+      <section className="trailer-stage" aria-label="Autoplaying Ascendance trailer">
+        <video
+          className={`trailer-video ${videoReady ? "is-ready" : ""}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/assets/cover-book-1.svg"
+          onCanPlay={() => setVideoReady(true)}
+          onError={() => setVideoReady(false)}
+        >
           <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
         </video>
         <div className="trailer-motion" aria-hidden="true">
           <span />
           <span />
           <span />
+        </div>
+        <div className="trailer-reel" aria-hidden="true">
+          <span>Disciples of the Inverted Cross</span>
+          <span>Merchants of the Ivory Towers</span>
+          <span>Rhapsodies of the Coming Regent</span>
         </div>
         <div className="trailer-copy">
           <p className="eyebrow">Ascendance</p>

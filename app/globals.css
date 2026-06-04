@@ -293,6 +293,11 @@ p {
 
 .trailer-video {
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.trailer-video.is-ready {
   opacity: 0.58;
 }
 
@@ -338,6 +343,36 @@ p {
   animation-delay: 1500ms;
 }
 
+.trailer-reel {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.trailer-reel span {
+  position: absolute;
+  width: min(720px, calc(100vw - 38px));
+  color: rgba(255, 247, 230, 0.9);
+  font-family: Centaur, Georgia, serif;
+  font-size: clamp(2rem, 10vw, 4.8rem);
+  line-height: 0.95;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  animation: trailer-title 12s ease-in-out infinite;
+}
+
+.trailer-reel span:nth-child(2) {
+  animation-delay: 4s;
+}
+
+.trailer-reel span:nth-child(3) {
+  animation-delay: 8s;
+}
+
 .trailer-copy {
   position: relative;
   z-index: 1;
@@ -375,6 +410,26 @@ p {
   50% {
     opacity: 0.82;
     transform: translateX(24px) rotate(-16deg);
+  }
+}
+
+@keyframes trailer-title {
+  0%,
+  8%,
+  100% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  14%,
+  27% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  35% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.02);
   }
 }
 
