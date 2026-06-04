@@ -5,6 +5,8 @@ import { defaultState } from "@/lib/seed";
 
 const STORAGE_KEY = "ascendance_next_user";
 const ADMIN_STORAGE_KEY = "ascendance_next_admin";
+const LAST_VIEW_KEY = "ascendance_last_view";
+const LAST_CHAPTER_KEY = "ascendance_last_chapter";
 
 function currency(amount) {
   return new Intl.NumberFormat("en-NG", {
@@ -37,6 +39,8 @@ function Toast({ message }) {
 
 export default function Home() {
   const [ready, setReady] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
+  const [showTrailer, setShowTrailer] = useState(false);
   const [view, setView] = useState("auth");
   const [user, setUser] = useState(null);
   const [admin, setAdmin] = useState(null);
@@ -65,23 +69,46 @@ export default function Home() {
   useEffect(() => {
     const savedUser = localStorage.getItem(STORAGE_KEY);
     const savedAdmin = localStorage.getItem(ADMIN_STORAGE_KEY);
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const parsedUser = savedUser ? JSON.parse(savedUser) : null;
+    const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
+    const savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
+    if (parsedUser) setUser(parsedUser);
     if (savedAdmin) setAdmin(JSON.parse(savedAdmin));
-    refreshState(savedUser ? JSON.parse(savedUser).id : null).finally(() => {
+    if (savedChapter) setActiveChapterId(savedChapter);
+    refreshState(parsedUser?.id || null).finally(() => {
       setReady(true);
-      setTimeout(() => document.querySelector(".splash")?.classList.add("is-hidden"), 1100);
+      setTimeout(() => {
+        setSplashDone(true);
+        if (parsedUser?.onboardingStep === "done") setView(savedView);
+        else setShowTrailer(true);
+      }, 1300);
     });
   }, []);
 
   useEffect(() => {
     if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    if (user && !isOnboarded) setView("auth");
-    if (user && isOnboarded && view === "auth") setView("home");
-  }, [user, isOnboarded, view]);
+    if (user && !isOnboarded) {
+      setShowTrailer(false);
+      setView("auth");
+    }
+    if (user && isOnboarded && view === "auth" && splashDone && !showTrailer) {
+      setView(localStorage.getItem(LAST_VIEW_KEY) || "home");
+    }
+  }, [user, isOnboarded, view, splashDone, showTrailer]);
 
   useEffect(() => {
     if (admin) localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(admin));
   }, [admin]);
+
+  useEffect(() => {
+    if (user && isOnboarded && splashDone && view !== "auth") {
+      localStorage.setItem(LAST_VIEW_KEY, view);
+    }
+  }, [user, isOnboarded, splashDone, view]);
+
+  useEffect(() => {
+    if (activeChapterId) localStorage.setItem(LAST_CHAPTER_KEY, activeChapterId);
+  }, [activeChapterId]);
 
   async function refreshState(userId = user?.id) {
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
@@ -118,6 +145,7 @@ export default function Home() {
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
+    setShowTrailer(false);
     setUser(data.user);
     notify("Verification code: 123456");
   }
@@ -133,6 +161,7 @@ export default function Home() {
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
+    setShowTrailer(false);
     setUser(data.user);
     notify("Welcome back.");
     await refreshState(data.user.id);
@@ -192,6 +221,8 @@ export default function Home() {
       return;
     }
     setActiveChapterId(item.chapter.id);
+    localStorage.setItem(LAST_VIEW_KEY, "reader");
+    localStorage.setItem(LAST_CHAPTER_KEY, item.chapter.id);
     setView("reader");
   }
 
@@ -343,8 +374,10 @@ export default function Home() {
 
   return (
     <>
-      <Splash />
-      {!user || !isOnboarded ? (
+      <Splash hidden={splashDone} />
+      {showTrailer && (!user || !isOnboarded) ? (
+        <TrailerIntro onEnter={() => { setShowTrailer(false); setView("auth"); }} />
+      ) : !user || !isOnboarded ? (
         <AuthView user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onProfile={updateProfile} />
       ) : (
         <AppShell view={view} setView={setView}>
@@ -408,14 +441,38 @@ export default function Home() {
   );
 }
 
-function Splash() {
+function Splash({ hidden = false }) {
   return (
-    <div className="splash">
+    <div className={`splash ${hidden ? "is-hidden" : ""}`}>
       <div className="splash-mark">A</div>
       <h1>Ascendance</h1>
       <p>The Trilogy</p>
-      <span>By BrandZilla Technologies</span>
+      <span className="presented-by">Presented by</span>
+      <strong className="brandzilla-name">BrandZilla Tech Limited</strong>
     </div>
+  );
+}
+
+function TrailerIntro({ onEnter }) {
+  return (
+    <main className="trailer-page">
+      <section className="trailer-stage">
+        <video className="trailer-video" autoPlay muted loop playsInline poster="/assets/cover-book-1.svg">
+          <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
+        </video>
+        <div className="trailer-motion" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="trailer-copy">
+          <p className="eyebrow">Ascendance</p>
+          <h1>The Trilogy</h1>
+          <p>Disciples of the Inverted Cross opens the reading journey.</p>
+          <button className="primary-btn" onClick={onEnter}>Login</button>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -487,7 +544,7 @@ function AppShell({ children, view, setView }) {
       <header className="topbar">
         <div className="brand-lockup">
           <strong>Ascendance</strong>
-          <span>Next.js App Router</span>
+          <span>BrandZilla Tech Limited</span>
         </div>
         <div className="top-actions">
           <button className="ghost-btn" onClick={() => setView("admin")}>Admin</button>
@@ -512,11 +569,11 @@ function HomeView({ books, purchases, user, progress, onViewBooks, onRead, onPur
     <>
       <section className="hero-band">
         <div className="hero-copy">
-          <p className="eyebrow">Premium digital trilogy</p>
-          <h1>Ascendance</h1>
+          <p className="eyebrow">{first.subtitle}</p>
+          <h1>{first.title}</h1>
           <p>{first.blurb}</p>
           <div className="inline-actions">
-            <button className="primary-btn" onClick={() => onRead(firstChapter)}>Start Preview</button>
+            <button className="primary-btn" onClick={() => onRead(firstChapter)}>Read Preview</button>
             <button className="ghost-btn" onClick={onViewBooks}>Contents</button>
           </div>
         </div>
@@ -542,9 +599,12 @@ function BookCard({ book, user, purchases, progress, onRead, onPurchase }) {
   const first = flattenChapters([book])[0];
   const owned = ownsBook(user.id, purchases, book.id);
   const preview = first?.chapter.isPreview;
-  const percent = Object.values(progress).filter((item) => item?.bookId === book.id).at(-1)?.percentage || 0;
+  const bookProgress = Object.values(progress).filter((item) => item?.bookId === book.id).at(-1);
+  const continueChapter = flattenChapters([book]).find((item) => item.chapter.id === bookProgress?.chapterId) || first;
+  const percent = bookProgress?.percentage || 0;
+  const primaryLabel = owned && percent > 0 ? "Continue Reading" : owned ? "Read" : preview ? "Read Preview" : "Unlock Book";
   return (
-    <article className="book-card">
+    <article className="book-card reader-home-card">
       <img src={book.cover} alt={`${book.title} cover`} />
       <div className="book-card-body">
         <div className="chapter-meta"><span>{book.subtitle}</span><span>{owned ? "Unlocked" : preview ? "Preview" : "Locked"}</span><span>{currency(book.price)}</span></div>
@@ -553,8 +613,8 @@ function BookCard({ book, user, purchases, progress, onRead, onPurchase }) {
         <div className="progress-track"><div className="progress-fill" style={{ width: `${percent}%` }} /></div>
         <p>{percent}% complete</p>
         <div className="inline-actions">
-          <button className="primary-btn" onClick={() => (owned || preview ? onRead(first) : onPurchase(book))}>{owned ? "Open" : preview ? "Start Preview" : "Unlock"}</button>
-          {!owned && <button className="ghost-btn" onClick={() => onPurchase(book)}>Buy</button>}
+          <button className="primary-btn" onClick={() => (owned || preview ? onRead(continueChapter) : onPurchase(book))}>{primaryLabel}</button>
+          {!owned && <button className="ghost-btn" onClick={() => onPurchase(book)}>Buy Book</button>}
         </div>
       </div>
     </article>
