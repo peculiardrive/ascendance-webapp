@@ -469,6 +469,7 @@ function TrailerIntro({ onEnter }) {
           onCanPlay={() => setVideoReady(true)}
           onError={() => setVideoReady(false)}
         >
+          <source src="/assets/ascendance-trailer.webm" type="video/webm" />
           <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
         </video>
         <div className="trailer-motion" aria-hidden="true">
