@@ -16,7 +16,25 @@ export async function POST(request) {
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return json({ ok: false, error: "An account already exists for this email. Log in instead." }, { status: 409 });
+      if (existing.emailVerified) {
+        return json({ ok: false, error: "An account already exists for this email. Log in instead." }, { status: 409 });
+      }
+
+      const code = generateVerificationCode();
+      const user = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          fullName: payload.fullName || existing.fullName,
+          passwordHash: hashPassword(password),
+          verificationCodeHash: hashVerificationCode(code),
+          verificationExpiresAt: verificationExpiry(),
+          verificationAttempts: 0,
+          onboardingStep: "verify",
+          lastLogin: new Date()
+        }
+      });
+      const delivery = await sendVerificationEmail({ to: email, code, name: user.fullName });
+      return json({ ok: true, user: publicUser(user), delivery, resent: true });
     }
 
     const code = generateVerificationCode();

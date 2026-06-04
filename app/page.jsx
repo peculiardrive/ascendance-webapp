@@ -147,7 +147,8 @@ export default function Home() {
     if (!data.ok) return notify(data.error);
     setShowTrailer(false);
     setUser(data.user);
-    notify(data.delivery?.provider === "console" ? "Verification code logged on the server." : "Verification code sent to your email.");
+    if (data.resent) notify(data.delivery?.provider === "console" ? "Account found. New code logged on the server." : "Account found. New verification code sent.");
+    else notify(data.delivery?.provider === "console" ? "Verification code logged on the server." : "Verification code sent to your email.");
   }
 
   async function login(formData) {
