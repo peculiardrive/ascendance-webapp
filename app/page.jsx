@@ -147,7 +147,7 @@ export default function Home() {
     if (!data.ok) return notify(data.error);
     setShowTrailer(false);
     setUser(data.user);
-    notify("Verification code: 123456");
+    notify(data.delivery?.provider === "console" ? "Verification code logged on the server." : "Verification code sent to your email.");
   }
 
   async function login(formData) {
@@ -176,6 +176,18 @@ export default function Home() {
     const data = await response.json();
     if (!data.ok) return notify(data.error);
     setUser(data.user);
+  }
+
+  async function resendVerificationCode() {
+    if (!user?.email) return;
+    const response = await fetch("/api/auth/resend-code", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: user.email })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    notify(data.delivery?.provider === "console" ? "New verification code logged on the server." : "New verification code sent.");
   }
 
   async function updateProfile(formData) {
@@ -378,7 +390,7 @@ export default function Home() {
       {showTrailer && (!user || !isOnboarded) ? (
         <TrailerIntro onEnter={() => { setShowTrailer(false); setView("auth"); }} />
       ) : !user || !isOnboarded ? (
-        <AuthView user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onProfile={updateProfile} />
+        <AuthView user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onResendCode={resendVerificationCode} onProfile={updateProfile} />
       ) : (
         <AppShell view={view} setView={setView}>
           {view === "home" && (
@@ -493,7 +505,7 @@ function TrailerIntro({ onEnter }) {
   );
 }
 
-function AuthView({ user, onSignup, onLogin, onVerify, onProfile }) {
+function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }) {
   const step = user?.onboardingStep || "signin";
   const [mode, setMode] = useState("signup");
 
@@ -527,8 +539,9 @@ function AuthView({ user, onSignup, onLogin, onVerify, onProfile }) {
         )}
         {step === "verify" && (
           <form onSubmit={(event) => { event.preventDefault(); onVerify(new FormData(event.currentTarget)); }} className="form-grid">
-            <label>Verification code<input name="code" inputMode="numeric" placeholder="123456" required /></label>
+            <label>Verification code<input name="code" inputMode="numeric" placeholder="6-digit code" maxLength={6} required /></label>
             <button className="primary-btn">Verify</button>
+            <button type="button" className="ghost-btn" onClick={onResendCode}>Resend Code</button>
           </form>
         )}
         {(step === "phone" || step === "profile") && (

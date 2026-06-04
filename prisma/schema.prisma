@@ -19,6 +19,9 @@ model User {
   profileImage     String?           @map("profile_image")
   avatar           String?
   emailVerified    Boolean           @default(false) @map("email_verified")
+  verificationCodeHash String?       @map("verification_code_hash")
+  verificationExpiresAt DateTime?    @map("verification_expires_at")
+  verificationAttempts Int           @default(0) @map("verification_attempts")
   signupMethod     String            @default("email") @map("signup_method")
   onboardingStep   String            @default("verify") @map("onboarding_step")
   createdAt        DateTime          @default(now()) @map("created_at")

@@ -1,4 +1,5 @@
-import { hashPassword, publicUser } from "@/lib/auth";
+import { generateVerificationCode, hashPassword, hashVerificationCode, publicUser, verificationExpiry } from "@/lib/auth";
+import { sendVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { json, readJson, requireFields } from "@/lib/store";
 
@@ -18,6 +19,7 @@ export async function POST(request) {
       return json({ ok: false, error: "An account already exists for this email. Log in instead." }, { status: 409 });
     }
 
+    const code = generateVerificationCode();
     const user = await prisma.user.create({
       data: {
         fullName: payload.fullName || "Ascendance Reader",
@@ -25,12 +27,16 @@ export async function POST(request) {
         passwordHash: hashPassword(password),
         avatar: "A",
         countryCode: "NG",
+        verificationCodeHash: hashVerificationCode(code),
+        verificationExpiresAt: verificationExpiry(),
+        verificationAttempts: 0,
         onboardingStep: "verify",
         lastLogin: new Date()
       }
     });
 
-    return json({ ok: true, user: publicUser(user), verificationCode: "123456" }, { status: 201 });
+    const delivery = await sendVerificationEmail({ to: email, code, name: user.fullName });
+    return json({ ok: true, user: publicUser(user), delivery }, { status: 201 });
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: 400 });
   }
