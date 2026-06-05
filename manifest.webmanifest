@@ -2,12 +2,18 @@
   "name": "Ascendance - The Trilogy",
   "short_name": "Ascendance",
   "description": "A premium mobile-first reading experience for Ascendance - The Trilogy.",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#121014",
-  "theme_color": "#121014",
+  "background_color": "#F9F3EC",
+  "theme_color": "#48006E",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/assets/brand/ascendance-app-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "assets/icon.svg",
       "sizes": "any",

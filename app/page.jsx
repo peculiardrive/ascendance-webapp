@@ -7,6 +7,22 @@ const STORAGE_KEY = "ascendance_next_user";
 const ADMIN_STORAGE_KEY = "ascendance_next_admin";
 const LAST_VIEW_KEY = "ascendance_last_view";
 const LAST_CHAPTER_KEY = "ascendance_last_chapter";
+const BRAND_ASSETS = {
+  lockup: "/assets/brand/ascendance-lockup.png",
+  wordmark: "/assets/brand/ascendance-wordmark.png",
+  symbol: "/assets/brand/ascendance-symbol.png",
+  appIcon: "/assets/brand/ascendance-app-icon.png",
+  brandzilla: "/assets/brand/brandzilla-technologies.png",
+  brandzillaIcon: "/assets/brand/brandzilla-icon.png"
+};
+
+const NAV_TABS = [
+  ["community", "Community", "wallet"],
+  ["books", "Store", "store"],
+  ["home", "Home", "home"],
+  ["notices", "Help", "help"],
+  ["profile", "Profile", "profile"]
+];
 
 function currency(amount) {
   return new Intl.NumberFormat("en-NG", {
@@ -35,6 +51,59 @@ function ownsBook(userId, purchases, bookId) {
 
 function Toast({ message }) {
   return message ? <div className="toast">{message}</div> : null;
+}
+
+function NavIcon({ type }) {
+  const icons = {
+    wallet: (
+      <>
+        <path d="M4 7.5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2Z" />
+        <path d="M16.5 12.5H22v4h-5.5a2 2 0 0 1 0-4Z" />
+        <path d="M7 7.5 15.5 4 18 7.5" />
+      </>
+    ),
+    store: (
+      <>
+        <path d="M4 10h16l-1.2-5.2A2 2 0 0 0 16.9 3H7.1a2 2 0 0 0-1.9 1.8L4 10Z" />
+        <path d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" />
+        <path d="M9 21v-7h6v7" />
+      </>
+    ),
+    home: (
+      <>
+        <path d="m3 11 9-8 9 8" />
+        <path d="M5 10.5V21h14V10.5" />
+        <path d="M10 21v-6h4v6" />
+      </>
+    ),
+    help: (
+      <>
+        <path d="M4 5h10a4 4 0 0 1 4 4v9H8a4 4 0 0 1-4-4V5Z" />
+        <path d="M9 9h5" />
+        <path d="M9 13h7" />
+        <path d="M18 11h2a2 2 0 0 1 2 2v6h-5" />
+      </>
+    ),
+    profile: (
+      <>
+        <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </>
+    )
+  };
+  return (
+    <svg className="nav-glyph" viewBox="0 0 24 24" aria-hidden="true">
+      {icons[type]}
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg className="heart-icon" viewBox="0 0 48 44" aria-hidden="true">
+      <path d="M24 41S4 29.4 4 15.1C4 7.5 9.8 3 16.1 3c3.7 0 6.4 1.6 7.9 4.1C25.5 4.6 28.2 3 31.9 3 38.2 3 44 7.5 44 15.1 44 29.4 24 41 24 41Z" />
+    </svg>
+  );
 }
 
 export default function Home() {
@@ -423,8 +492,10 @@ export default function Home() {
               books={books}
               purchases={purchases}
               user={user}
+              posts={posts}
               progress={progress}
               onViewBooks={() => setView("books")}
+              onViewCommunity={() => setView("community")}
               onRead={openChapter}
               onPurchase={purchase}
             />
@@ -481,11 +552,13 @@ export default function Home() {
 function Splash({ hidden = false }) {
   return (
     <div className={`splash ${hidden ? "is-hidden" : ""}`}>
-      <div className="splash-mark">A</div>
-      <h1>Ascendance</h1>
-      <p>The Trilogy</p>
-      <span className="presented-by">Presented by</span>
-      <strong className="brandzilla-name">BrandZilla Tech Limited</strong>
+      <div className="splash-inner">
+        <img className="splash-logo" src={BRAND_ASSETS.lockup} alt="Ascendance The Trilogy" />
+        <div className="splash-presenter">
+          <span className="presented-by">Presented by</span>
+          <img src={BRAND_ASSETS.brandzilla} alt="BrandZilla Technologies" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -509,21 +582,10 @@ function TrailerIntro({ onEnter }) {
           <source src="/assets/ascendance-trailer.webm" type="video/webm" />
           <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
         </video>
-        <div className="trailer-motion" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <div className="trailer-reel" aria-hidden="true">
-          <span>Disciples of the Inverted Cross</span>
-          <span>Merchants of the Ivory Towers</span>
-          <span>Rhapsodies of the Coming Regent</span>
-        </div>
         <div className="trailer-copy">
-          <p className="eyebrow">Ascendance</p>
-          <h1>The Trilogy</h1>
-          <p>Disciples of the Inverted Cross opens the reading journey.</p>
-          <button className="primary-btn" onClick={onEnter}>Login</button>
+          <h1>Play Trailer Video</h1>
+          <p>Ascendance</p>
+          <button className="trailer-login-btn" onClick={onEnter}>Login</button>
         </div>
       </section>
     </main>
@@ -532,32 +594,34 @@ function TrailerIntro({ onEnter }) {
 
 function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }) {
   const step = user?.onboardingStep || "signin";
-  const [mode, setMode] = useState("signup");
+  const [mode, setMode] = useState("login");
 
   return (
     <main className="auth-page">
       <section className="auth-panel">
-        <p className="eyebrow">Ascendance WebApp</p>
-        <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Community Identity" : mode === "login" ? "Welcome Back" : "Enter Ascendance"}</h1>
-        <p>{step === "signin" ? "Create your reader account or log in to continue reading." : "Complete this step to continue into the trilogy."}</p>
+        <img className="auth-logo" src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
+        <div className="auth-heading">
+          <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : "Create Profile"}</h1>
+          {step === "signin" && (
+            <button className="auth-alt-link" type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>
+              {mode === "signup" ? "Login" : "Create a Reader Profile"}
+            </button>
+          )}
+        </div>
         {step === "signin" && (
           <>
-            <div className="auth-switch" role="tablist" aria-label="Authentication mode">
-              <button type="button" className={mode === "signup" ? "is-active" : ""} onClick={() => setMode("signup")}>Sign up</button>
-              <button type="button" className={mode === "login" ? "is-active" : ""} onClick={() => setMode("login")}>Log in</button>
-            </div>
             {mode === "signup" ? (
               <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid">
                 <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
                 <label>Full name<input name="fullName" placeholder="Your name" autoComplete="name" required /></label>
                 <label>Password<input name="password" type="password" placeholder="Minimum 8 characters" autoComplete="new-password" minLength={8} required /></label>
-                <button className="primary-btn">Create Account</button>
+                <button className="primary-btn auth-submit">Submit</button>
               </form>
             ) : (
               <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
                 <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
                 <label>Password<input name="password" type="password" placeholder="Your password" autoComplete="current-password" required /></label>
-                <button className="primary-btn">Log In</button>
+                <button className="primary-btn auth-submit">Submit</button>
               </form>
             )}
           </>
@@ -565,7 +629,7 @@ function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }
         {step === "verify" && (
           <form onSubmit={(event) => { event.preventDefault(); onVerify(new FormData(event.currentTarget)); }} className="form-grid">
             <label>Verification code<input name="code" inputMode="numeric" placeholder="6-digit code" maxLength={6} required /></label>
-            <button className="primary-btn">Verify</button>
+            <button className="primary-btn auth-submit">Submit</button>
             <button type="button" className="ghost-btn" onClick={onResendCode}>Resend Code</button>
           </form>
         )}
@@ -578,7 +642,7 @@ function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }
                 <label>Country code<input name="country" defaultValue="NG" required /></label>
               </>
             )}
-            <button className="primary-btn">{step === "phone" ? "Continue" : "Start Reading"}</button>
+            <button className="primary-btn auth-submit">Submit</button>
           </form>
         )}
       </section>
@@ -587,28 +651,20 @@ function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }
 }
 
 function AppShell({ children, view, setView }) {
-  const tabs = [
-    ["home", "Home", "⌂"],
-    ["books", "Books", "▤"],
-    ["community", "Community", "◌"],
-    ["notices", "Notices", "◇"],
-    ["profile", "Profile", "◎"]
-  ];
   return (
     <div className="shell">
       <header className="topbar">
         <div className="brand-lockup">
-          <strong>Ascendance</strong>
-          <span>BrandZilla Tech Limited</span>
+          <img src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
         </div>
         <div className="top-actions">
           <button className="ghost-btn" onClick={() => setView("admin")}>Admin</button>
         </div>
       </header>
       <nav className="nav-tabs">
-        {tabs.map(([key, label, icon]) => (
+        {NAV_TABS.map(([key, label, icon]) => (
           <button key={key} className={`nav-link ${view === key ? "is-active" : ""}`} onClick={() => setView(key)}>
-            <span>{icon}</span>{label}
+            <NavIcon type={icon} />{label}
           </button>
         ))}
       </nav>
@@ -617,36 +673,57 @@ function AppShell({ children, view, setView }) {
   );
 }
 
-function HomeView({ books, purchases, user, progress, onViewBooks, onRead, onPurchase }) {
+function HomeView({ books, purchases, user, posts, progress, onViewBooks, onViewCommunity, onRead, onPurchase }) {
   const first = books[0];
   const firstChapter = flattenChapters([first])[0];
+  const firstProgress = Object.values(progress).filter((item) => item?.bookId === first.id).at(-1);
+  const continueChapter = flattenChapters([first]).find((item) => item.chapter.id === firstProgress?.chapterId) || firstChapter;
+  const leaders = [
+    ...posts.map((post) => ({
+      name: post.username,
+      points: 200 + (post.likes || 0) * 10 + (post.comments?.length || 0) * 20
+    })),
+    { name: "Stanley Ohanugo", points: 380 },
+    { name: "AdaReads", points: 350 },
+    { name: "Miriam A.", points: 280 },
+    { name: "Tolu Grace", points: 250 }
+  ]
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 4);
+
   return (
-    <>
-      <section className="hero-band">
-        <div className="hero-copy">
-          <p className="eyebrow">{first.subtitle}</p>
-          <h1>{first.title}</h1>
-          <p>{first.blurb}</p>
-          <div className="inline-actions">
-            <button className="primary-btn" onClick={() => onRead(firstChapter)}>Read Preview</button>
-            <button className="ghost-btn" onClick={onViewBooks}>Contents</button>
-          </div>
+    <div className="home-screen">
+      <section className="leader-section" aria-label="Community leaders">
+        <div className="leader-title">
+          <HeartIcon />
+          <h1>Community Leaders</h1>
+          <span className="info-dot" aria-hidden="true">i</span>
         </div>
-      </section>
-      <section className="content-stack">
-        <div className="section-heading">
-          <div>
-            <h2>The Trilogy</h2>
-            <p>Unlock, read, gift, and return to your saved place.</p>
-          </div>
-        </div>
-        <div className="grid book-grid">
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} user={user} purchases={purchases} progress={progress} onRead={onRead} onPurchase={onPurchase} />
+        <div className="leader-row">
+          {leaders.map((leader) => (
+            <article className="leader-card" key={`${leader.name}-${leader.points}`}>
+              <strong>{leader.points} Pts</strong>
+              <span>{leader.name}</span>
+            </article>
           ))}
         </div>
+        <button className="leaders-link" onClick={onViewCommunity}>See 50 Leaders</button>
       </section>
-    </>
+
+      <section className="featured-book">
+        <img className="featured-cover" src={first.cover} alt={`${first.title} cover`} />
+        <div className="featured-actions">
+          <button className="ghost-btn summary-btn" onClick={onViewBooks}>Book Summary</button>
+          <button className="primary-btn continue-btn" onClick={() => onRead(continueChapter)}>Continue Reading</button>
+        </div>
+      </section>
+
+      <section className="reader-home-list">
+        {books.map((book) => (
+          <BookCard key={book.id} book={book} user={user} purchases={purchases} progress={progress} onRead={onRead} onPurchase={onPurchase} />
+        ))}
+      </section>
+    </div>
   );
 }
 
