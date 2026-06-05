@@ -110,6 +110,19 @@ export default function Home() {
     if (activeChapterId) localStorage.setItem(LAST_CHAPTER_KEY, activeChapterId);
   }, [activeChapterId]);
 
+  useEffect(() => {
+    if (!ready || !user?.id || !isOnboarded) return;
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get("paystack_reference") || params.get("reference") || params.get("trxref");
+    if (!reference) return;
+    verifyPaystackPayment(reference);
+    params.delete("paystack_reference");
+    params.delete("reference");
+    params.delete("trxref");
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+  }, [ready, user?.id, isOnboarded]);
+
   async function refreshState(userId = user?.id) {
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
       fetch("/api/books", { headers: userId ? { "x-user-id": userId } : {} }),
@@ -209,19 +222,30 @@ export default function Home() {
   }
 
   async function purchase(book, productType = "book") {
-    const response = await fetch("/api/purchases", {
+    const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
       headers: { "content-type": "application/json", "x-user-id": user.id },
       body: JSON.stringify({
         productType,
-        bookId: productType === "book" ? book?.id : null,
-        amount: productType === "trilogy" ? settings.trilogyPrice : book.price,
-        product: productType === "trilogy" ? "Full Trilogy" : book.title
+        bookId: productType === "book" ? book?.id : null
       })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
-    notify("Payment successful. Content unlocked.");
+    notify("Opening Paystack checkout.");
+    window.location.href = data.authorizationUrl;
+  }
+
+  async function verifyPaystackPayment(reference) {
+    notify("Verifying payment...");
+    const response = await fetch("/api/payments/paystack/verify", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-user-id": user.id },
+      body: JSON.stringify({ reference })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    notify("Payment verified. Content unlocked.");
     await refreshState(user.id);
   }
 
