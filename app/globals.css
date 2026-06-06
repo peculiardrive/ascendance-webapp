@@ -1194,3 +1194,23 @@ textarea {
     bottom: 96px;
   }
 }
+
+.auth-alt-link {
+  width: 100%;
+  min-height: 50px;
+  justify-self: stretch;
+  padding: 10px 14px;
+  border: 2px solid var(--brand);
+  border-radius: 12px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.auth-alt-link:hover,
+.auth-alt-link:focus-visible {
+  background: #e6ccef;
+  box-shadow: 0 0 0 4px rgba(72, 0, 110, 0.12);
+}
