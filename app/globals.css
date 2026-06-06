@@ -1508,3 +1508,147 @@ textarea {
     padding: 0 14px 36px;
   }
 }
+
+/* Community leaderboard */
+.leader-section {
+  gap: 12px;
+}
+
+.leader-title {
+  align-items: flex-start;
+}
+
+.leader-title-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.leader-title-copy h1 {
+  margin: 0;
+}
+
+.leader-title-copy p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.leader-title .info-dot {
+  margin-top: 1px;
+  flex: 0 0 auto;
+}
+
+.leader-list {
+  display: grid;
+  gap: 7px;
+}
+
+.leader-card {
+  min-height: 58px;
+  aspect-ratio: auto;
+  display: grid;
+  grid-template-columns: 24px 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid #e3d9e7;
+  border-left: 3px solid var(--brand);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 14px rgba(45, 18, 57, 0.05);
+}
+
+.leader-card.rank-1 {
+  border-left-color: #bd8b24;
+  background: #fffdf7;
+}
+
+.leader-card.rank-2 {
+  border-left-color: #8c939d;
+}
+
+.leader-card.rank-3 {
+  border-left-color: #a8663d;
+}
+
+.leader-rank {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.leader-card.rank-1 .leader-rank {
+  color: #8f6412;
+}
+
+.leader-avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.leader-card.rank-1 .leader-avatar {
+  background: #9b701b;
+}
+
+.leader-identity,
+.leader-score {
+  min-width: 0;
+}
+
+.leader-identity strong,
+.leader-identity span,
+.leader-score strong,
+.leader-score span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leader-identity strong {
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.leader-identity span,
+.leader-score span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  line-height: 1.3;
+}
+
+.leader-score {
+  text-align: right;
+}
+
+.leader-score strong {
+  color: var(--brand);
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+
+.leaders-link {
+  justify-self: start;
+  padding: 3px 0;
+  color: var(--brand);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 620px) {
+  .leader-title-copy p {
+    font-size: 0.76rem;
+  }
+}

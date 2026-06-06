@@ -675,16 +675,35 @@ function HomeView({ books, purchases, user, posts, progress, onViewBooks, onView
   const firstChapter = flattenChapters([first])[0];
   const firstProgress = Object.values(progress).filter((item) => item?.bookId === first.id).at(-1);
   const continueChapter = flattenChapters([first]).find((item) => item.chapter.id === firstProgress?.chapterId) || firstChapter;
-  const leaders = [
-    ...posts.map((post) => ({
-      name: post.username,
-      points: 200 + (post.likes || 0) * 10 + (post.comments?.length || 0) * 20
-    })),
-    { name: "Stanley Ohanugo", points: 380 },
-    { name: "AdaReads", points: 350 },
-    { name: "Miriam A.", points: 280 },
-    { name: "Tolu Grace", points: 250 }
-  ]
+  const fallbackLeaders = [
+    { name: "Stanley Ohanugo", points: 380, country: "NG" },
+    { name: "AdaReads", points: 350, country: "NG" },
+    { name: "Miriam A.", points: 280, country: "GH" },
+    { name: "Tolu Grace", points: 250, country: "UK" }
+  ];
+  const communityLeaders = posts.reduce((leaderMap, post) => {
+    const name = post.username || "Ascendance Reader";
+    const key = name.toLocaleLowerCase();
+    const current = leaderMap.get(key) || {
+      name,
+      points: 175,
+      country: post.country,
+      avatar: post.avatar
+    };
+
+    current.points += 25 + (post.likes || 0) * 10 + (post.comments?.length || 0) * 20;
+    current.country ||= post.country;
+    current.avatar ||= post.avatar;
+    leaderMap.set(key, current);
+    return leaderMap;
+  }, new Map());
+
+  fallbackLeaders.forEach((leader) => {
+    const key = leader.name.toLocaleLowerCase();
+    if (!communityLeaders.has(key)) communityLeaders.set(key, leader);
+  });
+
+  const leaders = [...communityLeaders.values()]
     .sort((a, b) => b.points - a.points)
     .slice(0, 4);
 
@@ -693,18 +712,31 @@ function HomeView({ books, purchases, user, posts, progress, onViewBooks, onView
       <section className="leader-section" aria-label="Community leaders">
         <div className="leader-title">
           <HeartIcon />
-          <h1>Community Leaders</h1>
-          <span className="info-dot" aria-hidden="true">i</span>
+          <div className="leader-title-copy">
+            <h1>Community Leaders</h1>
+            <p>Readers making the biggest contribution this week</p>
+          </div>
+          <span className="info-dot" title="Points reward reviews, likes, and helpful comments" aria-label="How community points work">i</span>
         </div>
-        <div className="leader-row">
-          {leaders.map((leader) => (
-            <article className="leader-card" key={`${leader.name}-${leader.points}`}>
-              <strong>{leader.points} Pts</strong>
-              <span>{leader.name}</span>
+        <div className="leader-list">
+          {leaders.map((leader, index) => (
+            <article className={`leader-card rank-${index + 1}`} key={`${leader.name}-${leader.points}`}>
+              <span className="leader-rank" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
+              <div className="leader-avatar" aria-hidden="true">
+                {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
+              </div>
+              <div className="leader-identity">
+                <strong>{leader.name}</strong>
+                <span>{leader.country || "Reader"}</span>
+              </div>
+              <div className="leader-score">
+                <strong>{leader.points}</strong>
+                <span>points</span>
+              </div>
             </article>
           ))}
         </div>
-        <button className="leaders-link" onClick={onViewCommunity}>See 50 Leaders</button>
+        <button className="leaders-link" onClick={onViewCommunity}>View full leaderboard</button>
       </section>
 
       <section className="featured-book">
