@@ -932,6 +932,35 @@ textarea:focus {
   }
 }
 
+/* Keep the centered brand lockup clear of the admin action. */
+.topbar {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  gap: 8px;
+}
+
+.topbar::before {
+  content: "";
+  grid-column: 1;
+}
+
+.brand-lockup {
+  grid-column: 2;
+  width: min(300px, 100%);
+  justify-self: center;
+}
+
+.top-actions {
+  position: static;
+  grid-column: 3;
+  justify-self: end;
+}
+
+.top-actions .ghost-btn {
+  width: 52px;
+  padding: 6px 4px;
+}
+
 /* Responsive polish pass: keep the product feeling like a mobile PWA on every screen. */
 :root {
   --app-width: 480px;
