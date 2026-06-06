@@ -1214,3 +1214,19 @@ textarea {
   background: #e6ccef;
   box-shadow: 0 0 0 4px rgba(72, 0, 110, 0.12);
 }
+
+/* Final header sizing: prevent later responsive rules from widening the logo. */
+.topbar {
+  grid-template-columns: 44px minmax(0, 1fr) 52px;
+}
+
+.brand-lockup {
+  width: 100%;
+  max-width: 240px;
+  min-width: 0;
+}
+
+.brand-lockup img {
+  width: 100%;
+  max-width: 100%;
+}
