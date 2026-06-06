@@ -1230,3 +1230,281 @@ textarea {
   width: 100%;
   max-width: 100%;
 }
+
+/* Application density: compact UI chrome while preserving comfortable book text. */
+body {
+  font-size: 14px;
+}
+
+button {
+  min-height: 38px;
+}
+
+.trailer-copy h1 {
+  font-size: clamp(2.35rem, 10vw, 3.4rem);
+}
+
+.trailer-copy p {
+  top: calc(50% + 58px);
+  font-size: clamp(1.55rem, 7vw, 2.15rem);
+}
+
+.trailer-login-btn {
+  width: min(260px, 76vw);
+  min-height: 48px;
+  border-width: 2px;
+  border-radius: 10px;
+  font-size: clamp(1rem, 4.8vw, 1.3rem);
+}
+
+.primary-btn,
+.ghost-btn,
+.danger-btn,
+.pill-btn {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 0.86rem;
+}
+
+.auth-page {
+  padding: clamp(42px, 7svh, 68px) 20px 36px;
+}
+
+.auth-panel {
+  width: min(380px, 100%);
+  gap: 16px;
+}
+
+.auth-logo {
+  width: min(320px, 92%);
+  margin-bottom: 16px;
+}
+
+.auth-heading {
+  gap: 10px;
+}
+
+.auth-panel h1 {
+  font-size: clamp(1.65rem, 7vw, 2.1rem);
+}
+
+label {
+  gap: 5px;
+  font-size: 0.78rem;
+}
+
+input,
+select,
+textarea {
+  min-height: 44px;
+  padding: 9px 12px;
+  border-width: 2px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 96px;
+}
+
+.auth-alt-link {
+  min-height: 42px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+
+.auth-submit {
+  min-height: 50px;
+  margin-top: 6px;
+  border-radius: 10px;
+  font-size: 1.25rem;
+}
+
+.topbar {
+  padding: 12px 12px 10px;
+}
+
+.brand-lockup {
+  max-width: 200px;
+}
+
+.top-actions .ghost-btn {
+  min-height: 32px;
+  width: 48px;
+  padding: 4px;
+  font-size: 0.68rem;
+}
+
+.nav-tabs {
+  padding-top: 8px;
+  padding-bottom: max(7px, env(safe-area-inset-bottom));
+  border-radius: 18px 18px 0 0;
+}
+
+.nav-link {
+  min-height: 48px;
+  gap: 3px;
+  font-size: 0.68rem;
+}
+
+.nav-glyph {
+  width: 22px;
+  height: 22px;
+}
+
+.main {
+  padding: 0 14px 24px;
+}
+
+.home-screen,
+.content-stack,
+.grid,
+.form-grid {
+  gap: 12px;
+}
+
+.leader-section {
+  gap: 10px;
+}
+
+.leader-title {
+  gap: 7px;
+}
+
+.leader-title h1 {
+  font-size: 1.25rem;
+}
+
+.heart-icon {
+  width: 28px;
+  height: 26px;
+}
+
+.info-dot {
+  width: 19px;
+  height: 19px;
+  font-size: 0.82rem;
+}
+
+.leader-row {
+  gap: 7px;
+}
+
+.leader-card {
+  padding: 7px;
+  border-width: 2px;
+  border-radius: 10px;
+}
+
+.leader-card strong,
+.leader-card span {
+  font-size: clamp(0.62rem, 2.8vw, 0.76rem);
+}
+
+.leaders-link {
+  font-size: 0.82rem;
+}
+
+.featured-book {
+  gap: 16px;
+}
+
+.featured-cover {
+  width: min(230px, 64vw);
+}
+
+.featured-actions {
+  gap: 8px;
+}
+
+.featured-actions button {
+  min-height: 44px;
+  padding: 7px 9px;
+  border-width: 2px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+}
+
+.reader-home-list,
+.book-grid,
+.dashboard-grid {
+  gap: 12px;
+}
+
+.book-card-body,
+.post-card,
+.notice-card,
+.stat-card,
+.form-panel,
+.admin-panel,
+.admin-login-panel,
+.moderation-card,
+.profile-summary {
+  padding: 12px;
+}
+
+.section-heading h2 {
+  font-size: 1.35rem;
+}
+
+.chapter-meta {
+  gap: 5px;
+  font-size: 0.74rem;
+}
+
+.book-card p,
+.chapter-row p,
+.post-card p,
+.notice-card p,
+.form-panel p,
+.admin-panel p,
+.profile-summary p {
+  line-height: 1.45;
+}
+
+.chapter-row {
+  padding: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.82rem;
+}
+
+.comment-item,
+.settings-drawer {
+  padding: 9px;
+}
+
+.admin-heading h1 {
+  font-size: 1.65rem;
+}
+
+.stat-card strong {
+  font-size: 1.35rem;
+}
+
+.reader-topbar {
+  padding: 9px 11px;
+}
+
+.reader-title h1 {
+  font-size: 1.1rem;
+}
+
+.reader-body h2 {
+  font-size: 1.75rem;
+}
+
+.toast {
+  padding: 9px 11px;
+  font-size: 0.82rem;
+}
+
+@media (min-width: 760px) {
+  .main {
+    padding: 0 14px 36px;
+  }
+}
