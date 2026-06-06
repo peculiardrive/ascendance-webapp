@@ -602,11 +602,6 @@ function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }
         <img className="auth-logo" src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
         <div className="auth-heading">
           <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : "Create Profile"}</h1>
-          {step === "signin" && (
-            <button className="auth-alt-link" type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>
-              {mode === "signup" ? "Login" : "Create a Reader Profile"}
-            </button>
-          )}
         </div>
         {step === "signin" && (
           <>
@@ -615,12 +610,14 @@ function AuthView({ user, onSignup, onLogin, onVerify, onResendCode, onProfile }
                 <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
                 <label>Full name<input name="fullName" placeholder="Your name" autoComplete="name" required /></label>
                 <label>Password<input name="password" type="password" placeholder="Minimum 8 characters" autoComplete="new-password" minLength={8} required /></label>
+                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Already have an account? Login</button>
                 <button className="primary-btn auth-submit">Submit</button>
               </form>
             ) : (
               <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
                 <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
                 <label>Password<input name="password" type="password" placeholder="Your password" autoComplete="current-password" required /></label>
+                <button className="auth-alt-link" type="button" onClick={() => setMode("signup")}>Create a Reader Profile</button>
                 <button className="primary-btn auth-submit">Submit</button>
               </form>
             )}
