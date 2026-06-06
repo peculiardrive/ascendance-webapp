@@ -176,6 +176,10 @@ export default function Home() {
   }, [user, isOnboarded, splashDone, view]);
 
   useEffect(() => {
+    if (splashDone) window.scrollTo({ top: 0, behavior: "instant" });
+  }, [view, splashDone]);
+
+  useEffect(() => {
     if (activeChapterId) localStorage.setItem(LAST_CHAPTER_KEY, activeChapterId);
   }, [activeChapterId]);
 
@@ -670,11 +674,7 @@ function AppShell({ children, view, setView }) {
   );
 }
 
-function HomeView({ books, purchases, user, posts, progress, onViewBooks, onViewCommunity, onRead, onPurchase }) {
-  const first = books[0];
-  const firstChapter = flattenChapters([first])[0];
-  const firstProgress = Object.values(progress).filter((item) => item?.bookId === first.id).at(-1);
-  const continueChapter = flattenChapters([first]).find((item) => item.chapter.id === firstProgress?.chapterId) || firstChapter;
+function getCommunityLeaders(posts) {
   const fallbackLeaders = [
     { name: "Stanley Ohanugo", points: 380, country: "NG" },
     { name: "AdaReads", points: 350, country: "NG" },
@@ -703,9 +703,38 @@ function HomeView({ books, purchases, user, posts, progress, onViewBooks, onView
     if (!communityLeaders.has(key)) communityLeaders.set(key, leader);
   });
 
-  const leaders = [...communityLeaders.values()]
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 4);
+  return [...communityLeaders.values()].sort((a, b) => b.points - a.points);
+}
+
+function LeaderList({ leaders }) {
+  return (
+    <div className="leader-list">
+      {leaders.map((leader, index) => (
+        <article className={`leader-card rank-${index + 1}`} key={`${leader.name}-${leader.points}`}>
+          <span className="leader-rank" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
+          <div className="leader-avatar" aria-hidden="true">
+            {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
+          </div>
+          <div className="leader-identity">
+            <strong>{leader.name}</strong>
+            <span>{leader.country || "Reader"}</span>
+          </div>
+          <div className="leader-score">
+            <strong>{leader.points}</strong>
+            <span>points</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function HomeView({ books, purchases, user, posts, progress, onViewBooks, onViewCommunity, onRead, onPurchase }) {
+  const first = books[0];
+  const firstChapter = flattenChapters([first])[0];
+  const firstProgress = Object.values(progress).filter((item) => item?.bookId === first.id).at(-1);
+  const continueChapter = flattenChapters([first]).find((item) => item.chapter.id === firstProgress?.chapterId) || firstChapter;
+  const leaders = getCommunityLeaders(posts).slice(0, 4);
 
   return (
     <div className="home-screen">
@@ -718,24 +747,7 @@ function HomeView({ books, purchases, user, posts, progress, onViewBooks, onView
           </div>
           <span className="info-dot" title="Points reward reviews, likes, and helpful comments" aria-label="How community points work">i</span>
         </div>
-        <div className="leader-list">
-          {leaders.map((leader, index) => (
-            <article className={`leader-card rank-${index + 1}`} key={`${leader.name}-${leader.points}`}>
-              <span className="leader-rank" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
-              <div className="leader-avatar" aria-hidden="true">
-                {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
-              </div>
-              <div className="leader-identity">
-                <strong>{leader.name}</strong>
-                <span>{leader.country || "Reader"}</span>
-              </div>
-              <div className="leader-score">
-                <strong>{leader.points}</strong>
-                <span>points</span>
-              </div>
-            </article>
-          ))}
-        </div>
+        <LeaderList leaders={leaders} />
         <button className="leaders-link" onClick={onViewCommunity}>View full leaderboard</button>
       </section>
 
@@ -870,6 +882,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
 function CommunityView({ posts, user, onPost, onLike, onComment, onReport, onShare }) {
   const [sort, setSort] = useState("recent");
   const [replyTo, setReplyTo] = useState(null);
+  const leaders = getCommunityLeaders(posts);
   const sortedPosts = [...posts].sort((a, b) => {
     if (sort === "popular") return (b.comments?.length || 0) + (b.likes || 0) - ((a.comments?.length || 0) + (a.likes || 0));
     if (sort === "liked") return (b.likes || 0) - (a.likes || 0);
@@ -878,6 +891,15 @@ function CommunityView({ posts, user, onPost, onLike, onComment, onReport, onSha
 
   return (
     <div className="content-stack">
+      <section className="community-leaderboard" aria-labelledby="full-leaderboard-title">
+        <div className="section-heading">
+          <div>
+            <h2 id="full-leaderboard-title">Reader Leaderboard</h2>
+            <p>Ranked by reviews, likes, and helpful discussion.</p>
+          </div>
+        </div>
+        <LeaderList leaders={leaders} />
+      </section>
       <section className="form-panel">
         <div className="section-heading">
           <div>
