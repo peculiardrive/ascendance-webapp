@@ -1,6 +1,10 @@
-import { paystackRequest } from "@/lib/paystack";
+import { paystackAmount, paystackRequest, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { json, readJson, readState, requireFields, uid, userIdFrom, writeState } from "@/lib/store";
+
+function generateGiftCode() {
+  return Math.random().toString(36).replace(/[^a-z0-9]/gi, "").slice(0, 8).toUpperCase();
+}
 
 export async function POST(request) {
   try {
@@ -13,44 +17,100 @@ export async function POST(request) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
 
-    const state = await readState();
-    state.transactions = state.transactions || [];
-    state.purchases = state.purchases || [];
-
-    const transaction = state.transactions.find((item) => item.reference === reference && item.userId === userId);
-    if (!transaction) return json({ ok: false, error: "Payment reference not found." }, { status: 404 });
-
-    const existing = state.purchases.find((item) => item.paymentReference === reference);
-    if (existing) return json({ ok: true, purchase: existing, alreadyVerified: true });
+    const existing = await prisma.purchase.findUnique({ where: { paymentReference: reference } });
+    if (existing) {
+      return json({
+        ok: true,
+        purchase: { ...existing, amount: Number(existing.amount), status: existing.paymentStatus },
+        alreadyVerified: true
+      });
+    }
 
     const verification = await paystackRequest(`/transaction/verify/${encodeURIComponent(reference)}`);
+    const metadata = verification.data.metadata || {};
+    if (metadata.userId !== userId) {
+      return json({ ok: false, error: "Payment does not belong to this reader." }, { status: 403 });
+    }
+
+    const product = await resolvePaymentProduct({
+      productType: metadata.productType,
+      bookId: metadata.bookId || null,
+      sectionId: metadata.sectionId || null
+    });
     const paid = verification.data.status === "success";
-    const expectedAmount = Math.round(Number(transaction.amount || 0) * 100);
+    const expectedAmount = paystackAmount(product.amount);
     const paidAmount = Number(verification.data.amount || 0);
 
     if (!paid || paidAmount !== expectedAmount) {
-      transaction.status = paid ? "Amount Mismatch" : verification.data.status || "Failed";
-      await writeState(state);
       return json({ ok: false, error: "Payment could not be verified." }, { status: 400 });
     }
 
-    const purchase = {
-      id: uid("purchase"),
+    const state = await readState();
+    state.transactions = state.transactions || [];
+    state.purchases = state.purchases || [];
+    state.gifts = state.gifts || [];
+    const transaction = state.transactions.find((item) => item.reference === reference) || {
+      id: uid("tx"),
       userId,
-      productType: transaction.productType,
-      bookId: transaction.bookId || null,
-      sectionId: transaction.sectionId || null,
-      amount: Number(transaction.amount),
-      paymentReference: reference,
-      paymentGateway: "Paystack",
-      status: "Successful",
+      email: user.email,
+      amount: product.amount,
+      product: product.product,
+      productType: product.productType,
+      bookId: product.bookId,
+      sectionId: product.sectionId,
+      recipientEmail: metadata.recipientEmail || null,
+      gateway: "Paystack",
+      reference,
       createdAt: new Date().toISOString()
+    };
+
+    if (product.productType === "gift-trilogy") {
+      const existingGift = await prisma.gift.findFirst({ where: { paymentReference: reference } });
+      if (existingGift) return json({ ok: true, gift: existingGift, alreadyVerified: true });
+
+      const savedGift = await prisma.gift.create({
+        data: {
+          senderUserId: userId,
+          recipientEmail: String(metadata.recipientEmail || "").toLowerCase().trim(),
+          accessCode: generateGiftCode(),
+          giftPackage: "trilogy",
+          paymentReference: reference,
+          status: "Sent"
+        }
+      });
+      const gift = { ...savedGift, senderName: user.fullName };
+      state.gifts.unshift(gift);
+      transaction.status = "Successful";
+      transaction.verifiedAt = gift.createdAt;
+      transaction.gatewayResponse = verification.data.gateway_response;
+      if (!state.transactions.some((item) => item.reference === reference)) state.transactions.push(transaction);
+      await writeState(state);
+      return json({ ok: true, gift, transaction });
+    }
+
+    const savedPurchase = await prisma.purchase.create({
+      data: {
+        userId,
+        productType: product.productType,
+        bookId: product.bookId || null,
+        sectionId: product.sectionId || null,
+        amount: product.amount,
+        paymentReference: reference,
+        paymentGateway: "Paystack",
+        paymentStatus: "Successful"
+      }
+    });
+    const purchase = {
+      ...savedPurchase,
+      amount: Number(savedPurchase.amount),
+      status: savedPurchase.paymentStatus
     };
 
     state.purchases.push(purchase);
     transaction.status = "Successful";
     transaction.verifiedAt = purchase.createdAt;
     transaction.gatewayResponse = verification.data.gateway_response;
+    if (!state.transactions.some((item) => item.reference === reference)) state.transactions.push(transaction);
     await writeState(state);
 
     return json({ ok: true, purchase, transaction });

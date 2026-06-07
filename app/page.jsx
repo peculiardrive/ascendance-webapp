@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { USD_PRICES, usdBookPrice, usdToNgn } from "@/lib/pricing";
 import { defaultState } from "@/lib/seed";
 
 const STORAGE_KEY = "ascendance_next_user";
@@ -24,12 +25,30 @@ const NAV_TABS = [
   ["profile", "Profile", "profile"]
 ];
 
-function currency(amount) {
+function ngnCurrency(amount) {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
     maximumFractionDigits: 0
   }).format(amount || 0);
+}
+
+function usdCurrency(amount) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Number(amount || 0));
+}
+
+function ReaderPrice({ usdAmount, ngnAmount = usdToNgn(usdAmount) }) {
+  return (
+    <span className="reader-price" title={`Paystack checkout charge: ${ngnCurrency(ngnAmount)}`}>
+      <strong>{usdCurrency(usdAmount)}</strong>
+      <small>charged {ngnCurrency(ngnAmount)}</small>
+    </span>
+  );
 }
 
 function flattenChapters(books) {
@@ -200,7 +219,7 @@ export default function Home() {
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
       fetch("/api/books", { headers: userId ? { "x-user-id": userId } : {} }),
       fetch("/api/community/posts"),
-      fetch("/api/state")
+      fetch("/api/state", { headers: userId ? { "x-user-id": userId } : {} })
     ]);
     const booksData = await booksResponse.json();
     const postsData = await postsResponse.json();
@@ -318,7 +337,7 @@ export default function Home() {
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
-    notify("Payment verified. Content unlocked.");
+    notify(data.gift ? `Gift sent. Access code: ${data.gift.accessCode}` : "Payment verified. Content unlocked.");
     await refreshState(user.id);
   }
 
@@ -422,15 +441,18 @@ export default function Home() {
   }
 
   async function sendGift(formData) {
-    const response = await fetch("/api/gifts", {
+    const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
       headers: { "content-type": "application/json", "x-user-id": user.id },
-      body: JSON.stringify({ recipientEmail: formData.get("recipientEmail") })
+      body: JSON.stringify({
+        productType: "gift-trilogy",
+        recipientEmail: formData.get("recipientEmail")
+      })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
-    notify(`Gift code generated: ${data.gift.accessCode}`);
-    await refreshState(user.id);
+    notify("Opening Paystack checkout.");
+    window.location.href = data.authorizationUrl;
   }
 
   async function adminLogin(formData) {
@@ -780,7 +802,11 @@ function BookCard({ book, user, purchases, progress, onRead, onPurchase }) {
     <article className="book-card reader-home-card">
       <img src={book.cover} alt={`${book.title} cover`} />
       <div className="book-card-body">
-        <div className="chapter-meta"><span>{book.subtitle}</span><span>{owned ? "Unlocked" : preview ? "Preview" : "Locked"}</span><span>{currency(book.price)}</span></div>
+        <div className="chapter-meta">
+          <span>{book.subtitle}</span>
+          <span>{owned ? "Unlocked" : preview ? "Preview" : "Locked"}</span>
+          <ReaderPrice usdAmount={usdBookPrice(book)} />
+        </div>
         <h3>{book.title}</h3>
         <p>{book.blurb}</p>
         <div className="progress-track"><div className="progress-fill" style={{ width: `${percent}%` }} /></div>
@@ -803,6 +829,15 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
           <p>Server-side API checks protect locked chapters.</p>
         </div>
       </div>
+      <section className="bundle-offer">
+        <div>
+          <p className="eyebrow">Best value</p>
+          <h2>Unlock all three books</h2>
+          <p>One discounted payment unlocks the complete Ascendance trilogy.</p>
+        </div>
+        <ReaderPrice usdAmount={USD_PRICES.trilogy} />
+        <button className="primary-btn" onClick={() => onPurchase(null, "trilogy")}>Unlock Trilogy</button>
+      </section>
       {books.map((book) => (
         <section className="admin-panel" key={book.id}>
           <div className="section-heading">
@@ -811,7 +846,10 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
               <h2>{book.title}</h2>
               <p>{book.blurb}</p>
             </div>
-            <img src={book.cover} alt={`${book.title} cover`} className="mini-cover" />
+            <div className="store-book-aside">
+              <ReaderPrice usdAmount={usdBookPrice(book)} />
+              <img src={book.cover} alt={`${book.title} cover`} className="mini-cover" />
+            </div>
           </div>
           <div className="grid">
             {book.sections.map((section) => (
@@ -1014,9 +1052,13 @@ function NoticesView({ gifts, onGift }) {
     <div className="content-stack">
       <section className="form-panel">
         <h2>Send Gift</h2>
+        <div className="gift-price">
+          <span>Ascendance Trilogy gift</span>
+          <ReaderPrice usdAmount={USD_PRICES.giftTrilogy} />
+        </div>
         <form onSubmit={(event) => { event.preventDefault(); onGift(new FormData(event.currentTarget)); event.currentTarget.reset(); }} className="form-grid">
           <label>Recipient email<input name="recipientEmail" type="email" placeholder="friend@example.com" required /></label>
-          <button className="primary-btn">Generate Gift Code</button>
+          <button className="primary-btn">Pay &amp; Send Gift</button>
         </form>
       </section>
       {gifts.length ? gifts.map((gift) => <article className="notice-card" key={gift.id}><h3>{gift.recipientEmail}</h3><p>{gift.status} · {gift.accessCode}</p></article>) : <div className="empty-state">No gift activity yet.</div>}
@@ -1101,13 +1143,13 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
       <div className="grid dashboard-grid">
         <article className="stat-card"><strong>{books.length}</strong><span>Books</span></article>
         <article className="stat-card"><strong>{purchases.length}</strong><span>Purchases</span></article>
-        <article className="stat-card"><strong>{currency(revenue)}</strong><span>Revenue</span></article>
+        <article className="stat-card"><strong>{ngnCurrency(revenue)}</strong><span>Revenue</span></article>
         <article className="stat-card"><strong>{gifts.length}</strong><span>Gifts</span></article>
         <article className="stat-card"><strong>{posts.length}</strong><span>Posts</span></article>
       </div>
       <section className="admin-panel">
         <h2>Manage Books</h2>
-        {books.map((book) => <p key={book.id}>{book.subtitle}: {book.title} · {currency(book.price)} · {book.status}</p>)}
+        {books.map((book) => <p key={book.id}>{book.subtitle}: {book.title} · {ngnCurrency(book.price)} · {book.status}</p>)}
       </section>
       <section className="admin-panel">
         <div className="section-heading">

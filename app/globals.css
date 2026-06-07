@@ -1453,6 +1453,65 @@ textarea {
   font-size: 0.74rem;
 }
 
+.reader-price {
+  display: inline-grid;
+  justify-items: end;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.reader-price strong {
+  color: var(--brand);
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+
+.reader-price small {
+  color: var(--muted);
+  font-size: 0.56rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.bundle-offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 14px;
+  border: 1px solid #d8c7df;
+  border-left: 3px solid #b78a28;
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.bundle-offer h2,
+.bundle-offer p {
+  margin: 0;
+}
+
+.bundle-offer > .primary-btn {
+  grid-column: 1 / -1;
+}
+
+.gift-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 14px;
+  padding: 10px 0;
+  border-block: 1px solid #e4dbe7;
+  font-weight: 800;
+}
+
+.store-book-aside {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
 .book-card p,
 .chapter-row p,
 .post-card p,
