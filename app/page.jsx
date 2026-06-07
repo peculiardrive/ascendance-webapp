@@ -4,8 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { USD_PRICES, usdBookPrice, usdToNgn } from "@/lib/pricing";
 import { defaultState } from "@/lib/seed";
 
-const STORAGE_KEY = "ascendance_next_user";
-const ADMIN_STORAGE_KEY = "ascendance_next_admin";
 const LAST_VIEW_KEY = "ascendance_last_view";
 const LAST_CHAPTER_KEY = "ascendance_last_chapter";
 const BRAND_ASSETS = {
@@ -155,26 +153,43 @@ export default function Home() {
   const isOnboarded = user?.onboardingStep === "done";
 
   useEffect(() => {
-    const savedUser = localStorage.getItem(STORAGE_KEY);
-    const savedAdmin = localStorage.getItem(ADMIN_STORAGE_KEY);
-    const parsedUser = savedUser ? JSON.parse(savedUser) : null;
-    const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
-    const savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
-    if (parsedUser) setUser(parsedUser);
-    if (savedAdmin) setAdmin(JSON.parse(savedAdmin));
-    if (savedChapter) setActiveChapterId(savedChapter);
-    refreshState(parsedUser?.id || null).finally(() => {
-      setReady(true);
-      setTimeout(() => {
+    let active = true;
+    async function bootstrap() {
+      localStorage.removeItem("ascendance_next_user");
+      localStorage.removeItem("ascendance_next_admin");
+      const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
+      const savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
+      if (savedChapter) setActiveChapterId(savedChapter);
+
+      try {
+        const response = await fetch("/api/auth/session", { credentials: "same-origin" });
+        const data = await response.json();
+        if (!active) return;
+        setUser(data.user || null);
+        setAdmin(data.admin || null);
+        await refreshState();
+        if (!active) return;
+        setReady(true);
+        setTimeout(() => {
+          if (!active) return;
+          setSplashDone(true);
+          if (data.user?.onboardingStep === "done") setView(savedView);
+          else setShowTrailer(true);
+        }, 1300);
+      } catch {
+        if (!active) return;
+        setReady(true);
         setSplashDone(true);
-        if (parsedUser?.onboardingStep === "done") setView(savedView);
-        else setShowTrailer(true);
-      }, 1300);
-    });
+        setShowTrailer(true);
+      }
+    }
+    bootstrap();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
     if (user && !isOnboarded) {
       setShowTrailer(false);
       setView("auth");
@@ -183,10 +198,6 @@ export default function Home() {
       setView(localStorage.getItem(LAST_VIEW_KEY) || "home");
     }
   }, [user, isOnboarded, view, splashDone, showTrailer]);
-
-  useEffect(() => {
-    if (admin) localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(admin));
-  }, [admin]);
 
   useEffect(() => {
     if (user && isOnboarded && splashDone && view !== "auth") {
@@ -215,11 +226,11 @@ export default function Home() {
     window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }, [ready, user?.id, isOnboarded]);
 
-  async function refreshState(userId = user?.id) {
+  async function refreshState() {
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
-      fetch("/api/books", { headers: userId ? { "x-user-id": userId } : {} }),
+      fetch("/api/books"),
       fetch("/api/community/posts"),
-      fetch("/api/state", { headers: userId ? { "x-user-id": userId } : {} })
+      fetch("/api/state")
     ]);
     const booksData = await booksResponse.json();
     const postsData = await postsResponse.json();
@@ -270,7 +281,7 @@ export default function Home() {
     setShowTrailer(false);
     setUser(data.user);
     notify("Welcome back.");
-    await refreshState(data.user.id);
+    await refreshState();
   }
 
   async function verifyEmail(formData) {
@@ -299,7 +310,7 @@ export default function Home() {
   async function updateProfile(formData) {
     const response = await fetch("/api/users/me", {
       method: "PATCH",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         phone: formData.get("phone") || user.phone,
         username: formData.get("username") || user.username,
@@ -316,7 +327,7 @@ export default function Home() {
   async function purchase(book, productType = "book") {
     const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         productType,
         bookId: productType === "book" ? book?.id : null
@@ -332,19 +343,17 @@ export default function Home() {
     notify("Verifying payment...");
     const response = await fetch("/api/payments/paystack/verify", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ reference })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
     notify(data.gift ? `Gift sent. Access code: ${data.gift.accessCode}` : "Payment verified. Content unlocked.");
-    await refreshState(user.id);
+    await refreshState();
   }
 
   async function openChapter(item) {
-    const response = await fetch(`/api/chapters/${item.chapter.id}`, {
-      headers: user ? { "x-user-id": user.id } : {}
-    });
+    const response = await fetch(`/api/chapters/${item.chapter.id}`);
     if (response.status === 403) {
       notify("This chapter is locked. Unlock the book or trilogy.");
       return;
@@ -359,7 +368,7 @@ export default function Home() {
     if (!user || !chapterItem) return;
     await fetch("/api/progress", {
       method: "PUT",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         bookId: chapterItem.book.id,
         sectionId: chapterItem.section.id,
@@ -369,30 +378,30 @@ export default function Home() {
         deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop"
       })
     });
-    await refreshState(user.id);
+    await refreshState();
   }
 
   async function createPost(formData) {
     const response = await fetch("/api/community/posts", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ content: formData.get("content"), bookId: "book-1" })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
     notify("Review posted.");
-    await refreshState(user.id);
+    await refreshState();
   }
 
   async function communityAction(payload) {
     const response = await fetch("/api/community/posts", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-user-id": user?.id || "" },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
-    await refreshState(user?.id);
+    await refreshState();
     return data;
   }
 
@@ -443,7 +452,7 @@ export default function Home() {
   async function sendGift(formData) {
     const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-user-id": user.id },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         productType: "gift-trilogy",
         recipientEmail: formData.get("recipientEmail")
@@ -468,12 +477,21 @@ export default function Home() {
     if (!data.ok) return notify(data.error);
     setAdmin(data.admin);
     notify("Admin login successful.");
+    await refreshState();
   }
 
-  function adminLogout() {
-    localStorage.removeItem(ADMIN_STORAGE_KEY);
+  async function adminLogout() {
+    await fetch("/api/admin/logout", { method: "POST" });
     setAdmin(null);
+    await refreshState();
     notify("Admin logged out.");
+  }
+
+  async function readerLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    setView("auth");
+    await refreshState();
   }
 
   function toggleAutoScroll() {
@@ -554,7 +572,7 @@ export default function Home() {
             />
           )}
           {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} />}
-          {view === "profile" && <ProfileView user={user} progress={progress} purchases={purchases} onProfile={updateProfile} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setUser(null); setView("auth"); }} />}
+          {view === "profile" && <ProfileView user={user} progress={progress} purchases={purchases} onProfile={updateProfile} onLogout={readerLogout} />}
           {view === "admin" && (
             <AdminGate
               admin={admin}

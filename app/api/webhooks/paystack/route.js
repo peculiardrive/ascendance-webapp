@@ -1,11 +1,8 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { generateGiftCode } from "@/lib/gifts";
 import { paystackAmount, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { json, readState, uid, writeState } from "@/lib/store";
-
-function generateGiftCode() {
-  return Math.random().toString(36).replace(/[^a-z0-9]/gi, "").slice(0, 8).toUpperCase();
-}
 
 export async function POST(request) {
   const rawBody = await request.text();
@@ -15,9 +12,18 @@ export async function POST(request) {
   if (!secret) return json({ ok: false, error: "PAYSTACK_SECRET_KEY is not configured." }, { status: 500 });
 
   const hash = createHmac("sha512", secret).update(rawBody).digest("hex");
-  if (hash !== signature) return json({ ok: false, error: "Invalid Paystack signature." }, { status: 401 });
+  const expected = Buffer.from(hash);
+  const actual = Buffer.from(signature || "");
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+    return json({ ok: false, error: "Invalid Paystack signature." }, { status: 401 });
+  }
 
-  const event = JSON.parse(rawBody);
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return json({ ok: false, error: "Invalid webhook payload." }, { status: 400 });
+  }
   if (event.event !== "charge.success") return json({ ok: true, ignored: true });
 
   const data = event.data || {};

@@ -1,13 +1,24 @@
 import { publicUser, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { assertSameOrigin, readerSessionCookie } from "@/lib/session";
 import { json, readJson, requireFields } from "@/lib/store";
 
 export async function POST(request) {
   try {
+    assertSameOrigin(request);
     const payload = await readJson(request);
     requireFields(payload, ["email", "password"]);
 
     const email = String(payload.email).toLowerCase().trim();
+    const rateLimit = await consumeRateLimit(request, {
+      scope: "reader-login",
+      identity: email,
+      limit: 5,
+      windowMs: 15 * 60 * 1000
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !verifyPassword(String(payload.password), user.passwordHash)) {
@@ -19,8 +30,11 @@ export async function POST(request) {
       data: { lastLogin: new Date() }
     });
 
-    return json({ ok: true, user: publicUser(updated) });
+    return json(
+      { ok: true, user: publicUser(updated) },
+      { headers: { "set-cookie": readerSessionCookie(updated.id) } }
+    );
   } catch (error) {
-    return json({ ok: false, error: error.message }, { status: 400 });
+    return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }
 }

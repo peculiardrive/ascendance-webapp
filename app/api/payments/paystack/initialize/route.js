@@ -1,10 +1,12 @@
 import { paystackAmount, paystackReference, paystackRequest, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
-import { json, readJson, readState, requireFields, uid, userIdFrom, writeState } from "@/lib/store";
+import { assertSameOrigin, readerSessionFrom } from "@/lib/session";
+import { json, readJson, readState, requireFields, uid, writeState } from "@/lib/store";
 
 export async function POST(request) {
   try {
-    const userId = userIdFrom(request);
+    assertSameOrigin(request);
+    const userId = readerSessionFrom(request)?.sub;
     const payload = await readJson(request);
     requireFields(payload, ["productType"]);
     if (!userId) return json({ ok: false, error: "Missing user session." }, { status: 401 });
@@ -86,6 +88,6 @@ export async function POST(request) {
       accessCode: response.data.access_code
     });
   } catch (error) {
-    return json({ ok: false, error: error.message }, { status: 400 });
+    return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }
 }

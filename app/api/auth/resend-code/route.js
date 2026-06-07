@@ -1,16 +1,27 @@
 import { generateVerificationCode, hashVerificationCode, publicUser, verificationExpiry } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { assertSameOrigin } from "@/lib/session";
 import { json, readJson, requireFields } from "@/lib/store";
 
 export async function POST(request) {
   try {
+    assertSameOrigin(request);
     const payload = await readJson(request);
     requireFields(payload, ["email"]);
     const email = String(payload.email).toLowerCase().trim();
+    const rateLimit = await consumeRateLimit(request, {
+      scope: "resend-verification",
+      identity: email,
+      limit: 3,
+      windowMs: 15 * 60 * 1000
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
+    if (!user) return json({ ok: true, delivery: null });
     if (user.emailVerified) return json({ ok: true, user: publicUser(user), alreadyVerified: true });
 
     const code = generateVerificationCode();
@@ -26,6 +37,6 @@ export async function POST(request) {
     const delivery = await sendVerificationEmail({ to: email, code, name: updated.fullName });
     return json({ ok: true, user: publicUser(updated), delivery });
   } catch (error) {
-    return json({ ok: false, error: error.message }, { status: 400 });
+    return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }
 }

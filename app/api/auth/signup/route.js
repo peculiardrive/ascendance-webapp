@@ -1,14 +1,24 @@
 import { generateVerificationCode, hashPassword, hashVerificationCode, publicUser, verificationExpiry } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { assertSameOrigin } from "@/lib/session";
 import { json, readJson, requireFields } from "@/lib/store";
 
 export async function POST(request) {
   try {
+    assertSameOrigin(request);
     const payload = await readJson(request);
     requireFields(payload, ["email", "password"]);
     const email = String(payload.email).toLowerCase().trim();
     const password = String(payload.password);
+    const rateLimit = await consumeRateLimit(request, {
+      scope: "reader-signup",
+      identity: email,
+      limit: 5,
+      windowMs: 30 * 60 * 1000
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
 
     if (password.length < 8) {
       return json({ ok: false, error: "Password must be at least 8 characters." }, { status: 400 });
@@ -56,6 +66,6 @@ export async function POST(request) {
     const delivery = await sendVerificationEmail({ to: email, code, name: user.fullName });
     return json({ ok: true, user: publicUser(user), delivery }, { status: 201 });
   } catch (error) {
-    return json({ ok: false, error: error.message }, { status: 400 });
+    return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }
 }

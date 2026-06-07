@@ -1,14 +1,13 @@
+import { generateGiftCode } from "@/lib/gifts";
 import { paystackAmount, paystackRequest, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
-import { json, readJson, readState, requireFields, uid, userIdFrom, writeState } from "@/lib/store";
-
-function generateGiftCode() {
-  return Math.random().toString(36).replace(/[^a-z0-9]/gi, "").slice(0, 8).toUpperCase();
-}
+import { assertSameOrigin, readerSessionFrom } from "@/lib/session";
+import { json, readJson, readState, requireFields, uid, writeState } from "@/lib/store";
 
 export async function POST(request) {
   try {
-    const userId = userIdFrom(request);
+    assertSameOrigin(request);
+    const userId = readerSessionFrom(request)?.sub;
     const payload = await readJson(request);
     requireFields(payload, ["reference"]);
     if (!userId) return json({ ok: false, error: "Missing user session." }, { status: 401 });
@@ -115,6 +114,6 @@ export async function POST(request) {
 
     return json({ ok: true, purchase, transaction });
   } catch (error) {
-    return json({ ok: false, error: error.message }, { status: 400 });
+    return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }
 }

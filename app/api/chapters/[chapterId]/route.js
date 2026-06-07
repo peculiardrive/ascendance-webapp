@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { flattenChapters, hasChapterAccess, json, readState, userIdFrom } from "@/lib/store";
+import { readerSessionFrom } from "@/lib/session";
+import { flattenChapters, hasChapterAccess, json, readState } from "@/lib/store";
 
 export async function GET(request, { params }) {
   const state = await readState();
-  const userId = userIdFrom(request);
+  const userId = readerSessionFrom(request)?.sub || null;
   if (userId) {
     const purchases = await prisma.purchase.findMany({
       where: { userId, paymentStatus: "Successful" }
