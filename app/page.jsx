@@ -1603,7 +1603,7 @@ function CommunityView({
       )}
 
       {surface === "feed" ? (
-        <div style={{ padding: '0 24px', paddingBottom: '40px' }}>
+        <div style={{ padding: '0 12px', paddingBottom: '40px' }}>
           {/* Reader Leaderboard Section */}
           <section style={{ marginTop: '16px' }}>
             <div style={{ marginBottom: '16px' }}>
@@ -1640,7 +1640,7 @@ function CommunityView({
           </section>
 
           {/* Community & Composer Section */}
-          <section style={{ marginTop: '24px', background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <section style={{ marginTop: '24px', background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
             <h2 style={{ margin: '0 0 8px', color: 'var(--app-purple)', fontSize: '1.6rem', fontFamily: 'Georgia, serif' }}>Community</h2>
             <p style={{ margin: '0 0 24px', color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.5' }}>Reader reviews, replies, sharing, and moderation signals.</p>
             
