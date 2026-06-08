@@ -1590,6 +1590,9 @@ function CommunityView({
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           ) : null}
+          {surface === "compose" ? (
+            <button form="compose-form" type="submit" style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontWeight: "bold", fontSize: "1rem", cursor: "pointer", marginLeft: "12px" }}>Post</button>
+          ) : null}
           {surface === "feed" ? (
             <>
               <button className="circle-icon-btn" onClick={() => setSearchOpen(!searchOpen)} aria-label="Search">
@@ -1704,15 +1707,19 @@ function CommunityView({
       ) : null}
 
       {surface === "compose" ? (
-        <section className="compose-screen">
-          <form className="review-composer" onSubmit={submitReview} style={{ display: 'grid', gap: '20px' }}>
-            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Title
-              <input name="title" maxLength={30} placeholder="What is the headline?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+        <section className="compose-screen" style={{ marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--app-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '2rem', fontFamily: 'Georgia, serif', lineHeight: 1 }}>
+              “
+            </div>
+          </div>
+          <form id="compose-form" className="review-composer" onSubmit={submitReview} style={{ display: 'grid', gap: '20px' }}>
+            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Title
+              <input name="title" maxLength={30} placeholder="What is the headline?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', fontSize: '1rem', outline: 'none' }} />
             </label>
-            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Review
-              <textarea name="review" maxLength={250} placeholder="What is your experience?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent', minHeight: '160px' }} />
+            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Review
+              <textarea name="review" maxLength={250} placeholder="What is your experience?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', minHeight: '160px', fontSize: '1rem', resize: 'vertical', outline: 'none' }} />
             </label>
-            <button className="ghost-btn" style={{ borderColor: 'var(--app-purple)', color: 'var(--app-purple)', fontWeight: 'bold' }}>Post</button>
           </form>
         </section>
       ) : null}
