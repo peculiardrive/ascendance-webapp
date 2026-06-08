@@ -1186,12 +1186,22 @@ function HomeView({
       </section>
 
       <section className="leader-section community-leaders" aria-label="Community leaders" style={{ textStyle: "left", marginTop: "24px" }}>
-        <div className="leader-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-          <div className="leader-title-copy">
-            <h2 style={{ margin: 0 }}>Community Leaders</h2>
-            <p style={{ margin: 0 }}>Top contributors this week</p>
+        <div className="leader-title" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "4px" }}>
+          <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#F45A62" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: "2px" }}>
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <div className="leader-title-copy">
+              <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.2rem", fontWeight: "bold", fontFamily: "Inter, sans-serif" }}>Community Leaders</h2>
+              <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "0.85rem" }}>Readers making the biggest contribution this week</p>
+            </div>
           </div>
-          <button className="ghost-btn leaders-link" onClick={onViewLeaderboard} style={{ minHeight: "auto", padding: "4px 8px", fontSize: "0.75rem" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--app-purple)" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: "2px" }}>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", paddingRight: "4px" }}>
+          <button onClick={onViewLeaderboard} style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontSize: "0.9rem", fontWeight: "bold", textDecoration: "underline", cursor: "pointer", padding: 0 }}>
             View Full Leaderboard
           </button>
         </div>
