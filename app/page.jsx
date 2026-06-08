@@ -1580,12 +1580,9 @@ function CommunityView({
 
   return (
     <div className="community-screen">
-      <header className="community-header" style={{ alignItems: 'center', justifyContent: surface === "feed" ? 'center' : 'space-between', padding: '16px 24px', background: 'transparent' }}>
+      <header className="community-header" style={{ alignItems: 'center', justifyContent: surface === "feed" ? 'center' : 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
         {surface === "feed" ? (
-          <>
-            <img src={BRAND_ASSETS.wordmark} alt="Ascendance" style={{ height: '24px' }} />
-            <button style={{ position: 'absolute', right: '24px', border: '2px solid var(--app-purple)', background: 'transparent', color: 'var(--app-purple)', fontWeight: 'bold', padding: '4px 12px', borderRadius: '8px', fontSize: '0.85rem' }}>Admin</button>
-          </>
+          <img src={BRAND_ASSETS.wordmark} alt="Ascendance" style={{ height: '28px' }} />
         ) : (
           <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
             {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
