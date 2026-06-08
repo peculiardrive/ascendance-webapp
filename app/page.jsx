@@ -1628,6 +1628,10 @@ function CommunityView({
 
       {surface === "leaderboard" ? (
         <section className="full-leaderboard-screen" style={{ marginTop: '24px' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ margin: 0, color: 'var(--app-purple)', fontSize: '1.4rem', fontFamily: 'Georgia, serif' }}>Reader Leaderboard</h2>
+            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '0.9rem' }}>Ranked by reviews, likes, and helpful discusions</p>
+          </div>
           <div style={{ display: 'grid', gap: '12px' }}>
             {getCommunityLeaders(posts).map((leader, i) => (
               <button key={leader.name} onClick={() => openLeader(leader)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
