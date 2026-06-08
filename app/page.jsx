@@ -1582,7 +1582,7 @@ function CommunityView({
     <div className="community-screen">
       <header className="community-header" style={{ alignItems: 'center' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
-          {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Sort" : surface === "review" ? "Reviews" : "Community"}
+          {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
         </h1>
         <div className="community-tools">
           {surface !== "feed" ? (
@@ -1674,16 +1674,26 @@ function CommunityView({
         <section className="history-screen" style={{ marginTop: '24px', display: 'grid', gap: '16px' }}>
           {historyType === "posts"
             ? userPosts.map((post) => (
-                <article key={post.id} style={{ padding: '16px', background: 'transparent', border: '1px solid #111', borderRadius: '12px' }}>
-                  <h3 style={{ margin: '0 0 8px', fontSize: '1.2rem', color: 'var(--app-purple)' }}>{splitPostContent(post.content).title}</h3>
-                  <p style={{ margin: '0 0 12px', fontSize: '0.95rem', color: '#4b5563', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{splitPostContent(post.content).body}</p>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--app-muted)' }}>{new Date(post.createdAt).toLocaleDateString()}</span>
+                <article key={post.id} style={{ padding: '16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                    <div className="avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{post.avatar || post.username?.slice(0, 1) || "A"}</div>
+                    <strong style={{ fontSize: '1rem' }}>{post.username}</strong>
+                  </div>
+                  <p style={{ margin: '0 0 12px', fontSize: '0.95rem', color: '#4b5563', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.5' }}>{splitPostContent(post.content).body}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--app-purple)' }}>{splitPostContent(post.content).title}</h3>
+                  </div>
                 </article>
               ))
             : userComments.map((comment) => (
-                <article key={comment.id || comment.text} style={{ padding: '16px', background: 'transparent', border: '1px solid #111', borderRadius: '12px' }}>
-                  <p style={{ margin: '0 0 8px', fontSize: '0.95rem', color: '#4b5563' }}>{comment.text}</p>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--app-muted)' }}>{new Date(comment.createdAt || Date.now()).toLocaleDateString()}</span>
+                <article key={comment.id || comment.text} style={{ padding: '16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                    <div className="avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{comment.avatar || comment.user?.slice(0, 1) || "A"}</div>
+                    <strong style={{ fontSize: '1rem' }}>{comment.user}</strong>
+                  </div>
+                  <p style={{ margin: '0 0 12px', fontSize: '0.95rem', color: '#4b5563', lineHeight: '1.5' }}>{comment.text}</p>
+                  <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{new Date(comment.createdAt || Date.now()).toLocaleDateString()}</span>
                 </article>
               ))}
           {((historyType === "posts" && !userPosts.length) || (historyType === "comments" && !userComments.length)) ? <div className="empty-state">Nothing here yet.</div> : null}
@@ -1691,18 +1701,18 @@ function CommunityView({
       ) : null}
 
       {surface === "notifications" ? (
-        <section className="notification-list" style={{ marginTop: '24px', display: 'grid', gap: '12px' }}>
+        <section className="notification-list" style={{ marginTop: '24px', display: 'grid', gap: '16px' }}>
           {posts.flatMap((post) => (post.comments || []).map((comment) => ({ ...comment, post }))).slice(0, 12).map((notice, index) => (
-            <article className="notification-item" key={notice.id || `${notice.text}-${index}`} style={{ display: 'flex', gap: '16px', padding: '16px', background: '#1c1c1e', color: 'white', borderRadius: '12px', alignItems: 'flex-start' }}>
-              <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#b01834', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>{notice.avatar || notice.user?.slice(0, 1) || "A"}</div>
+            <article className="notification-item" key={notice.id || `${notice.text}-${index}`} style={{ display: 'flex', gap: '16px', padding: '16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', alignItems: 'flex-start' }}>
+              <div className="avatar" style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '1.2rem' }}>{notice.avatar || notice.user?.slice(0, 1) || "A"}</div>
               <div>
-                <p style={{ margin: '0 0 4px', fontSize: '0.95rem' }}><strong>{notice.user}</strong> replied to “{splitPostContent(notice.post.content).title}”</p>
-                <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#9ca3af' }}>"{notice.text}"</p>
-                <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{new Date(notice.createdAt || Date.now()).toLocaleDateString()}</span>
+                <p style={{ margin: '0 0 4px', fontSize: '1rem', color: '#111' }}><strong>{notice.user}</strong> replied to your review <em>“{splitPostContent(notice.post.content).title}”</em></p>
+                <p style={{ margin: '0 0 8px', fontSize: '0.95rem', color: '#4b5563', lineHeight: '1.4' }}>"{notice.text}"</p>
+                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{new Date(notice.createdAt || Date.now()).toLocaleDateString()}</span>
               </div>
             </article>
           ))}
-          {!posts.some((post) => post.comments?.length) ? <div className="empty-state">No notifications yet.</div> : null}
+          {!posts.some((post) => post.comments?.length) ? <div className="empty-state" style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>No notifications yet.</div> : null}
         </section>
       ) : null}
 
@@ -1726,11 +1736,12 @@ function CommunityView({
 
       {surface === "sort" ? (
         <section className="sort-screen" style={{ marginTop: '24px' }}>
+          <p style={{ margin: '0 0 24px', color: '#6b7280', fontSize: '1rem', fontWeight: 'bold' }}>How should we sort your feed?</p>
           <form style={{ display: 'grid', gap: '16px' }}>
             {["newest", "oldest", "liked", "replied"].map((sortOption) => (
-              <label key={sortOption} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '8px', border: '1px solid #111', cursor: 'pointer', background: sort === sortOption ? 'rgba(0,0,0,0.05)' : 'transparent' }}>
-                <input type="radio" name="sort" value={sortOption} checked={sort === sortOption} onChange={() => { setSort(sortOption); setSurface("feed"); }} style={{ transform: 'scale(1.5)', accentColor: 'var(--app-purple)' }} />
-                <span style={{ fontSize: '1.1rem', textTransform: 'capitalize' }}>
+              <label key={sortOption} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer', background: sort === sortOption ? 'var(--app-purple)' : 'transparent', color: sort === sortOption ? 'white' : 'inherit', transition: 'all 0.2s' }}>
+                <input type="radio" name="sort" value={sortOption} checked={sort === sortOption} onChange={() => { setSort(sortOption); setSurface("feed"); }} style={{ display: 'none' }} />
+                <span style={{ fontSize: '1.1rem', textTransform: 'capitalize', fontWeight: 'bold' }}>
                   {sortOption === "liked" ? "Most Liked" : sortOption === "replied" ? "Most Replied" : sortOption}
                 </span>
               </label>
