@@ -1582,12 +1582,12 @@ function CommunityView({
     <div className="community-screen">
       <header className="community-header" style={{ alignItems: 'center' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
-          {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Sort" : "Community"}
+          {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Sort" : surface === "review" ? "Reviews" : "Community"}
         </h1>
         <div className="community-tools">
           {surface !== "feed" ? (
-            <button className="circle-icon-btn" onClick={() => setSurface("feed")} aria-label="Back">
-              <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back">
+              <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           ) : null}
           {surface === "feed" ? (
@@ -1623,7 +1623,7 @@ function CommunityView({
         </section>
       ) : null}
 
-      {surface === "feed" && !selected ? (
+      {surface === "feed" ? (
         <>
           <div className={`feed-toolbar ${searchOpen ? "has-search" : ""}`}>
             {searchOpen ? <label className="search-field">Search reviews<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search community" autoFocus /></label> : null}
@@ -1635,7 +1635,7 @@ function CommunityView({
                 key={post.id}
                 post={post}
                 user={user}
-                onOpen={() => setSelectedPost(post.id)}
+                onOpen={() => { setSelectedPost(post.id); setSurface("review"); }}
                 onLike={onLike}
                 onShare={onShare}
               />
@@ -1645,13 +1645,15 @@ function CommunityView({
         </>
       ) : null}
 
-      {surface === "feed" && selected ? (
-        <section className="review-detail">
-          <button className="text-back" onClick={() => setSelectedPost(null)}>Back to reviews</button>
+      {surface === "review" && selected ? (
+        <section className="review-detail" style={{ marginTop: '24px' }}>
           <ReviewCard post={selected} user={user} onOpen={() => {}} onLike={onLike} onShare={onShare} expanded />
-          <div className="reply-heading"><h2>Replies</h2><span>{selected.comments?.length || 0}</span></div>
-          <CommentForm label="Add a comment" onSubmit={(text) => onComment(selected.id, text)} />
-          <div className="comment-list">
+          <div className="reply-heading" style={{ marginTop: '32px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.2rem', color: 'var(--app-purple)', margin: 0 }}>Reviews</h2>
+            <span style={{ fontWeight: 'bold', color: '#666' }}>{selected.comments?.length || 0}</span>
+          </div>
+          <CommentForm label="Write a review" onSubmit={(text) => onComment(selected.id, text)} />
+          <div className="comment-list" style={{ marginTop: '24px' }}>
             {(selected.comments || []).filter((comment) => !comment.parentId).map((comment) => (
               <CommunityComment
                 key={comment.id || comment.text}
@@ -1661,7 +1663,7 @@ function CommunityView({
               />
             ))}
           </div>
-          <button className="report-link" onClick={() => onReport(selected.id)}>Report this review</button>
+          <button className="report-link" onClick={() => onReport(selected.id)} style={{ marginTop: '32px', color: '#888', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>Report this review</button>
         </section>
       ) : null}
 
