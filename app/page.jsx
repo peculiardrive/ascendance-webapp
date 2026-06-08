@@ -1580,15 +1580,11 @@ function CommunityView({
 
   return (
     <div className="community-screen">
-      <header className="community-header" style={{ alignItems: 'center', justifyContent: surface === "feed" ? 'center' : 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
-        {surface === "feed" ? (
-          <img src={BRAND_ASSETS.wordmark} alt="Ascendance" style={{ height: '28px' }} />
-        ) : (
+      {surface !== "feed" && (
+        <header className="community-header" style={{ alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
             {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
           </h1>
-        )}
-        {surface !== "feed" && (
           <div className="community-tools">
             <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back">
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1603,8 +1599,8 @@ function CommunityView({
               </select>
             ) : null}
           </div>
-        )}
-      </header>
+        </header>
+      )}
 
       {surface === "feed" ? (
         <div style={{ padding: '0 24px', paddingBottom: '40px' }}>
