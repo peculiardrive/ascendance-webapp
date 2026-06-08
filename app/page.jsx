@@ -1615,14 +1615,37 @@ function CommunityView({
         </div>
       </header>
 
-      {surface === "feed" || surface === "leaderboard" ? (
-        <section className={`leader-section community-leaders ${surface === "leaderboard" ? "is-full" : ""}`} aria-label="Community leaders">
+      {surface === "feed" ? (
+        <section className={`leader-section community-leaders`} aria-label="Community leaders">
           <div className="leader-title">
             <HeartIcon />
             <div className="leader-title-copy"><h2>Community Leaders</h2><p>Top contributors this week</p></div>
-            {surface === "feed" ? <button className="leaders-link" onClick={() => setSurface("leaderboard")}>View all</button> : null}
+            <button className="leaders-link" onClick={() => setSurface("leaderboard")}>View all</button>
           </div>
-          <LeaderList leaders={surface === "leaderboard" ? getCommunityLeaders(posts) : leaders} onSelect={openLeader} />
+          <LeaderList leaders={leaders} onSelect={openLeader} />
+        </section>
+      ) : null}
+
+      {surface === "leaderboard" ? (
+        <section className="full-leaderboard-screen" style={{ marginTop: '24px' }}>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {getCommunityLeaders(posts).map((leader, i) => (
+              <button key={leader.name} onClick={() => openLeader(leader)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: i < 3 ? 'var(--app-purple)' : '#6b7280', minWidth: '24px' }}>#{i + 1}</span>
+                <div className="avatar" style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                  {leader.avatar || leader.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '4px' }}>{leader.name}</strong>
+                  <span style={{ fontSize: '0.9rem', color: '#6b7280' }}>{leader.country}</span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <strong style={{ display: 'block', fontSize: '1.1rem', color: 'var(--app-purple)' }}>{leader.pts}</strong>
+                  <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>Pts</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </section>
       ) : null}
 
