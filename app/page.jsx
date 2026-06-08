@@ -1580,11 +1580,28 @@ function CommunityView({
 
   return (
     <div className="community-screen">
-      {surface !== "feed" && (
-        <header className="community-header" style={{ alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
+      <header className="community-header" style={{ alignItems: 'center', justifyContent: surface === "feed" ? 'center' : 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
+        {surface === "feed" ? (
+          <>
+            <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>Community</h1>
+            <div className="community-tools">
+              <button className="circle-icon-btn" onClick={() => setSearchOpen(!searchOpen)} aria-label="Search">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <button className="circle-icon-btn" onClick={() => setSurface("notifications")} aria-label="Notifications">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <button className="circle-icon-btn" onClick={() => setSurface("history")} aria-label="History">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            </div>
+          </>
+        ) : (
           <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
             {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
           </h1>
+        )}
+        {surface !== "feed" && (
           <div className="community-tools">
             <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back">
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1599,65 +1616,27 @@ function CommunityView({
               </select>
             ) : null}
           </div>
-        </header>
-      )}
+        )}
+      </header>
 
       {surface === "feed" ? (
-        <div style={{ padding: '0 12px', paddingBottom: '40px' }}>
-          {/* Reader Leaderboard Section */}
-          <section style={{ marginTop: '16px' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, color: 'var(--app-purple)', fontSize: '1.4rem', fontFamily: 'Georgia, serif' }}>Reader Leaderboard</h2>
-              <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '0.9rem' }}>Ranked by reviews, likes, and helpful discussion.</p>
+        <>
+          <section className="leader-section community-leaders" aria-label="Community leaders" style={{ padding: '0 24px' }}>
+            <div className="leader-title">
+              <HeartIcon />
+              <div className="leader-title-copy">
+                <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.2rem", fontWeight: "bold", fontFamily: "Inter, sans-serif" }}>Community Leaders</h2>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-secondary)" }}>Readers making the biggest contribution this week</p>
+              </div>
+              <InfoIcon />
             </div>
-            <div style={{ display: 'grid', gap: '12px' }}>
-              {getCommunityLeaders(posts).slice(0, 4).map((leader, i) => {
-                const colors = [
-                  { border: '#C29837', bg: '#A67C24', rank: '#A67C24' }, // Gold/Bronze
-                  { border: '#8A9BA8', bg: '#4A0E4E', rank: '#111' }, // Silver / Purple
-                  { border: '#CD7F32', bg: '#4A0E4E', rank: '#111' }, // Bronze / Purple
-                  { border: '#4A0E4E', bg: '#4A0E4E', rank: '#111' }, // Purple / Purple
-                ];
-                const c = colors[i] || colors[3];
-                return (
-                  <button key={leader.name} onClick={() => openLeader(leader)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'white', border: 'none', borderLeft: `6px solid ${c.border}`, borderRadius: '8px', width: '100%', textAlign: 'left', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                    <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.bg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', flexShrink: 0 }}>
-                      {leader.avatar || leader.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <strong style={{ display: 'block', fontSize: '1.05rem', marginBottom: '2px', color: '#111' }}>{leader.name}</strong>
-                      <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'bold' }}>{leader.country}</span>
-                    </div>
-                    <div style={{ color: 'var(--app-purple)', fontWeight: 'bold', fontSize: '1.05rem' }}>
-                      {leader.points} Points
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <LeaderList leaders={getCommunityLeaders(posts)} onSelect={() => setSurface("leaderboard")} />
           </section>
 
-          {/* Community & Composer Section */}
-          <section style={{ marginTop: '24px', background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <h2 style={{ margin: '0 0 8px', color: 'var(--app-purple)', fontSize: '1.6rem', fontFamily: 'Georgia, serif' }}>Community</h2>
-            <p style={{ margin: '0 0 24px', color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.5' }}>Reader reviews, replies, sharing, and moderation signals.</p>
-            
-            <h3 style={{ margin: '0 0 8px', color: 'var(--app-purple)', fontSize: '0.95rem', fontWeight: 'bold' }}>Your review</h3>
-            <form onSubmit={submitReview} style={{ display: 'grid', gap: '16px' }}>
-              <textarea name="review" placeholder="Write your review" style={{ width: '100%', minHeight: '120px', padding: '16px', borderRadius: '12px', border: '2px solid var(--app-purple)', fontSize: '1rem', outline: 'none', resize: 'vertical' }} required />
-              <button type="submit" style={{ background: 'var(--app-purple)', color: 'white', padding: '16px', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.1rem', border: 'none', cursor: 'pointer' }}>Post Review</button>
-            </form>
-          </section>
-
-          {/* Feed Toolbar & Feed List */}
-          <div style={{ marginTop: '32px' }}>
-            <div className={`feed-toolbar ${searchOpen ? "has-search" : ""}`} style={{ marginBottom: '16px' }}>
+          <div style={{ padding: '0 12px' }}>
+            <div className={`feed-toolbar ${searchOpen ? "has-search" : ""}`} style={{ marginTop: '24px', marginBottom: '16px' }}>
               {searchOpen ? <label className="search-field" style={{ flex: 1 }}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search community" autoFocus style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)' }} /></label> : null}
-              <div style={{ display: 'flex', justifyContent: searchOpen ? 'flex-end' : 'space-between', width: searchOpen ? 'auto' : '100%', alignItems: 'center' }}>
-                {!searchOpen && <button onClick={() => setSearchOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>
-                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  Search
-                </button>}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', width: searchOpen ? 'auto' : '100%', alignItems: 'center' }}>
                 <button className="ghost-btn" onClick={() => setSurface("sort")} style={{ color: 'var(--app-purple)', padding: 0, minHeight: 'auto' }}>Sort <span>▼</span></button>
               </div>
             </div>
@@ -1674,7 +1653,44 @@ function CommunityView({
               ))}
             </div>
           </div>
-        </div>
+          <button className="compose-fab" onClick={() => setSurface("compose")} aria-label="Write a review">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </>
+      ) : null}
+
+      {surface === "leaderboard" ? (
+        <section className="full-leaderboard-screen" style={{ marginTop: '24px', padding: '0 12px' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ margin: 0, color: 'var(--app-purple)', fontSize: '1.4rem', fontFamily: 'Georgia, serif' }}>Reader Leaderboard</h2>
+            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '0.9rem' }}>Ranked by reviews, likes, and helpful discussion.</p>
+          </div>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {getCommunityLeaders(posts).map((leader, i) => {
+              const colors = [
+                { border: '#C29837', bg: '#A67C24', rank: '#A67C24' }, // Gold/Bronze
+                { border: '#8A9BA8', bg: '#4A0E4E', rank: '#111' }, // Silver / Purple
+                { border: '#CD7F32', bg: '#4A0E4E', rank: '#111' }, // Bronze / Purple
+                { border: '#4A0E4E', bg: '#4A0E4E', rank: '#111' }, // Purple / Purple
+              ];
+              const c = colors[i] || colors[3];
+              return (
+                <button key={leader.name} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'white', border: 'none', borderLeft: `6px solid ${c.border}`, borderRadius: '8px', width: '100%', textAlign: 'left', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                  <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.bg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', flexShrink: 0 }}>
+                    {leader.avatar || leader.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ display: 'block', fontSize: '1.05rem', marginBottom: '2px', color: '#111' }}>{leader.name}</strong>
+                    <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'bold' }}>{leader.country}</span>
+                  </div>
+                  <div style={{ color: 'var(--app-purple)', fontWeight: 'bold', fontSize: '1.05rem' }}>
+                    {leader.points} Points
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
       ) : null}
 
       {surface === "review" && selected ? (
