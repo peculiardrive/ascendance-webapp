@@ -7,3 +7,5 @@ data/state.json
 
 .vercel
 .env*.local
+*.pdf
+dev.db

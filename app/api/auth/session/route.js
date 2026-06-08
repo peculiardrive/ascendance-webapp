@@ -1,11 +1,12 @@
 import { publicAdmin, publicUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { adminSessionFrom, readerSessionFrom } from "@/lib/session";
+import { adminChallengeFrom, adminSessionFrom, readerSessionFrom } from "@/lib/session";
 import { json } from "@/lib/store";
 
 export async function GET(request) {
   const readerSession = readerSessionFrom(request);
   const adminSession = adminSessionFrom(request);
+  const adminChallenge = adminChallengeFrom(request);
   const [user, admin] = await Promise.all([
     readerSession
       ? prisma.user.findUnique({ where: { id: readerSession.sub } })
@@ -18,6 +19,7 @@ export async function GET(request) {
   return json({
     ok: true,
     user: publicUser(user),
-    admin: publicAdmin(admin)
+    admin: publicAdmin(admin),
+    adminChallengePending: Boolean(adminChallenge?.sub && adminChallenge.role)
   });
 }

@@ -3,6 +3,7 @@ import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { seedBooks } from "./lib/seed.js";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)));
 const dataDir = join(root, "data");
@@ -34,11 +35,11 @@ const defaultState = {
   posts: [],
   notifications: [],
   settings: {
-    bookOnePrice: 4500,
-    bookTwoPrice: 5000,
-    bookThreePrice: 5500,
-    trilogyPrice: 12000,
-    giftPrice: 9500,
+    bookOnePrice: 3522,
+    bookTwoPrice: 4882,
+    bookThreePrice: 4882,
+    trilogyPrice: 8962,
+    giftPrice: 4882,
     giftLimit: 5
   },
   readerSettings: {},
@@ -93,6 +94,7 @@ function normalizeState(state) {
   return {
     ...structuredClone(defaultState),
     ...(state || {}),
+    books: seedBooks,
     settings: {
       ...defaultState.settings,
       ...(state?.settings || {})
@@ -408,6 +410,34 @@ async function handleApi(request, response) {
         sendJson(response, 404, { ok: false, error: "User not found." });
         return true;
       }
+
+      if (payload.productType === "book") {
+        if (payload.bookId === "book-2") {
+          const ownsBook1 = state.purchases.some(
+            (p) =>
+              p.userId === userId &&
+              p.status === "Successful" &&
+              (p.productType === "trilogy" || p.productType === "gift-trilogy" || p.bookId === "book-1")
+          );
+          if (!ownsBook1) {
+            sendJson(response, 403, { ok: false, error: "You must purchase Volume 1 (Disciples of the Inverted Cross) before you can purchase Volume 2." });
+            return true;
+          }
+        }
+        if (payload.bookId === "book-3") {
+          const ownsBook2 = state.purchases.some(
+            (p) =>
+              p.userId === userId &&
+              p.status === "Successful" &&
+              (p.productType === "trilogy" || p.productType === "gift-trilogy" || p.bookId === "book-2")
+          );
+          if (!ownsBook2) {
+            sendJson(response, 403, { ok: false, error: "You must purchase Volume 2 (Merchants of the Ivory Towers) before you can purchase Volume 3." });
+            return true;
+          }
+        }
+      }
+
       const reference = payload.reference || `ASC-${Date.now()}`;
       const purchase = {
         id: uid("purchase"),

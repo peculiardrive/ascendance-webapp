@@ -18,6 +18,41 @@ export async function POST(request) {
     const product = await resolvePaymentProduct(payload);
     if (product.amount <= 0) return json({ ok: false, error: "This item does not require payment." }, { status: 400 });
 
+    if (product.productType === "book") {
+      if (product.bookId === "book-2") {
+        const ownsBook1 = await prisma.purchase.findFirst({
+          where: {
+            userId,
+            paymentStatus: "Successful",
+            OR: [
+              { productType: "trilogy" },
+              { productType: "gift-trilogy" },
+              { bookId: "book-1" }
+            ]
+          }
+        });
+        if (!ownsBook1) {
+          return json({ ok: false, error: "You must purchase Volume 1 (Disciples of the Inverted Cross) before you can purchase Volume 2." }, { status: 403 });
+        }
+      }
+      if (product.bookId === "book-3") {
+        const ownsBook2 = await prisma.purchase.findFirst({
+          where: {
+            userId,
+            paymentStatus: "Successful",
+            OR: [
+              { productType: "trilogy" },
+              { productType: "gift-trilogy" },
+              { bookId: "book-2" }
+            ]
+          }
+        });
+        if (!ownsBook2) {
+          return json({ ok: false, error: "You must purchase Volume 2 (Merchants of the Ivory Towers) before you can purchase Volume 3." }, { status: 403 });
+        }
+      }
+    }
+
     const state = await readState();
     const recipientEmail = String(payload.recipientEmail || "").toLowerCase().trim();
     if (product.productType === "gift-trilogy") {

@@ -6,9 +6,12 @@ export async function GET(request) {
   const state = await readState();
   const userId = readerSessionFrom(request)?.sub || null;
   if (userId) {
-    const purchases = await prisma.purchase.findMany({
-      where: { userId, paymentStatus: "Successful" }
-    });
+    let purchases = [];
+    if (process.env.DATABASE_URL) {
+      purchases = await prisma.purchase.findMany({
+        where: { userId, paymentStatus: "Successful" }
+      });
+    }
     state.purchases = purchases.map((purchase) => ({
       ...purchase,
       amount: Number(purchase.amount),

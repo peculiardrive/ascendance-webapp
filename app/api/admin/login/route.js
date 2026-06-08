@@ -1,7 +1,9 @@
-import { publicAdmin, verifyPassword } from "@/lib/auth";
+import { createAdminChallenge, revokeAdminChallenge } from "@/lib/admin-2fa";
+import { verifyPassword } from "@/lib/auth";
+import { sendAdminTwoFactorEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { consumeRateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { adminSessionCookie, assertSameOrigin } from "@/lib/session";
+import { adminChallengeCookie, assertSameOrigin, clearAdminSessionCookie } from "@/lib/session";
 import { json, readJson, requireFields } from "@/lib/store";
 
 export async function POST(request) {
@@ -25,9 +27,28 @@ export async function POST(request) {
       return json({ ok: false, error: "Invalid admin email or password." }, { status: 401 });
     }
 
+    const challenge = await createAdminChallenge(admin.id);
+    try {
+      await sendAdminTwoFactorEmail({
+        to: admin.email,
+        code: challenge.code,
+        challengeId: challenge.id
+      });
+    } catch (error) {
+      await revokeAdminChallenge(challenge.id);
+      throw error;
+    }
+
+    const headers = new Headers();
+    headers.append("set-cookie", clearAdminSessionCookie());
+    headers.append("set-cookie", adminChallengeCookie(challenge.id, admin.id));
     return json(
-      { ok: true, admin: publicAdmin(admin) },
-      { headers: { "set-cookie": adminSessionCookie(admin) } }
+      {
+        ok: true,
+        requiresTwoFactor: true,
+        delivery: process.env.NODE_ENV === "production" ? "email" : "email-or-console"
+      },
+      { headers }
     );
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: error.status || 400 });

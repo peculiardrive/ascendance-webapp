@@ -1,4 +1,7 @@
-const productionOnlyDirectives = process.env.NODE_ENV === "production" ? "; upgrade-insecure-requests" : "";
+const isProduction = process.env.NODE_ENV === "production";
+const productionOnlyDirectives = isProduction ? "; upgrade-insecure-requests" : "";
+const developmentScriptSource = isProduction ? "" : " 'unsafe-eval'";
+const developmentConnectSource = isProduction ? "" : " ws:";
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -9,8 +12,8 @@ const contentSecurityPolicy = [
   "media-src 'self'",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self'",
+  `script-src 'self' 'unsafe-inline'${developmentScriptSource}`,
+  `connect-src 'self'${developmentConnectSource}`,
   `worker-src 'self' blob:${productionOnlyDirectives}`
 ].join("; ");
 

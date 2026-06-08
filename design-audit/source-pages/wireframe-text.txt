@@ -1,0 +1,97 @@
+
+--- PAGE 1 ---
+User Journey & Interface Review.
+Please review and minimize the text size of Presented By 
+and BrandZilla: Use this guide for appropriate text.
+1. The “Home” for Books should 
+show only One Book at a time – 
+Current Unlocked Book. Disable 
+scroll down to see other Books, it is 
+distractive. Let this – viewing other 
+Books be accessible on the Stores 
+page – Unlocked Book in Store can 
+be accessed by the “Read” button 
+that replaces Unlock after payment 
+is processed. 
+ 
+2.  Follow suggested Page Flow for 
+Community Leaders, This is taking 
+up the entire space to show the 
+Book. 
+3. Audio Book Player button added. 
+1. Hide Admin Login button in the 
+public user interface. Admin can use 
+weblink to access login page and 
+manage app and engagements. This 
+button doesn’t have to be in the pages 
+accessible to Readers. Please remove, 
+so we can free space to see how final 
+brand ID looks on the header. 
+2. The Reading Page: The Reading Page 
+is too busy, the Scroll slide, TTS buttons 
+and all are crowding the space.  – Add 
+margins to the Left and Right. Text and 
+buttons are touching the edges of the 
+Phone screen, not professional. Make 
+these changes:
+Please check accompanying MS Word 
+doc for recommendations. 
+Reading Page: This is the most important Page in WebApp, 
+because, if people cannot read, they will not unlock Books. 
+Let’s simplify it!!!
+Readers will be able to Read 
+Prologue and first 14 Chapters 
+(Book One: The Formation) FREE. 
+This Page opens when User taps 
+on Next Button, after the last 
+Chapter in the FREE read. 
+Intention is to let User see the 3 
+Books, and subtly persuade 
+purchasing the Trilogy, by making 
+the default selection $6.59. 
+Note: This Page only applies to 
+this Navigation flow – When user 
+taps on Next after Last Chapter of 
+Free Chapters in Reader Page. 
+Page After Free Chapters Reading. 
+Please review Store Page: We are not unlocking by Chapter 
+– but Sequels (Books). Add Image of 3 Books to persuade 
+Bulk (Trilogy) Purchase. 
+1. Let the name of the Book – Trilogy 
+be conspicuous after removing Admin 
+button, and not minimized on the 
+Pages – That’s what we a re selling. 
+2. Make Page settings features, such 
+as Font Size, Font type, Scroll speed, 
+etc. are accessible from Setting 
+button. 
+The Divider is a visual marker of the 
+Fixed elements on the Page, Scrolling 
+will not remove the information 
+above this marker – TTS, Save 
+buttons, and Book Title and Current 
+section. 
+Please check accompanying MS Word 
+doc for recommendations. 
+Store Button.
+Add Order for Printed 
+Copy in Store
+After Reading First Book…
+Community Page: 
+This is the second most important 
+Page after Reading Page. 
+The current Page design is too 
+confusing. 
+Please check accompanying MS 
+Word doc for recommendations 
+for a simpler, user-friendly flow. 
+ 
+Profile Page Page: 
+Add these 2 to the Profile Page: 
+1.
+Share WebApp Link
+2.
+Button to Install WebApp 
+Icon (and Quick access on 
+Device).
+ 

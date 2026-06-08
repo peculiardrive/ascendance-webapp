@@ -24,6 +24,11 @@ export async function POST(request) {
       return json({ ok: false, error: "Password must be at least 8 characters." }, { status: 400 });
     }
 
+    if (!process.env.DATABASE_URL) {
+      // Local development fallback
+      return json({ ok: true, user: { id: "mock-user-1", fullName: payload.fullName || "Demo Reader", email }, delivery: { id: "mock-delivery-1" } }, { status: 201 });
+    }
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       if (existing.emailVerified) {

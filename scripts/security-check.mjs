@@ -6,6 +6,7 @@ process.env.SESSION_SECRET = "security-test-secret-that-is-long-and-random";
 
 const {
   assertSameOrigin,
+  adminChallengeCookie,
   createSessionToken,
   readerSessionCookie,
   verifySessionToken
@@ -32,6 +33,10 @@ assert.equal(verifySessionToken(expired, "reader"), null);
 const cookie = readerSessionCookie("reader-123");
 assert.match(cookie, /HttpOnly/);
 assert.match(cookie, /SameSite=Strict/);
+const challengeCookie = adminChallengeCookie("challenge-123", "admin-123");
+assert.match(challengeCookie, /ascendance_admin_challenge=/);
+assert.match(challengeCookie, /HttpOnly/);
+assert.match(challengeCookie, /Max-Age=600/);
 
 assert.throws(
   () => assertSameOrigin(new Request("https://ascendance-trilogy.com/api/test", {
@@ -69,5 +74,13 @@ for (const file of sourceFiles) {
 assert.equal(existsSync(join(root, "app/api/purchases/route.js")), false);
 assert.equal(existsSync(join(root, "app/api/gifts/route.js")), false);
 assert.doesNotMatch(readFileSync(join(root, "app/api/state/route.js"), "utf8"), /export async function PUT/);
+
+const adminLoginRoute = readFileSync(join(root, "app/api/admin/login/route.js"), "utf8");
+assert.match(adminLoginRoute, /requiresTwoFactor:\s*true/);
+assert.doesNotMatch(adminLoginRoute, /adminSessionCookie/);
+
+const adminVerifyRoute = readFileSync(join(root, "app/api/admin/verify-2fa/route.js"), "utf8");
+assert.match(adminVerifyRoute, /verifyAdminChallenge/);
+assert.match(adminVerifyRoute, /adminSessionCookie/);
 
 console.log("Security regression checks passed.");
