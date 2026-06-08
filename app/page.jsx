@@ -1621,17 +1621,15 @@ function CommunityView({
                 const c = colors[i] || colors[3];
                 return (
                   <button key={leader.name} onClick={() => openLeader(leader)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'white', border: 'none', borderLeft: `6px solid ${c.border}`, borderRadius: '8px', width: '100%', textAlign: 'left', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: c.rank, minWidth: '16px', textAlign: 'center' }}>{i + 1}</span>
-                    <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.bg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem' }}>
+                    <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.bg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', flexShrink: 0 }}>
                       {leader.avatar || leader.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <strong style={{ display: 'block', fontSize: '1rem', marginBottom: '2px', color: '#111' }}>{leader.name}</strong>
-                      <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 'bold' }}>{leader.country}</span>
+                      <strong style={{ display: 'block', fontSize: '1.05rem', marginBottom: '2px', color: '#111' }}>{leader.name}</strong>
+                      <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'bold' }}>{leader.country}</span>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <strong style={{ display: 'block', fontSize: '1.1rem', color: 'var(--app-purple)' }}>{leader.pts}</strong>
-                      <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: 'bold' }}>points</span>
+                    <div style={{ color: 'var(--app-purple)', fontWeight: 'bold', fontSize: '1.05rem' }}>
+                      {leader.points} Points
                     </div>
                   </button>
                 );
