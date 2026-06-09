@@ -1992,11 +1992,16 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onLogout, on
         <button className="ghost-btn" onClick={onShareApp} style={{ borderColor: 'var(--app-purple)', color: 'var(--app-purple)', fontWeight: 'bold' }}>Share WebApp Link</button>
       </section>
 
-      <section className="profile-install" style={{ textAlign: 'center' }}>
+      <section className="profile-install" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
         <button onClick={onInstall} style={{ background: 'transparent', border: 'none', color: 'var(--app-purple)', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Install icon on Device
         </button>
+
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <button onClick={onLogout} className="danger-btn" style={{ padding: '8px 16px', borderRadius: '8px' }}>Sign Out</button>
+          <a href="/admin" className="ghost-btn" style={{ padding: '8px 16px', borderRadius: '8px', color: 'var(--app-purple)', borderColor: 'var(--app-purple)', textDecoration: 'none' }}>Admin Portal</a>
+        </div>
       </section>
     </div>
   );
