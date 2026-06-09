@@ -1558,8 +1558,8 @@ function CommunityView({
   }).filter((post) => `${post.username} ${post.content}`.toLowerCase().includes(query.toLowerCase()));
 
   const selected = selectedPost ? posts.find((post) => post.id === selectedPost) : null;
-  const userPosts = posts.filter((post) => post.userId === user.id);
-  const userComments = posts.flatMap((post) => (post.comments || []).filter((comment) => comment.userId === user.id || comment.user === user.username).map((comment) => ({ ...comment, post })));
+  const userPosts = posts.filter((post) => user && post.userId === user.id);
+  const userComments = posts.flatMap((post) => (post.comments || []).filter((comment) => user && (comment.userId === user.id || comment.user === user.username)).map((comment) => ({ ...comment, post })));
 
   async function submitReview(event) {
     event.preventDefault();
@@ -1675,7 +1675,7 @@ function CommunityView({
               ];
               const c = colors[i] || colors[3];
               return (
-                <button key={leader.name} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'white', border: 'none', borderLeft: `6px solid ${c.border}`, borderRadius: '8px', width: '100%', textAlign: 'left', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                <button key={leader.name} onClick={() => openLeader(leader)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'white', border: 'none', borderLeft: `6px solid ${c.border}`, borderRadius: '8px', width: '100%', textAlign: 'left', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer' }}>
                   <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.bg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', flexShrink: 0 }}>
                     {leader.avatar || leader.name.slice(0, 2).toUpperCase()}
                   </div>
