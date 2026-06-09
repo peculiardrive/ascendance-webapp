@@ -372,7 +372,7 @@ export default function Home() {
         phone: formData.get("phone") || user.phone,
         username: formData.get("username") || user?.username,
         country: formData.get("country") || user.country,
-        fullName: formData.get("fullName") || user.fullName
+        fullName: formData.get("fullName") || user?.fullName
       })
     });
     const data = await response.json();
@@ -843,7 +843,7 @@ function TrailerIntro({ onEnter }) {
             <h1>Play Trailer Video</h1>
             <p>Ascendance</p>
           </div>
-          <button className="trailer-login-btn-new" onClick={() => onEnter(false)}>Login</button>
+          <button className="trailer-login-btn-new" onClick={() => onEnter(true)}>Login</button>
         </div>
       </section>
     </main>
@@ -1574,7 +1574,7 @@ function CommunityView({
     payload.set("content", `${title}\n${review}`);
     await onPost(payload);
     setComposerOpen(false);
-    setShareSuccess({ content: review, username: user?.username || user.fullName });
+    setShareSuccess({ content: review, username: user?.username || user?.fullName });
   }
 
   function openLeader(leader) {
