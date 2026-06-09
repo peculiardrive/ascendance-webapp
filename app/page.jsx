@@ -370,7 +370,7 @@ export default function Home() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         phone: formData.get("phone") || user.phone,
-        username: formData.get("username") || user.username,
+        username: formData.get("username") || user?.username,
         country: formData.get("country") || user.country,
         fullName: formData.get("fullName") || user.fullName
       })
@@ -1142,7 +1142,7 @@ function HomeView({
   onViewLeaderboard
 }) {
   const [showSummary, setShowSummary] = useState(false);
-  const ownedBooks = books.filter((book) => ownsBook(user.id, purchases, book.id));
+  const ownedBooks = books.filter((book) => ownsBook(user?.id, purchases, book.id));
   const currentBook = ownedBooks.at(-1) || books[0];
   const firstChapter = flattenChapters([currentBook])[0];
   const currentProgress = Object.values(progress).filter((item) => item?.bookId === currentBook.id).at(-1);
@@ -1234,7 +1234,7 @@ function HomeView({
 
 function BookCard({ book, user, purchases, progress, onRead, onPurchase }) {
   const first = flattenChapters([book])[0];
-  const owned = ownsBook(user.id, purchases, book.id);
+  const owned = ownsBook(user?.id, purchases, book.id);
   const preview = first?.chapter.isPreview;
   const bookProgress = Object.values(progress).filter((item) => item?.bookId === book.id).at(-1);
   const continueChapter = flattenChapters([book]).find((item) => item.chapter.id === bookProgress?.chapterId) || first;
@@ -1285,7 +1285,7 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
       {books.map((book) => (
         <section className="store-book" key={book.id}>
           {(() => {
-            const state = bookPurchaseState(book, user.id, purchases);
+            const state = bookPurchaseState(book, user?.id, purchases);
             const first = flattenChapters([book])[0];
             const latestProgress = Object.values(progress).filter((item) => item?.bookId === book.id).at(-1);
             const continueChapter = flattenChapters([book]).find((item) => item.chapter.id === latestProgress?.chapterId) || first;
@@ -1392,7 +1392,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
 
   function goNext() {
     if (!next) return;
-    const locked = !next.chapter.isPreview && !ownsBook(user.id, purchases, next.book.id);
+    const locked = !next.chapter.isPreview && !ownsBook(user?.id, purchases, next.book.id);
     if (locked) {
       setUnlockOpen(true);
       return;
@@ -1558,8 +1558,8 @@ function CommunityView({
   }).filter((post) => `${post.username} ${post.content}`.toLowerCase().includes(query.toLowerCase()));
 
   const selected = selectedPost ? posts.find((post) => post.id === selectedPost) : null;
-  const userPosts = posts.filter((post) => user && post.userId === user.id);
-  const userComments = posts.flatMap((post) => (post.comments || []).filter((comment) => user && (comment.userId === user.id || comment.user === user.username)).map((comment) => ({ ...comment, post })));
+  const userPosts = posts.filter((post) => user && post.userId === user?.id);
+  const userComments = posts.flatMap((post) => (post.comments || []).filter((comment) => user && (comment.userId === user?.id || comment.user === user?.username)).map((comment) => ({ ...comment, post })));
 
   async function submitReview(event) {
     event.preventDefault();
@@ -1570,7 +1570,7 @@ function CommunityView({
     payload.set("content", `${title}\n${review}`);
     await onPost(payload);
     setComposerOpen(false);
-    setShareSuccess({ content: review, username: user.username || user.fullName });
+    setShareSuccess({ content: review, username: user?.username || user.fullName });
   }
 
   function openLeader(leader) {
@@ -1815,7 +1815,7 @@ function CommunityView({
 }
 
 function ReviewCard({ post, user, onOpen, onLike, onShare, expanded = false }) {
-  const liked = post.likedBy?.includes(user.id);
+  const liked = post.likedBy?.includes(user?.id);
   const copy = splitPostContent(post.content);
   return (
     <article className={`review-card ${post.pinned ? "is-pinned" : ""}`}>
