@@ -2040,6 +2040,7 @@ function AdminGate({
 }
 
 function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModeratePost, onAdminReply, onRefresh }) {
+  const [activeTab, setActiveTab] = useState("overview");
   const revenue = purchases.reduce((sum, purchase) => sum + Number(purchase.amount || 0), 0);
   const [selectedBookId, setSelectedBookId] = useState(books[0]?.id || "");
   const [selectedSectionId, setSelectedSectionId] = useState("");
@@ -2061,258 +2062,297 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   }, [selectedBookId, books]);
 
   return (
-    <div className="content-stack">
-      <div className="admin-heading">
-        <p className="eyebrow">Admin backend</p>
-        <h1>Dashboard</h1>
-        <div className="admin-session">
-          <span>{admin.name} · {admin.role}</span>
-          <button className="ghost-btn" onClick={onLogout}>Admin Logout</button>
+    <div className="admin-layout">
+      <nav className="admin-sidebar">
+        <div className="admin-sidebar-header">
+          <p className="eyebrow">BrandZilla</p>
+          <h2>Ascendance</h2>
+          <span className="admin-role-badge">{admin.role}</span>
         </div>
-      </div>
-      <div className="grid dashboard-grid">
-        <article className="stat-card"><strong>{books.length}</strong><span>Books</span></article>
-        <article className="stat-card"><strong>{purchases.length}</strong><span>Purchases</span></article>
-        <article className="stat-card"><strong>{ngnCurrency(revenue)}</strong><span>Revenue</span></article>
-        <article className="stat-card"><strong>{gifts.length}</strong><span>Gifts</span></article>
-        <article className="stat-card"><strong>{posts.length}</strong><span>Posts</span></article>
-      </div>
-      
-      <section className="admin-panel">
-        <h2>Manage Books</h2>
-        {books.map((book) => (
-          <div key={book.id} style={{ borderBottom: "1px solid rgba(128,105,90,0.1)", padding: "8px 0" }}>
-            <strong>{book.subtitle}: {book.title}</strong> · {usdCurrency(book.usdPrice || 0)} ({ngnCurrency(book.price)}) · {book.status}
-            {book.sections && book.sections.map((sec) => (
-              <div key={sec.id} style={{ paddingLeft: "20px", fontSize: "0.9rem", color: "var(--muted)" }}>
-                - Section: {sec.title} ({sec.chapters?.length || 0} chapters)
-              </div>
-            ))}
-          </div>
-        ))}
-      </section>
+        <div className="admin-nav-links">
+          <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")}>Overview</button>
+          <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")}>Library</button>
+          <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")}>Community</button>
+        </div>
+        <div className="admin-sidebar-footer">
+          <p>{admin.name}</p>
+          <button className="ghost-btn" onClick={onLogout} style={{ width: "100%", justifyContent: "center" }}>Logout</button>
+        </div>
+      </nav>
 
-      <section className="admin-panel" style={{ display: "grid", gap: "20px" }}>
-        <h2>Book Management Panel</h2>
-        
-        {/* Create Book Form */}
-        <form onSubmit={async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const payload = {
-            title: fd.get("title"),
-            subtitle: fd.get("subtitle"),
-            author: fd.get("author"),
-            cover: fd.get("cover"),
-            price: Number(fd.get("price") || 0),
-            usdPrice: Number(fd.get("usdPrice") || 0),
-            status: fd.get("status"),
-            preview: fd.get("preview") === "true",
-            blurb: fd.get("blurb")
-          };
-          try {
-            const res = await fetch("/api/admin/books", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.ok) {
-              e.target.reset();
-              onRefresh();
-            } else {
-              alert(data.error);
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        }} className="form-grid" style={{ border: "1px solid rgba(128,105,90,0.16)", padding: "16px", borderRadius: "8px" }}>
-          <h3>Create Book</h3>
-          <div className="two-col">
-            <label>Title<input name="title" placeholder="e.g. Disciples of the Inverted Cross" required /></label>
-            <label>Subtitle<input name="subtitle" placeholder="e.g. Book One: The Formation" /></label>
-            <label>Author<input name="author" placeholder="e.g. BrandZilla Technologies" /></label>
-            <label>Cover URL<input name="cover" placeholder="e.g. /assets/books/disciples-inverted-cross.jpeg" /></label>
-            <label>Price (NGN)<input name="price" type="number" placeholder="4500" /></label>
-            <label>USD Price<input name="usdPrice" type="number" step="0.01" placeholder="2.59" /></label>
-            <label>Status
-              <select name="status">
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
-                <option value="Hidden">Hidden</option>
-              </select>
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
-              <input name="preview" type="checkbox" value="true" />
-              <span>Available as Preview</span>
-            </label>
-          </div>
-          <label>Blurb<textarea name="blurb" placeholder="Book description..." style={{ minHeight: "80px" }} /></label>
-          <button className="primary-btn" style={{ justifySelf: "start" }}>Save Book</button>
-        </form>
+      <main className="admin-content">
+        <div className="admin-header-bar">
+          <h1>{activeTab === "overview" ? "Overview" : activeTab === "library" ? "Library Management" : "Community Moderation"}</h1>
+          <button className="ghost-btn" onClick={onRefresh} style={{ background: "white" }}>Refresh Data</button>
+        </div>
 
-        {/* Create Section Form */}
-        <form onSubmit={async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const bookId = fd.get("bookId");
-          const payload = {
-            title: fd.get("title"),
-            subtitle: fd.get("subtitle"),
-            price: Number(fd.get("price") || 0),
-            order: Number(fd.get("order") || 1),
-            tts: fd.get("tts") === "true",
-            voice: fd.get("voice")
-          };
-          try {
-            const res = await fetch(`/api/admin/books/${bookId}/sections`, {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.ok) {
-              e.target.reset();
-              onRefresh();
-            } else {
-              alert(data.error);
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        }} className="form-grid" style={{ border: "1px solid rgba(128,105,90,0.16)", padding: "16px", borderRadius: "8px" }}>
-          <h3>Create Section</h3>
-          <div className="two-col">
-            <label>Select Book
-              <select name="bookId" required>
-                {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
-              </select>
-            </label>
-            <label>Section Title<input name="title" placeholder="e.g. Book 1 – The Formation" required /></label>
-            <label>Section Subtitle<input name="subtitle" placeholder="e.g. by Ikenna Obiajulu" /></label>
-            <label>Price (NGN)<input name="price" type="number" placeholder="0" /></label>
-            <label>Order<input name="order" type="number" placeholder="1" /></label>
-            <label>Voice
-              <select name="voice">
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-              </select>
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
-              <input name="tts" type="checkbox" value="true" defaultChecked />
-              <span>Enable TTS</span>
-            </label>
-          </div>
-          <button className="primary-btn" style={{ justifySelf: "start" }}>Save Section</button>
-        </form>
-
-        {/* Create Chapter Form */}
-        <form onSubmit={async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const sectionId = fd.get("sectionId");
-          const payload = {
-            title: fd.get("title"),
-            subtitle: fd.get("subtitle"),
-            content: fd.get("content"),
-            chapterNumber: Number(fd.get("chapterNumber") || 1),
-            order: Number(fd.get("order") || 1),
-            isPreview: fd.get("isPreview") === "true",
-            status: fd.get("status")
-          };
-          try {
-            const res = await fetch(`/api/admin/sections/${sectionId}/chapters`, {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.ok) {
-              e.target.reset();
-              onRefresh();
-            } else {
-              alert(data.error);
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        }} className="form-grid" style={{ border: "1px solid rgba(128,105,90,0.16)", padding: "16px", borderRadius: "8px" }}>
-          <h3>Create Chapter</h3>
-          <div className="two-col">
-            <label>Select Book
-              <select value={selectedBookId} onChange={(e) => {
-                setSelectedBookId(e.target.value);
-              }} required>
-                <option value="" disabled>-- Choose Book --</option>
-                {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
-              </select>
-            </label>
-            <label>Select Section
-              <select name="sectionId" value={selectedSectionId} onChange={(e) => setSelectedSectionId(e.target.value)} required>
-                <option value="" disabled>-- Choose Section --</option>
-                {(books.find(b => b.id === selectedBookId)?.sections || []).map(s => (
-                  <option key={s.id} value={s.id}>{s.title}</option>
+        {activeTab === "overview" && (
+          <div className="admin-tab-pane">
+            <div className="grid dashboard-grid" style={{ marginBottom: "40px" }}>
+              <article className="stat-card"><strong>{books.length}</strong><span>Books</span></article>
+              <article className="stat-card"><strong>{purchases.length}</strong><span>Purchases</span></article>
+              <article className="stat-card"><strong>{ngnCurrency(revenue)}</strong><span>Revenue</span></article>
+              <article className="stat-card"><strong>{gifts.length}</strong><span>Gifts</span></article>
+              <article className="stat-card"><strong>{posts.length}</strong><span>Posts</span></article>
+            </div>
+            <div className="admin-library-grid">
+              <div className="admin-library-card">
+                <h2>Recent Purchases</h2>
+                {purchases.slice(0, 5).map(p => (
+                  <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <span>{p.userId}</span>
+                    <strong>{ngnCurrency(p.amount)}</strong>
+                  </div>
                 ))}
-              </select>
-            </label>
-            <label>Chapter Title<input name="title" placeholder="e.g. Chapter One" required /></label>
-            <label>Chapter Subtitle<input name="subtitle" placeholder="e.g. A Sign in the Dust" /></label>
-            <label>Chapter Number<input name="chapterNumber" type="number" placeholder="1" /></label>
-            <label>Order<input name="order" type="number" placeholder="1" /></label>
-            <label>Status
-              <select name="status">
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
-              </select>
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
-              <input name="isPreview" type="checkbox" value="true" />
-              <span>Is Free Preview</span>
-            </label>
+                {purchases.length === 0 && <p className="muted">No purchases yet.</p>}
+              </div>
+            </div>
           </div>
-          <label>Content (Double-newline separated paragraphs)<textarea name="content" placeholder="Type or paste paragraphs separated by empty lines..." required style={{ minHeight: "150px" }} /></label>
-          <button className="primary-btn" style={{ justifySelf: "start" }}>Save Chapter</button>
-        </form>
-      </section>
+        )}
 
-      <section className="admin-panel">
-        <div className="section-heading">
-          <div>
-            <h2>Community Management</h2>
-            <p>Moderate reader reviews, answer publicly, and watch reported posts.</p>
-          </div>
-        </div>
-        <div className="content-stack">
-          {posts.map((post) => (
-            <article className={`moderation-card ${post.reported ? "is-reported" : ""}`} key={post.id}>
-              <div>
-                <div className="chapter-meta">
-                  <span>{post.status}</span>
-                  <span>{post.country}</span>
-                  <span>{post.likes || 0} likes</span>
-                  <span>{post.comments?.length || 0} comments</span>
-                  {post.reported && <span>{post.reports?.length || 1} report</span>}
+        {activeTab === "library" && (
+          <div className="admin-tab-pane admin-library-grid">
+            <div className="admin-library-card">
+              <h2>Books</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {books.map((book) => (
+                  <div key={book.id} className="admin-book-item">
+                    <div className="admin-book-header">
+                      <strong>{book.subtitle}: {book.title}</strong>
+                      <span className={`admin-book-status ${book.status}`}>{book.status}</span>
+                    </div>
+                    <div style={{ fontSize: "0.85rem", color: "var(--muted)", marginTop: "4px" }}>
+                      {usdCurrency(book.usdPrice || 0)} ({ngnCurrency(book.price)})
+                    </div>
+                    {book.sections && book.sections.length > 0 && (
+                      <div className="admin-sections-list">
+                        {book.sections.map((sec) => (
+                          <div key={sec.id} style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                            • {sec.title} <span style={{ opacity: 0.5 }}>({sec.chapters?.length || 0} chapters)</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin-library-card">
+              <h2>Create Book</h2>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const payload = {
+                  title: fd.get("title"),
+                  subtitle: fd.get("subtitle"),
+                  author: fd.get("author"),
+                  cover: fd.get("cover"),
+                  price: Number(fd.get("price") || 0),
+                  usdPrice: Number(fd.get("usdPrice") || 0),
+                  status: fd.get("status"),
+                  preview: fd.get("preview") === "true",
+                  blurb: fd.get("blurb")
+                };
+                try {
+                  const res = await fetch("/api/admin/books", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+                  const data = await res.json();
+                  if (data.ok) { e.target.reset(); onRefresh(); } else { alert(data.error); }
+                } catch (err) { console.error(err); }
+              }} className="form-grid">
+                <div className="two-col">
+                  <label>Title<input name="title" placeholder="e.g. Disciples of the Inverted Cross" required /></label>
+                  <label>Subtitle<input name="subtitle" placeholder="e.g. Book One: The Formation" /></label>
+                  <label>Author<input name="author" placeholder="e.g. BrandZilla Technologies" /></label>
+                  <label>Cover URL<input name="cover" placeholder="e.g. /assets/books/disciples-inverted-cross.jpeg" /></label>
+                  <label>Price (NGN)<input name="price" type="number" placeholder="4500" /></label>
+                  <label>USD Price<input name="usdPrice" type="number" step="0.01" placeholder="2.59" /></label>
+                  <label>Status
+                    <select name="status">
+                      <option value="Published">Published</option>
+                      <option value="Draft">Draft</option>
+                      <option value="Hidden">Hidden</option>
+                    </select>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
+                    <input name="preview" type="checkbox" value="true" />
+                    <span>Available as Preview</span>
+                  </label>
                 </div>
-                <h3>{post.username}</h3>
-                <p>{post.content}</p>
-              </div>
-              <form onSubmit={(event) => {
-                event.preventDefault();
-                onAdminReply(post.id, new FormData(event.currentTarget).get("comment") || "");
-                event.currentTarget.reset();
-              }} className="comment-form">
-                <input name="comment" placeholder="Reply as admin" />
-                <button className="primary-btn">Reply</button>
+                <label>Blurb<textarea name="blurb" placeholder="Book description..." style={{ minHeight: "80px", width: "100%", padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "inherit" }} /></label>
+                <button className="primary-btn" style={{ justifySelf: "start" }}>Save Book</button>
               </form>
-              <div className="inline-actions action-wrap">
-                <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Visible")}>Approve</button>
-                <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Hidden")}>Hide</button>
-                <button className="danger-btn" onClick={() => onModeratePost(post.id, "Deleted")}>Delete</button>
+            </div>
+
+            <div className="admin-library-card">
+              <h2>Create Section</h2>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const bookId = fd.get("bookId");
+                const payload = {
+                  title: fd.get("title"),
+                  subtitle: fd.get("subtitle"),
+                  price: Number(fd.get("price") || 0),
+                  order: Number(fd.get("order") || 1),
+                  tts: fd.get("tts") === "true",
+                  voice: fd.get("voice")
+                };
+                try {
+                  const res = await fetch(`/api/admin/books/${bookId}/sections`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+                  const data = await res.json();
+                  if (data.ok) { e.target.reset(); onRefresh(); } else { alert(data.error); }
+                } catch (err) { console.error(err); }
+              }} className="form-grid">
+                <div className="two-col">
+                  <label>Select Book
+                    <select name="bookId" required>
+                      {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
+                    </select>
+                  </label>
+                  <label>Section Title<input name="title" placeholder="e.g. Book 1 – The Formation" required /></label>
+                  <label>Section Subtitle<input name="subtitle" placeholder="e.g. by Ikenna Obiajulu" /></label>
+                  <label>Price (NGN)<input name="price" type="number" placeholder="0" /></label>
+                  <label>Order<input name="order" type="number" placeholder="1" /></label>
+                  <label>Voice
+                    <select name="voice">
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                    </select>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
+                    <input name="tts" type="checkbox" value="true" defaultChecked />
+                    <span>Enable TTS</span>
+                  </label>
+                </div>
+                <button className="primary-btn" style={{ justifySelf: "start" }}>Save Section</button>
+              </form>
+            </div>
+
+            <div className="admin-library-card">
+              <h2>Create Chapter</h2>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const sectionId = fd.get("sectionId");
+                const payload = {
+                  title: fd.get("title"),
+                  subtitle: fd.get("subtitle"),
+                  content: fd.get("content"),
+                  chapterNumber: Number(fd.get("chapterNumber") || 1),
+                  order: Number(fd.get("order") || 1),
+                  isPreview: fd.get("isPreview") === "true",
+                  status: fd.get("status")
+                };
+                try {
+                  const res = await fetch(`/api/admin/sections/${sectionId}/chapters`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+                  const data = await res.json();
+                  if (data.ok) { e.target.reset(); onRefresh(); } else { alert(data.error); }
+                } catch (err) { console.error(err); }
+              }} className="form-grid">
+                <div className="two-col">
+                  <label>Select Book
+                    <select value={selectedBookId} onChange={(e) => setSelectedBookId(e.target.value)} required>
+                      <option value="" disabled>-- Choose Book --</option>
+                      {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
+                    </select>
+                  </label>
+                  <label>Select Section
+                    <select name="sectionId" value={selectedSectionId} onChange={(e) => setSelectedSectionId(e.target.value)} required>
+                      <option value="" disabled>-- Choose Section --</option>
+                      {(books.find(b => b.id === selectedBookId)?.sections || []).map(s => (
+                        <option key={s.id} value={s.id}>{s.title}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>Chapter Title<input name="title" placeholder="e.g. Chapter One" required /></label>
+                  <label>Chapter Subtitle<input name="subtitle" placeholder="e.g. A Sign in the Dust" /></label>
+                  <label>Chapter Number<input name="chapterNumber" type="number" placeholder="1" /></label>
+                  <label>Order<input name="order" type="number" placeholder="1" /></label>
+                  <label>Status
+                    <select name="status">
+                      <option value="Published">Published</option>
+                      <option value="Draft">Draft</option>
+                    </select>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
+                    <input name="isPreview" type="checkbox" value="true" />
+                    <span>Is Free Preview</span>
+                  </label>
+                </div>
+                <label>Content (Double-newline separated paragraphs)
+                  <textarea name="content" placeholder="Type or paste paragraphs separated by empty lines..." required style={{ minHeight: "200px", width: "100%", padding: "16px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "inherit", lineHeight: "1.6" }} />
+                </label>
+                <button className="primary-btn" style={{ justifySelf: "start" }}>Save Chapter</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "community" && (
+          <div className="admin-tab-pane">
+            <div className="admin-library-card">
+              <h2>Reported Posts</h2>
+              <div className="content-stack" style={{ marginTop: "24px" }}>
+                {posts.filter(p => p.reported).length === 0 ? (
+                  <p className="muted">No reported posts.</p>
+                ) : (
+                  posts.filter(p => p.reported).map((post) => (
+                    <article className="moderation-card is-reported" key={post.id} style={{ border: "1px solid #F8D7DA" }}>
+                      <div>
+                        <div className="chapter-meta">
+                          <span>{post.status}</span>
+                          <span>{post.country}</span>
+                          <span>{post.likes || 0} likes</span>
+                          <span>{post.reports?.length || 1} report(s)</span>
+                        </div>
+                        <h3 style={{ margin: "8px 0" }}>{post.username}</h3>
+                        <p>{post.content}</p>
+                      </div>
+                      <div className="inline-actions action-wrap" style={{ marginTop: "16px" }}>
+                        <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Visible")}>Approve</button>
+                        <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Hidden")}>Hide</button>
+                        <button className="danger-btn" onClick={() => onModeratePost(post.id, "Deleted")}>Delete</button>
+                      </div>
+                    </article>
+                  ))
+                )}
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            </div>
+
+            <div className="admin-library-card" style={{ marginTop: "32px" }}>
+              <h2>All Posts</h2>
+              <div className="content-stack" style={{ marginTop: "24px" }}>
+                {posts.filter(p => !p.reported).map((post) => (
+                  <article className="moderation-card" key={post.id}>
+                    <div>
+                      <div className="chapter-meta">
+                        <span>{post.status}</span>
+                        <span>{post.country}</span>
+                        <span>{post.likes || 0} likes</span>
+                      </div>
+                      <h3 style={{ margin: "8px 0" }}>{post.username}</h3>
+                      <p>{post.content}</p>
+                    </div>
+                    <form onSubmit={(event) => {
+                      event.preventDefault();
+                      onAdminReply(post.id, new FormData(event.currentTarget).get("comment") || "");
+                      event.currentTarget.reset();
+                    }} className="comment-form" style={{ marginTop: "16px" }}>
+                      <input name="comment" placeholder="Reply as admin" style={{ padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", width: "100%" }} />
+                      <button className="primary-btn">Reply</button>
+                    </form>
+                    <div className="inline-actions action-wrap" style={{ marginTop: "12px" }}>
+                      <button className="ghost-btn" onClick={() => onModeratePost(post.id, "Hidden")}>Hide</button>
+                      <button className="danger-btn" onClick={() => onModeratePost(post.id, "Deleted")}>Delete</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
