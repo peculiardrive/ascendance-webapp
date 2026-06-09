@@ -1144,14 +1144,16 @@ function getCommunityLeaders(posts) {
 
 function LeaderList({ leaders, onSelect }) {
   return (
-    <div className="leader-strip" role="list" aria-label="Top community contributors">
+    <div className="leader-strip" role="list" aria-label="Top community contributors" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px', msOverflowStyle: 'none', scrollbarWidth: 'none', paddingLeft: '24px', paddingRight: '24px', margin: '0 -24px' }}>
       {leaders.map((leader, index) => (
-        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)}>
-          <div className="leader-avatar" aria-hidden="true">
+        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: '80px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <div className="leader-avatar" aria-hidden="true" style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(74, 14, 78, 0.2)' }}>
             {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
           </div>
-          <strong>{leader.points} pts <span>{leader.country || ""}</span></strong>
-          <span>{leader.name}</span>
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--ink)', width: '80px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{leader.name}</span>
+            <span style={{ display: 'inline-block', fontSize: '0.65rem', color: 'var(--muted)', background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', fontWeight: '600' }}>{leader.points} Pts {leader.country}</span>
+          </div>
         </button>
       ))}
     </div>
@@ -1215,24 +1217,19 @@ function HomeView({
         </div>
       </section>
 
-      <section className="leader-section community-leaders" aria-label="Community leaders" style={{ textStyle: "left", marginTop: "24px" }}>
-        <div className="leader-title" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "4px" }}>
-          <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#F45A62" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: "2px" }}>
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-            <div className="leader-title-copy">
-              <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.2rem", fontWeight: "bold", fontFamily: "Inter, sans-serif" }}>Community Leaders</h2>
-              <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "0.85rem" }}>Readers making the biggest contribution this week</p>
+      <section className="leader-section community-leaders" aria-label="Community leaders" style={{ textStyle: "left", marginTop: "24px", padding: '24px 0' }}>
+        <div className="leader-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', padding: '0 24px' }}>
+          <div className="leader-title-group" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <div style={{ color: '#F45A62', marginTop: '2px' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </div>
+            <div>
+              <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.25rem", fontWeight: "800", fontFamily: "Inter, sans-serif", letterSpacing: "-0.02em" }}>Community Leaders</h2>
+              <p style={{ margin: '4px 0 0', fontSize: "0.85rem", color: "var(--muted)" }}>Readers making the biggest contribution this week</p>
             </div>
           </div>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--app-purple)" xmlns="http://www.w3.org/2000/svg" style={{ marginTop: "2px" }}>
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-          </svg>
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", paddingRight: "4px" }}>
-          <button onClick={onViewLeaderboard} style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontSize: "0.9rem", fontWeight: "bold", textDecoration: "underline", cursor: "pointer", padding: 0 }}>
-            View Full Leaderboard
+          <button onClick={onViewLeaderboard} style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer", padding: 0 }}>
+            View All
           </button>
         </div>
         <LeaderList leaders={leaders} onSelect={onSelectLeader} />
@@ -1610,19 +1607,19 @@ function CommunityView({
 
   return (
     <div className="community-screen">
-      <header className="community-header" style={{ alignItems: 'center', justifyContent: surface === "feed" ? 'center' : 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
+      <header className="community-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
         {surface === "feed" ? (
           <>
-            <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>Community</h1>
-            <div className="community-tools">
-              <button className="circle-icon-btn" onClick={() => setSearchOpen(!searchOpen)} aria-label="Search">
-                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0, fontSize: '1.8rem' }}>Community</h1>
+            <div className="topbar-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <button onClick={() => setSearchOpen(!searchOpen)} aria-label="Search" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               </button>
-              <button className="circle-icon-btn" onClick={() => setSurface("notifications")} aria-label="Notifications">
-                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <button onClick={() => setSurface("notifications")} aria-label="Notifications" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"></path></svg>
               </button>
-              <button className="circle-icon-btn" onClick={() => setSurface("history")} aria-label="History">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <button onClick={() => setSurface("history")} aria-label="History" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </button>
             </div>
           </>
@@ -1652,13 +1649,19 @@ function CommunityView({
       {surface === "feed" ? (
         <>
           <section className="leader-section community-leaders" aria-label="Community leaders" style={{ padding: '0 24px' }}>
-            <div className="leader-title">
-              <HeartIcon />
-              <div className="leader-title-copy">
-                <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.2rem", fontWeight: "bold", fontFamily: "Inter, sans-serif" }}>Community Leaders</h2>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-secondary)" }}>Readers making the biggest contribution this week</p>
+            <div className="leader-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div className="leader-title-group" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{ color: '#F45A62', marginTop: '2px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, color: "var(--app-purple)", fontSize: "1.25rem", fontWeight: "800", fontFamily: "Inter, sans-serif", letterSpacing: "-0.02em" }}>Community Leaders</h2>
+                  <p style={{ margin: '4px 0 0', fontSize: "0.85rem", color: "var(--muted)" }}>Readers making the biggest contribution this week</p>
+                </div>
               </div>
-              <InfoIcon />
+              <div style={{ color: 'var(--muted)', opacity: 0.7, cursor: 'pointer' }} onClick={() => setSurface("leaderboard")}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              </div>
             </div>
             <LeaderList leaders={getCommunityLeaders(posts)} onSelect={() => setSurface("leaderboard")} />
           </section>
@@ -1667,7 +1670,10 @@ function CommunityView({
             <div className={`feed-toolbar ${searchOpen ? "has-search" : ""}`} style={{ marginTop: '24px', marginBottom: '16px' }}>
               {searchOpen ? <label className="search-field" style={{ flex: 1 }}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search community" autoFocus style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)' }} /></label> : null}
               <div style={{ display: 'flex', justifyContent: 'flex-end', width: searchOpen ? 'auto' : '100%', alignItems: 'center' }}>
-                <button className="ghost-btn" onClick={() => setSurface("sort")} style={{ color: 'var(--app-purple)', padding: 0, minHeight: 'auto' }}>Sort <span>▼</span></button>
+                <button onClick={() => setSurface("sort")} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(0,0,0,0.04)', border: 'none', padding: '8px 16px', borderRadius: '100px', color: 'var(--ink)', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer' }}>
+                  {sort === "newest" ? "Newest" : sort === "oldest" ? "Oldest" : sort === "liked" ? "Most Liked" : "Most Replied"}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
               </div>
             </div>
             <div className="community-feed">
@@ -1683,8 +1689,8 @@ function CommunityView({
               ))}
             </div>
           </div>
-          <button className="compose-fab" onClick={() => setSurface("compose")} aria-label="Write a review">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <button onClick={() => setSurface("compose")} aria-label="Write a review" style={{ position: 'fixed', bottom: '80px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--app-purple) 0%, #7e22ce 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 8px 24px rgba(74, 14, 78, 0.3)', cursor: 'pointer', zIndex: 100 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </button>
         </>
       ) : null}
@@ -1848,19 +1854,30 @@ function ReviewCard({ post, user, onOpen, onLike, onShare, expanded = false }) {
   const liked = post.likedBy?.includes(user?.id);
   const copy = splitPostContent(post.content);
   return (
-    <article className={`review-card ${post.pinned ? "is-pinned" : ""}`}>
-      <button className="review-card-main" onClick={onOpen}>
-        <div className="review-author">
-          <div className="avatar">{post.avatar || post.username?.slice(0, 1) || "A"}</div>
-          <div><strong>{post.username}</strong><span>{post.country} · {new Date(post.createdAt).toLocaleDateString()}</span></div>
+    <article className={`review-card ${post.pinned ? "is-pinned" : ""}`} style={{ background: 'white', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,0.02)', overflow: 'hidden', marginBottom: '16px' }}>
+      <button className="review-card-main" onClick={onOpen} style={{ width: '100%', textAlign: 'left', padding: '20px', background: 'none', border: 'none', cursor: 'pointer' }}>
+        <div className="review-author" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+          <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem' }}>{post.avatar || post.username?.slice(0, 1) || "A"}</div>
+          <div>
+            <strong style={{ display: 'block', color: 'var(--ink)', fontSize: '0.95rem' }}>{post.username}</strong>
+            <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>{post.country} · {new Date(post.createdAt).toLocaleDateString()}</span>
+          </div>
         </div>
-        <h2>{copy.title}</h2>
-        <p>{copy.body}</p>
+        <h2 style={{ fontSize: '1.15rem', color: 'var(--app-purple)', margin: '0 0 8px 0', lineHeight: '1.3' }}>{copy.title}</h2>
+        <p style={{ fontSize: '0.95rem', color: '#4b5563', lineHeight: '1.6', margin: 0, display: expanded ? 'block' : '-webkit-box', WebkitLineClamp: expanded ? 'unset' : 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{copy.body}</p>
       </button>
-      <div className="review-actions">
-        <button onClick={() => onLike(post.id)} aria-label={`${liked ? "Unlike" : "Like"} review`}>{liked ? "Liked" : "Like"} <strong>{post.likes || 0}</strong></button>
-        <button onClick={onOpen}>Replies <strong>{post.comments?.length || 0}</strong></button>
-        <button onClick={() => onShare(post, "native")}>Share</button>
+      <div className="review-actions" style={{ display: 'flex', gap: '24px', padding: '12px 20px', borderTop: '1px solid rgba(0,0,0,0.04)', background: '#fafafa' }}>
+        <button onClick={() => onLike(post.id)} aria-label={`${liked ? "Unlike" : "Like"} review`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: liked ? 'var(--danger)' : 'var(--muted)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', padding: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          {post.likes || 0}
+        </button>
+        <button onClick={onOpen} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', padding: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          {post.comments?.length || 0}
+        </button>
+        <button onClick={() => onShare(post, "native")} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', padding: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        </button>
       </div>
     </article>
   );
