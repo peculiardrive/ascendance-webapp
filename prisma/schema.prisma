@@ -9,31 +9,31 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(cuid()) @map("user_id")
-  fullName         String            @map("full_name")
-  username         String?           @unique
-  email            String            @unique
-  phone            String?
-  countryCode      String            @default("NG") @map("country_code")
-  passwordHash     String?           @map("password_hash")
-  profileImage     String?           @map("profile_image")
-  avatar           String?
-  emailVerified    Boolean           @default(false) @map("email_verified")
-  verificationCodeHash String?       @map("verification_code_hash")
-  verificationExpiresAt DateTime?    @map("verification_expires_at")
-  verificationAttempts Int           @default(0) @map("verification_attempts")
-  signupMethod     String            @default("email") @map("signup_method")
-  onboardingStep   String            @default("verify") @map("onboarding_step")
-  createdAt        DateTime          @default(now()) @map("created_at")
-  lastLogin        DateTime?         @map("last_login")
-  purchases        Purchase[]
-  readingProgress  ReadingProgress[]
-  sentGifts        Gift[]            @relation("GiftSender")
-  redeemedGifts    Gift[]            @relation("GiftRedeemer")
-  communityPosts   CommunityPost[]
-  comments         Comment[]
-  likes            PostLike[]
-  points           Int               @default(0)
+  id                    String            @id @default(cuid()) @map("user_id")
+  fullName              String            @map("full_name")
+  username              String?           @unique
+  email                 String            @unique
+  phone                 String?
+  countryCode           String            @default("NG") @map("country_code")
+  passwordHash          String?           @map("password_hash")
+  profileImage          String?           @map("profile_image")
+  avatar                String?
+  emailVerified         Boolean           @default(false) @map("email_verified")
+  signupMethod          String            @default("email") @map("signup_method")
+  onboardingStep        String            @default("verify") @map("onboarding_step")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  lastLogin             DateTime?         @map("last_login")
+  verificationCodeHash  String?           @map("verification_code_hash")
+  verificationExpiresAt DateTime?         @map("verification_expires_at")
+  verificationAttempts  Int               @default(0) @map("verification_attempts")
+  points                Int               @default(0)
+  comments              Comment[]
+  communityPosts        CommunityPost[]
+  redeemedGifts         Gift[]            @relation("GiftRedeemer")
+  sentGifts             Gift[]            @relation("GiftSender")
+  likes                 PostLike[]
+  purchases             Purchase[]
+  readingProgress       ReadingProgress[]
 
   @@map("users")
 }
@@ -61,11 +61,11 @@ model Book {
   status             String            @default("Draft")
   freePreviewEnabled Boolean           @default(false) @map("free_preview_enabled")
   createdAt          DateTime          @default(now()) @map("created_at")
-  sections           Section[]
   chapters           Chapter[]
+  communityPosts     CommunityPost[]
   purchases          Purchase[]
   readingProgress    ReadingProgress[]
-  communityPosts     CommunityPost[]
+  sections           Section[]
 
   @@index([bookOrder])
   @@map("books")
@@ -82,10 +82,10 @@ model Section {
   ttsEnabled      Boolean           @default(true) @map("tts_enabled")
   ttsVoice        String?           @map("tts_voice")
   createdAt       DateTime          @default(now()) @map("created_at")
-  book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
   chapters        Chapter[]
   purchases       Purchase[]
   readingProgress ReadingProgress[]
+  book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@index([bookId, orderNumber])
   @@map("sections")
@@ -123,9 +123,9 @@ model Purchase {
   paymentGateway   String   @map("payment_gateway")
   paymentStatus    String   @map("payment_status")
   createdAt        DateTime @default(now()) @map("created_at")
+  book             Book?    @relation(fields: [bookId], references: [id])
+  section          Section? @relation(fields: [sectionId], references: [id])
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book             Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
-  section          Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@map("purchases")
@@ -141,10 +141,10 @@ model ReadingProgress {
   percentageCompleted Decimal  @default(0) @map("percentage_completed") @db.Decimal(5, 2)
   deviceType          String?  @map("device_type")
   lastReadAt          DateTime @default(now()) @map("last_read_at")
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   book                Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  section             Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
   chapter             Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  section             Section? @relation(fields: [sectionId], references: [id])
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, chapterId])
   @@index([userId])
@@ -162,8 +162,8 @@ model Gift {
   redeemedByUserId String?   @map("redeemed_by_user_id")
   redeemedAt       DateTime? @map("redeemed_at")
   createdAt        DateTime  @default(now()) @map("created_at")
+  redeemedBy       User?     @relation("GiftRedeemer", fields: [redeemedByUserId], references: [id])
   sender           User      @relation("GiftSender", fields: [senderUserId], references: [id], onDelete: Cascade)
-  redeemedBy       User?     @relation("GiftRedeemer", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
 
   @@index([senderUserId])
   @@index([recipientEmail])
@@ -181,9 +181,9 @@ model CommunityPost {
   status        String     @default("Visible")
   pinned        Boolean    @default(false)
   createdAt     DateTime   @default(now()) @map("created_at")
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book          Book?      @relation(fields: [bookId], references: [id], onDelete: SetNull)
   comments      Comment[]
+  book          Book?      @relation(fields: [bookId], references: [id])
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes         PostLike[]
 
   @@index([createdAt])
@@ -211,4 +211,25 @@ model PostLike {
 
   @@id([postId, userId])
   @@map("post_likes")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model admin_two_factor_challenges {
+  id          String    @id
+  admin_id    String
+  code_hash   String
+  expires_at  DateTime
+  attempts    Int       @default(0)
+  consumed_at DateTime?
+  created_at  DateTime  @default(now())
+
+  @@index([admin_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rate_limit_buckets {
+  key        String   @id
+  count      Int      @default(0)
+  reset_at   DateTime
+  updated_at DateTime @default(now())
 }
