@@ -181,50 +181,66 @@ export default function Home() {
   useEffect(() => {
     let active = true;
     async function bootstrap() {
-      const onAdminRoute = window.location.pathname.startsWith("/admin");
-      setAdminRoute(onAdminRoute);
-      const previewView = process.env.NODE_ENV !== "production"
-        ? new URLSearchParams(window.location.search).get("preview")
-        : null;
-      if (previewView && !onAdminRoute) {
-        setUser({
-          id: "reader-preview",
-          fullName: "Stanley Ohanugo",
-          username: "Stanley O.",
-          email: "reader@example.com",
-          phone: "+234 708 298 0403",
-          country: "NG",
-          onboardingStep: "done"
-        });
-        setReady(true);
-        setSplashDone(true);
-        setView(previewView);
-        return;
-      }
-      localStorage.removeItem("ascendance_next_user");
-      localStorage.removeItem("ascendance_next_admin");
-      const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
-      const savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
-      if (savedChapter) setActiveChapterId(savedChapter);
-
       try {
-        const response = await fetch("/api/auth/session", { credentials: "same-origin" });
-        const data = await response.json();
-        if (!active) return;
-        setUser(data.user || null);
-        setAdmin(data.admin || null);
-        setAdminTwoFactorPending(Boolean(data.adminChallengePending && !data.admin));
-        await refreshState();
-        if (!active) return;
-        setReady(true);
-        setTimeout(() => {
-          if (!active) return;
+        const onAdminRoute = window.location.pathname.startsWith("/admin");
+        setAdminRoute(onAdminRoute);
+        const previewView = process.env.NODE_ENV !== "production"
+          ? new URLSearchParams(window.location.search).get("preview")
+          : null;
+        if (previewView && !onAdminRoute) {
+          setUser({
+            id: "reader-preview",
+            fullName: "Stanley Ohanugo",
+            username: "Stanley O.",
+            email: "reader@example.com",
+            phone: "+234 708 298 0403",
+            country: "NG",
+            onboardingStep: "done"
+          });
+          setReady(true);
           setSplashDone(true);
-          if (onAdminRoute) setView("admin");
-          else if (data.user?.onboardingStep === "done") setView(savedView);
-          else setShowTrailer(true);
-        }, 1300);
-      } catch {
+          setView(previewView);
+          return;
+        }
+
+        let savedView = "home";
+        let savedChapter = null;
+        try {
+          localStorage.removeItem("ascendance_next_user");
+          localStorage.removeItem("ascendance_next_admin");
+          savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
+          savedChapter = localStorage.getItem(LAST_CHAPTER_KEY);
+        } catch (e) {
+          console.warn("localStorage access blocked", e);
+        }
+        if (savedChapter) setActiveChapterId(savedChapter);
+
+        try {
+          const response = await fetch("/api/auth/session", { credentials: "same-origin" });
+          const data = await response.json();
+          if (!active) return;
+          setUser(data.user || null);
+          setAdmin(data.admin || null);
+          setAdminTwoFactorPending(Boolean(data.adminChallengePending && !data.admin));
+          await refreshState();
+          if (!active) return;
+          setReady(true);
+          setTimeout(() => {
+            if (!active) return;
+            setSplashDone(true);
+            if (onAdminRoute) setView("admin");
+            else if (data.user?.onboardingStep === "done") setView(savedView);
+            else setShowTrailer(true);
+          }, 1300);
+        } catch (error) {
+          console.error("Auth session fetch failed:", error);
+          if (!active) return;
+          setReady(true);
+          setSplashDone(true);
+          setShowTrailer(true);
+        }
+      } catch (fatalError) {
+        console.error("Fatal bootstrap error:", fatalError);
         if (!active) return;
         setReady(true);
         setSplashDone(true);
