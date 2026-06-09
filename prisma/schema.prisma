@@ -26,6 +26,8 @@ model User {
   verificationCodeHash  String?           @map("verification_code_hash")
   verificationExpiresAt DateTime?         @map("verification_expires_at")
   verificationAttempts  Int               @default(0) @map("verification_attempts")
+  passwordResetCodeHash String?           @map("password_reset_code_hash")
+  passwordResetExpiresAt DateTime?        @map("password_reset_expires_at")
   points                Int               @default(0)
   comments              Comment[]
   communityPosts        CommunityPost[]

@@ -32,7 +32,9 @@ export async function POST(request, { params }) {
 
     const chapterContent = Array.isArray(payload.content)
       ? payload.content
-      : String(payload.content).split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+      : String(payload.content).includes("<p>") || String(payload.content).includes("<br>") 
+        ? String(payload.content) 
+        : String(payload.content).split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
 
     const chapter = {
       id: uid("chapter"),

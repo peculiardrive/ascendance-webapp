@@ -42,7 +42,13 @@ export async function PUT(request, { params }) {
       ...foundChapter,
       title: payload.title !== undefined ? payload.title : foundChapter.title,
       subtitle: payload.subtitle !== undefined ? payload.subtitle : foundChapter.subtitle,
-      content: payload.content !== undefined ? payload.content : foundChapter.content,
+      content: payload.content !== undefined ? (
+        Array.isArray(payload.content) 
+          ? payload.content 
+          : String(payload.content).includes("<p>") || String(payload.content).includes("<br>")
+            ? String(payload.content)
+            : String(payload.content).split(/\n{2,}/).map(p => p.trim()).filter(Boolean)
+      ) : foundChapter.content,
       chapterNumber: payload.chapterNumber !== undefined ? Number(payload.chapterNumber) : foundChapter.chapterNumber,
       order: payload.order !== undefined ? Number(payload.order) : foundChapter.order,
       isPreview: payload.isPreview !== undefined ? Boolean(payload.isPreview) : foundChapter.isPreview,

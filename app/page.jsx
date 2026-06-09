@@ -367,6 +367,35 @@ export default function Home() {
     await refreshState();
   }
 
+  async function requestPasswordReset(formData) {
+    const response = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: formData.get("email") })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    notify("If the account exists, a recovery code has been sent.");
+    return true; // Used by AuthView to proceed
+  }
+
+  async function resetPassword(formData) {
+    const response = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: formData.get("email"),
+        code: formData.get("code"),
+        newPassword: formData.get("newPassword")
+      })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    setUser(data.user);
+    notify("Password successfully reset. Welcome back.");
+    await refreshState();
+  }
+
   async function verifyEmail(formData) {
     const response = await fetch("/api/auth/verify-email", {
       method: "POST",
@@ -405,6 +434,25 @@ export default function Home() {
     if (!data.ok) return notify(data.error);
     setUser(data.user);
     notify("Profile saved.");
+  }
+
+  async function changePassword(formData) {
+    const currentPassword = formData.get("currentPassword");
+    const newPassword = formData.get("newPassword");
+    const confirmPassword = formData.get("confirmPassword");
+
+    if (newPassword !== confirmPassword) {
+      return notify("New passwords do not match.");
+    }
+
+    const response = await fetch("/api/users/me/password", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    notify("Password updated successfully.");
   }
 
   async function purchase(book, productType = "book") {
@@ -674,7 +722,7 @@ export default function Home() {
       {showTrailer && (!user || !isOnboarded) ? (
         <TrailerIntro onEnter={(shouldPlay) => { setAutoplayAudio(shouldPlay); setShowTrailer(false); setView("auth"); }} />
       ) : !user || !isOnboarded ? (
-        <AuthView autoplay={autoplayAudio} user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onResendCode={resendVerificationCode} onProfile={updateProfile} />
+        <AuthView autoplay={autoplayAudio} user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onResendCode={resendVerificationCode} onProfile={updateProfile} onRequestPasswordReset={requestPasswordReset} onResetPassword={resetPassword} />
       ) : (
         <AppShell view={view} setView={(v) => {
           if (v === "community") {
@@ -749,6 +797,7 @@ export default function Home() {
               purchases={purchases}
               gifts={gifts}
               onProfile={updateProfile}
+              onChangePassword={changePassword}
               onLogout={readerLogout}
               onShareApp={() => setShareModalOpen(true)}
               onInstall={installApp}
@@ -881,16 +930,17 @@ function TrailerIntro({ onEnter }) {
   );
 }
 
-function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, onProfile }) {
+function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, onProfile, onRequestPasswordReset, onResetPassword }) {
   const step = user?.onboardingStep || "signin";
   const [mode, setMode] = useState("login");
+  const [resetEmail, setResetEmail] = useState("");
 
   return (
     <main className="auth-page">
       <section className="auth-panel">
         <img className="auth-logo" src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
         <div className="auth-heading">
-          <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : "Create Profile"}</h1>
+          <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : mode === "forgot" ? "Reset Password" : mode === "reset" ? "New Password" : "Create Profile"}</h1>
         </div>
         {step === "signin" && (
           <>
@@ -904,16 +954,48 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
                   <button className="primary-btn auth-submit-new">Submit</button>
                 </div>
               </form>
-            ) : (
+            ) : mode === "login" ? (
               <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
                 <input name="email" type="email" placeholder="Email" autoComplete="email" required />
                 <input name="password" type="password" placeholder="Password" autoComplete="current-password" required />
-                <button className="auth-alt-link" type="button" onClick={() => setMode("signup")}>Create a Reader Profile</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 8px', marginTop: '-8px' }}>
+                  <button className="auth-alt-link" style={{ textAlign: 'left' }} type="button" onClick={() => setMode("forgot")}>Forgot Password?</button>
+                  <button className="auth-alt-link" type="button" onClick={() => setMode("signup")}>Create Profile</button>
+                </div>
                 <div className="auth-submit-container">
                   <button className="primary-btn auth-submit-new">Submit</button>
                 </div>
               </form>
-            )}
+            ) : mode === "forgot" ? (
+              <form onSubmit={async (event) => { 
+                event.preventDefault(); 
+                const formData = new FormData(event.currentTarget);
+                const email = formData.get("email");
+                const success = await onRequestPasswordReset(formData); 
+                if (success) {
+                  setResetEmail(email);
+                  setMode("reset");
+                }
+              }} className="form-grid new-auth-form">
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', marginBottom: '8px' }}>Enter your email to receive a recovery code.</p>
+                <input name="email" type="email" placeholder="Email" autoComplete="email" required />
+                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Back to Login</button>
+                <div className="auth-submit-container">
+                  <button className="primary-btn auth-submit-new">Send Code</button>
+                </div>
+              </form>
+            ) : mode === "reset" ? (
+              <form onSubmit={(event) => { event.preventDefault(); onResetPassword(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', marginBottom: '8px' }}>Enter the 6-digit code sent to your email.</p>
+                <input type="hidden" name="email" value={resetEmail} />
+                <input name="code" inputMode="numeric" placeholder="6-digit code" maxLength={6} required />
+                <input name="newPassword" type="password" placeholder="New Password (Min 8 chars)" minLength={8} required />
+                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Back to Login</button>
+                <div className="auth-submit-container">
+                  <button className="primary-btn auth-submit-new">Reset Password</button>
+                </div>
+              </form>
+            ) : null}
           </>
         )}
         {step === "verify" && (
@@ -1522,7 +1604,14 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
       <article className="reader-body" style={{ fontFamily: settings.font, fontSize: settings.size, lineHeight: settings.line, textAlign: settings.align, paddingBottom: '100px' }}>
         <p className="eyebrow">{activeChapter.chapter.title}</p>
         <h2>{activeChapter.chapter.subtitle}</h2>
-        {activeChapter.chapter.content.map((paragraph, paragraphIndex) => <p key={`${activeChapter.chapter.id}-${paragraphIndex}`}>{paragraph}</p>)}
+        <div 
+          className="chapter-content-html"
+          dangerouslySetInnerHTML={{ 
+            __html: Array.isArray(activeChapter.chapter.content) 
+              ? activeChapter.chapter.content.map(p => `<p>${p}</p>`).join('')
+              : activeChapter.chapter.content 
+          }} 
+        />
         
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', paddingTop: '20px', borderTop: '1px solid rgba(128,105,90,0.2)' }}>
           <button className="ghost-btn" disabled={!prev} onClick={() => prev && onRead(prev)}>Previous</button>
@@ -1957,7 +2046,7 @@ function NoticesView({ gifts, onGift }) {
   );
 }
 
-function ProfileView({ user, progress, purchases, gifts, onProfile, onLogout, onShareApp, onInstall, canInstall }) {
+function ProfileView({ user, progress, purchases, gifts, onProfile, onChangePassword, onLogout, onShareApp, onInstall, canInstall }) {
   const completed = Object.values(progress).filter((item) => Number(item?.percentage || 0) >= 100).length;
   return (
     <div className="profile-screen" style={{ maxWidth: '800px', margin: '0 auto', padding: '16px', background: 'var(--reader-bg, #fff)', minHeight: '100vh' }}>
@@ -1965,19 +2054,44 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onLogout, on
         <button className="circle-icon-btn" onClick={() => window.history.back()} aria-label="Back" style={{ border: 'none', background: 'transparent' }}>
           <svg viewBox="0 0 24 24" width="24" height="24"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: '0 auto', fontSize: '1.6rem' }}>ASCENDANCE</h1>
+        <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: '0 auto', fontSize: '1.6rem' }}>Profile</h1>
         <div style={{ width: '40px' }}></div>
       </header>
 
-      <section className="profile-form-section" style={{ display: 'grid', gap: '20px', marginBottom: '32px' }}>
+      <section className="profile-form-section" style={{ display: 'grid', gap: '20px', marginBottom: '40px' }}>
         <form onSubmit={(event) => { event.preventDefault(); onProfile(new FormData(event.currentTarget)); }} style={{ display: 'grid', gap: '20px' }}>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Full Name
+            <input name="fullName" defaultValue={user?.fullName || ""} placeholder="Your Name" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+          </label>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Email Address
+            <input name="email" defaultValue={user?.email || ""} readOnly style={{ padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(0,0,0,0.03)', color: 'rgba(0,0,0,0.5)', cursor: 'not-allowed' }} />
+          </label>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Username
+            <input name="username" defaultValue={user?.username || ""} placeholder="@username" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+          </label>
           <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Phone number
-            <input name="phone" defaultValue={user.phone} placeholder="+1 9289 982 928" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+            <input name="phone" defaultValue={user?.phone || ""} placeholder="+1 9289 982 928" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
           </label>
           <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Country
-            <input name="country" defaultValue={user.country} placeholder="United States" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+            <input name="country" defaultValue={user?.countryCode || ""} placeholder="US" style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
           </label>
           <button className="primary-btn" style={{ minHeight: '56px', borderRadius: '8px', fontWeight: 'bold' }}>Save Profile</button>
+        </form>
+      </section>
+
+      <section className="profile-password-section" style={{ display: 'grid', gap: '20px', marginBottom: '40px' }}>
+        <h2 style={{ color: 'var(--app-purple)', margin: 0, fontSize: '1.25rem' }}>Change Password</h2>
+        <form onSubmit={(event) => { event.preventDefault(); onChangePassword(new FormData(event.currentTarget)); event.currentTarget.reset(); }} style={{ display: 'grid', gap: '20px' }}>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Current Password
+            <input name="currentPassword" type="password" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+          </label>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>New Password
+            <input name="newPassword" type="password" required minLength={8} style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+          </label>
+          <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)' }}>Confirm New Password
+            <input name="confirmPassword" type="password" required minLength={8} style={{ padding: '16px', borderRadius: '8px', border: '1px solid #111', background: 'transparent' }} />
+          </label>
+          <button className="primary-btn" style={{ minHeight: '56px', borderRadius: '8px', fontWeight: 'bold', background: 'var(--ink)' }}>Update Password</button>
         </form>
       </section>
 
@@ -2005,7 +2119,6 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onLogout, on
 
         <div style={{ display: 'flex', gap: '16px' }}>
           <button onClick={onLogout} className="danger-btn" style={{ padding: '8px 16px', borderRadius: '8px' }}>Sign Out</button>
-          <a href="/admin" className="ghost-btn" style={{ padding: '8px 16px', borderRadius: '8px', color: 'var(--app-purple)', borderColor: 'var(--app-purple)', textDecoration: 'none' }}>Admin Portal</a>
         </div>
       </section>
     </div>
@@ -2071,7 +2184,15 @@ function RichTextEditor({ name, defaultValue, placeholder }) {
   const inputRef = useRef(null);
   const [html, setHtml] = useState(() => {
     if (!defaultValue) return "";
-    return defaultValue.split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
+    if (Array.isArray(defaultValue)) {
+      return defaultValue.map(p => `<p>${p}</p>`).join("");
+    }
+    // If it's already an HTML string, just return it. 
+    // If it's plain text with newlines, convert to paragraphs.
+    if (String(defaultValue).includes("<p>") || String(defaultValue).includes("<br>")) {
+      return String(defaultValue);
+    }
+    return String(defaultValue).split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
   });
 
   useEffect(() => {
@@ -2082,12 +2203,7 @@ function RichTextEditor({ name, defaultValue, placeholder }) {
 
   const handleInput = () => {
     if (editorRef.current) {
-      const newHtml = editorRef.current.innerHTML;
-      let text = newHtml.replace(/<p[^>]*>/gi, "").replace(/<\/p>/gi, "\n\n");
-      text = text.replace(/<br\s*\/?>/gi, "\n");
-      text = text.replace(/&nbsp;/gi, " ");
-      text = text.replace(/<[^>]+>/g, ""); // Strip remaining tags
-      inputRef.current.value = text.trim();
+      inputRef.current.value = editorRef.current.innerHTML.trim();
     }
   };
 
@@ -2208,10 +2324,48 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             </div>
             <div className="admin-library-grid">
               <div className="admin-library-card">
+                <h2>Revenue (Last 7 Days)</h2>
+                {(() => {
+                  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - (6 - i));
+                    return d.toISOString().split("T")[0];
+                  });
+                  const revByDate = purchases.reduce((acc, p) => {
+                    if (p.paymentStatus !== "Successful") return acc;
+                    const date = new Date(p.createdAt || p.paidAt).toISOString().split("T")[0];
+                    if (!acc[date]) acc[date] = 0;
+                    acc[date] += Number(p.amount || 0);
+                    return acc;
+                  }, {});
+                  const maxRev = Math.max(...last7Days.map(d => revByDate[d] || 0), 100);
+
+                  return (
+                    <div className="chart-container" style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', marginTop: '24px', paddingBottom: '24px', borderBottom: '1px solid var(--border)', position: 'relative' }}>
+                      {last7Days.map(date => {
+                        const rev = revByDate[date] || 0;
+                        const heightPct = (rev / maxRev) * 100;
+                        const label = new Date(date).toLocaleDateString(undefined, { weekday: 'short' });
+                        return (
+                          <div key={date} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', height: '100%', group: 'true' }}>
+                            <div className="chart-tooltip" style={{ opacity: 0, transition: '0.2s', background: 'var(--ink)', color: 'var(--bg)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', marginBottom: '8px', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                              {ngnCurrency(rev)}
+                            </div>
+                            <div style={{ width: '100%', maxWidth: '40px', height: `${heightPct}%`, background: 'var(--brand)', borderRadius: '4px 4px 0 0', minHeight: '4px', transition: 'height 0.3s ease' }}></div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--ink-light)', marginTop: '8px', position: 'absolute', bottom: 0 }}>{label}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="admin-library-card">
                 <h2>Recent Purchases</h2>
                 {purchases.slice(0, 5).map(p => (
                   <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                    <span>{p.userId}</span>
+                    <span style={{ fontSize: '0.9rem' }}>{p.userId || "Unknown"} <br/><small className="muted">{p.productType}</small></span>
                     <strong>{ngnCurrency(p.amount)}</strong>
                   </div>
                 ))}
