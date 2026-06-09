@@ -1124,6 +1124,9 @@ button:disabled {
 }
 
 .auth-alt-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
   color: var(--app-purple);
   font-size: 1rem;
   font-weight: 800;
@@ -2836,13 +2839,13 @@ body {
 }
 
 .trailer-copy h1 {
-  max-width: 9ch;
-  font-size: clamp(2.8rem, 14vw, 4rem);
+  max-width: 15ch;
+  font-size: 3.5rem;
 }
 
 .trailer-copy p {
   top: calc(50% + 74px);
-  font-size: clamp(2rem, 10vw, 3rem);
+  font-size: 2rem;
 }
 
 .trailer-login-btn {
@@ -2882,21 +2885,24 @@ body {
   text-align: left;
   font-size: 1.05rem;
   font-weight: 800;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 input,
 select,
 textarea {
-  min-height: 52px;
-  border-width: 3px;
-  border-radius: 16px;
+  min-height: 48px;
+  border-width: 1.5px;
+  border-radius: 8px;
 }
 
-.auth-submit {
-  min-height: 64px;
+.auth-submit, .auth-submit-new {
+  min-height: 52px;
   margin-top: clamp(12px, 3vh, 28px);
-  border-radius: 16px;
-  font-size: clamp(1.45rem, 8vw, 2.2rem);
+  border-radius: 8px;
+  font-size: 1.2rem;
 }
 
 .topbar {
