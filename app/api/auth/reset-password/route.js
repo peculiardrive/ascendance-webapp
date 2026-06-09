@@ -1,7 +1,7 @@
-import { hashPassword, publicUser, signReaderSession, verifyPassword } from "@/lib/auth";
+import { hashPassword, publicUser, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { readerSessionCookie } from "@/lib/session";
 import { json, readJson } from "@/lib/store";
-import { cookies } from "next/headers";
 
 export async function POST(request) {
   try {
@@ -44,15 +44,10 @@ export async function POST(request) {
       }
     });
 
-    const token = await signReaderSession(updatedUser);
-    (await cookies()).set("session", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60
-    });
-
-    return json({ ok: true, user: publicUser(updatedUser) });
+    return json(
+      { ok: true, user: publicUser(updatedUser) },
+      { headers: { "set-cookie": readerSessionCookie(updatedUser.id) } }
+    );
   } catch (error) {
     console.error("Reset password error:", error);
     return json({ ok: false, error: "Internal server error" }, { status: 500 });
