@@ -2126,6 +2126,24 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [selectedBookId, setSelectedBookId] = useState(books[0]?.id || "");
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const [editingItem, setEditingItem] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === "users" && users.length === 0) {
+      setLoadingUsers(true);
+      fetch("/api/admin/users")
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) setUsers(data.users || []);
+          setLoadingUsers(false);
+        })
+        .catch(e => {
+          console.error("Failed to fetch users", e);
+          setLoadingUsers(false);
+        });
+    }
+  }, [activeTab]);
 
   const handleDelete = async (type, id) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
@@ -2163,6 +2181,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")} style={{ padding: "8px 16px" }}>Overview</button>
             <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
             <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
+            <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")} style={{ padding: "8px 16px" }}>Users</button>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -2467,6 +2486,57 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                   </article>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+        {activeTab === "users" && (
+          <div className="admin-tab-pane">
+            <div className="admin-library-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                <h2>Registered Users</h2>
+                <span className="admin-role-badge">{users.length} Total Readers</span>
+              </div>
+              
+              {loadingUsers ? (
+                <div style={{ textAlign: "center", padding: "40px", color: "var(--brand)" }}>Loading users...</div>
+              ) : users.length === 0 ? (
+                <p className="muted">No users found.</p>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Name</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Email</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Joined</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Purchases</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Chapters Read</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map(u => (
+                        <tr key={u.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                          <td style={{ padding: "12px", fontWeight: "bold", color: "var(--ink)" }}>{u.fullName || "—"}</td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}>{u.email}</td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}>{new Date(u.createdAt).toLocaleDateString()}</td>
+                          <td style={{ padding: "12px" }}>
+                            <span className="admin-role-badge" style={{ background: u._count?.purchases > 0 ? "var(--app-green)" : "var(--line)", color: u._count?.purchases > 0 ? "white" : "var(--ink)" }}>
+                              {u._count?.purchases || 0}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span className="admin-role-badge" style={{ background: u._count?.readingProgress > 0 ? "var(--app-purple)" : "var(--line)", color: u._count?.readingProgress > 0 ? "white" : "var(--ink)" }}>
+                              {u._count?.readingProgress || 0}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px", fontWeight: "600", color: "var(--brand)" }}>{u.points || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
