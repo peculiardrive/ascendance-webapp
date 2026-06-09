@@ -839,11 +839,11 @@ function TrailerIntro({ onEnter }) {
           <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
         </video>
         <div className="trailer-copy">
-          <h1>Play Trailer Video</h1>
-          <p>Ascendance</p>
-        </div>
-        <div className="trailer-actions-container">
-          <button className="trailer-action-btn primary" onClick={() => onEnter(false)}>Login</button>
+          <div className="trailer-text-container">
+            <h1>Play Trailer Video</h1>
+            <p>Ascendance</p>
+          </div>
+          <button className="trailer-login-btn-new" onClick={() => onEnter(false)}>Login</button>
         </div>
       </section>
     </main>
@@ -864,19 +864,23 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
         {step === "signin" && (
           <>
             {mode === "signup" ? (
-              <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid">
-                <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
-                <label>Full name<input name="fullName" placeholder="Your name" autoComplete="name" required /></label>
-                <label>Password<input name="password" type="password" placeholder="Minimum 8 characters" autoComplete="new-password" minLength={8} required /></label>
+              <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
+                <input name="email" type="email" placeholder="Email" autoComplete="email" required />
+                <input name="fullName" placeholder="Full name" autoComplete="name" required />
+                <input name="password" type="password" placeholder="Password (Min 8 characters)" autoComplete="new-password" minLength={8} required />
                 <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Already have an account? Login</button>
-                <button className="primary-btn auth-submit">Submit</button>
+                <div className="auth-submit-container">
+                  <button className="primary-btn auth-submit-new">Submit</button>
+                </div>
               </form>
             ) : (
-              <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
-                <label>Email<input name="email" type="email" placeholder="reader@example.com" autoComplete="email" required /></label>
-                <label>Password<input name="password" type="password" placeholder="Your password" autoComplete="current-password" required /></label>
+              <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
+                <input name="email" type="email" placeholder="Email" autoComplete="email" required />
+                <input name="password" type="password" placeholder="Password" autoComplete="current-password" required />
                 <button className="auth-alt-link" type="button" onClick={() => setMode("signup")}>Create a Reader Profile</button>
-                <button className="primary-btn auth-submit">Submit</button>
+                <div className="auth-submit-container">
+                  <button className="primary-btn auth-submit-new">Submit</button>
+                </div>
               </form>
             )}
           </>
