@@ -2152,23 +2152,25 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   }, [selectedBookId, books]);
 
   return (
-    <div className="admin-layout">
-      <nav className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <p className="eyebrow">BrandZilla</p>
-          <h2>Ascendance</h2>
+    <div className="admin-layout" style={{ flexDirection: "column" }}>
+      <header className="admin-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 32px", background: "var(--ink)", color: "var(--bg)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <div>
+            <p className="eyebrow" style={{ margin: "0 0 4px 0", color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>BrandZilla</p>
+            <h2 style={{ margin: 0, color: "white", fontSize: "1.2rem" }}>Ascendance Admin</h2>
+          </div>
+          <div style={{ display: "flex", gap: "12px", marginLeft: "16px" }}>
+            <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")} style={{ padding: "8px 16px" }}>Overview</button>
+            <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
+            <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span className="admin-role-badge">{admin.role}</span>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9rem" }}>{admin.name}</span>
+          <button className="ghost-btn" onClick={onLogout} style={{ color: "var(--bg)", borderColor: "rgba(255,255,255,0.3)", padding: "6px 12px", minHeight: "auto" }}>Logout</button>
         </div>
-        <div className="admin-nav-links">
-          <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")}>Overview</button>
-          <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")}>Library</button>
-          <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")}>Community</button>
-        </div>
-        <div className="admin-sidebar-footer">
-          <p>{admin.name}</p>
-          <button className="ghost-btn" onClick={onLogout} style={{ width: "100%", justifyContent: "center" }}>Logout</button>
-        </div>
-      </nav>
+      </header>
 
       <main className="admin-content">
         <div className="admin-header-bar">
