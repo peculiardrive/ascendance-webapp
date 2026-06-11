@@ -9,3 +9,5 @@ data/state.json
 .env*.local
 *.pdf
 dev.db
+
+.env*.local

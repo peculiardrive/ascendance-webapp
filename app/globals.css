@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 :root {
   --bg: #f9f3ec;
   --panel: #fffdf8;
@@ -27,7 +29,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: Roboto, "Open Sans", Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: Outfit, Roboto, "Open Sans", Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 button,
@@ -96,7 +98,7 @@ p {
 .admin-heading h1,
 .reader-body h2 {
   margin: 0;
-  font-family: Centaur, Georgia, "Times New Roman", serif;
+  font-family: "Playfair Display", Centaur, Georgia, "Times New Roman", serif;
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -4070,3 +4072,448 @@ textarea,
   opacity: 1 !important;
   transform: translateY(-4px);
 }
+
+/* ------------------------------------- */
+/* DESKTOP LAYOUT OVERRIDES              */
+/* ------------------------------------- */
+@media (min-width: 760px) {
+  .shell {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+  }
+  
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 48px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  
+  .topbar .brand-lockup {
+    width: 200px;
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  
+  .desktop-nav-link {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .desktop-nav-link:hover {
+    color: var(--ink);
+  }
+  
+  .desktop-nav-link.is-active {
+    color: var(--brand);
+    border-bottom: 2px solid var(--brand);
+  }
+  
+  .nav-tabs {
+    display: none !important;
+  }
+  
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px;
+    width: 100%;
+  }
+
+  .auth-page {
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+  }
+
+  .auth-panel {
+    background: #fff;
+    padding: 48px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    max-width: 480px;
+  }
+
+  .featured-book {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .cover-stage {
+    margin: 0;
+  }
+
+  .featured-cover {
+    max-width: 100%;
+  }
+
+  .community-leaders .leader-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  .auth-alt-link {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
+
+/* --- PREMIUM VISUAL ENHANCEMENTS --- */
+
+/* 1. Ambient Themes */
+.reader-shell.midnight-gold {
+  background: #111112 !important;
+  color: #efe9dc !important;
+}
+.reader-shell.midnight-gold .reader-topbar {
+  background: rgba(17, 17, 18, 0.94) !important;
+  border-bottom: 1px solid #c99d42 !important;
+  backdrop-filter: blur(14px);
+}
+.reader-shell.midnight-gold .reader-title h1,
+.reader-shell.midnight-gold .reader-body h2,
+.reader-shell.midnight-gold .reader-body .eyebrow {
+  color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .reader-command {
+  color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .reader-command:hover {
+  background: rgba(201, 157, 66, 0.1) !important;
+}
+.reader-shell.midnight-gold .settings-drawer {
+  background: #19191c !important;
+  border: 1px solid #c99d42 !important;
+  color: #efe9dc !important;
+}
+.reader-shell.midnight-gold .settings-drawer label {
+  color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .settings-drawer select,
+.reader-shell.midnight-gold .settings-drawer input[type="range"] {
+  border-color: #c99d42 !important;
+  background: #111112 !important;
+  color: #efe9dc !important;
+}
+
+.reader-shell.royal-forest {
+  background: #0b170f !important;
+  color: #f2eade !important;
+}
+.reader-shell.royal-forest .reader-topbar {
+  background: rgba(11, 23, 15, 0.94) !important;
+  border-bottom: 1px solid #3c5e47 !important;
+  backdrop-filter: blur(14px);
+}
+.reader-shell.royal-forest .reader-title h1,
+.reader-shell.royal-forest .reader-body h2,
+.reader-shell.royal-forest .reader-body .eyebrow {
+  color: #b3d2b2 !important;
+}
+.reader-shell.royal-forest .reader-command {
+  color: #b3d2b2 !important;
+}
+.reader-shell.royal-forest .reader-command:hover {
+  background: rgba(179, 210, 178, 0.1) !important;
+}
+.reader-shell.royal-forest .settings-drawer {
+  background: #14281a !important;
+  border: 1px solid #3c5e47 !important;
+  color: #f2eade !important;
+}
+.reader-shell.royal-forest .settings-drawer label {
+  color: #b3d2b2 !important;
+}
+.reader-shell.royal-forest .settings-drawer select,
+.reader-shell.royal-forest .settings-drawer input[type="range"] {
+  border-color: #3c5e47 !important;
+  background: #0b170f !important;
+  color: #f2eade !important;
+}
+
+/* 2. 3D Tilt Cover Effect */
+.cover-3d-wrap {
+  perspective: 1000px;
+  display: inline-block;
+  cursor: pointer;
+}
+.cover-3d {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.cover-3d:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 3. Glossary Sidebar Drawer */
+.glossary-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(420px, 100vw);
+  height: 100vh;
+  z-index: 120;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+.glossary-drawer.is-open {
+  transform: translateX(0);
+}
+.glossary-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.glossary-header h2 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  color: var(--brand);
+}
+.glossary-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+.glossary-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.glossary-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--panel-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.glossary-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.glossary-avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  font-family: "Playfair Display", serif;
+}
+.glossary-card-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--brand);
+}
+.glossary-card-info span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.glossary-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* Midnight Gold & Royal Forest Glossary integrations */
+.reader-shell.midnight-gold .glossary-drawer {
+  background: #19191c !important;
+  border-left-color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .glossary-header h2,
+.reader-shell.midnight-gold .glossary-card-info h3 {
+  color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .glossary-card {
+  background: #232328 !important;
+  border-color: #3e3e46 !important;
+}
+.reader-shell.midnight-gold .glossary-card p {
+  color: #efe9dc !important;
+}
+
+.reader-shell.royal-forest .glossary-drawer {
+  background: #14281a !important;
+  border-left-color: #3c5e47 !important;
+}
+.reader-shell.royal-forest .glossary-header h2,
+.reader-shell.royal-forest .glossary-card-info h3 {
+  color: #b3d2b2 !important;
+}
+.reader-shell.royal-forest .glossary-card {
+  background: #1c3524 !important;
+  border-color: #2b4f38 !important;
+}
+.reader-shell.royal-forest .glossary-card p {
+  color: #f2eade !important;
+}
+
+/* 4. Insta-Quote Card Generator */
+.quote-card-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 99;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.quote-card-box {
+  width: min(480px, 100%);
+  background: #fffdf8;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+.quote-card-preview {
+  aspect-ratio: 1;
+  padding: 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #48006e, #2b0044);
+  color: #ffffff;
+  overflow: hidden;
+}
+.quote-card-preview::before {
+  content: '"';
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 8rem;
+  font-family: Georgia, serif;
+  opacity: 0.15;
+  color: #c99d42;
+  line-height: 1;
+}
+.quote-card-text {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  line-height: 1.5;
+  font-style: italic;
+  z-index: 2;
+  margin-bottom: 20px;
+  position: relative;
+}
+.quote-card-attribution {
+  font-family: Outfit, sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #c99d42;
+  z-index: 2;
+}
+.quote-card-watermark {
+  position: absolute;
+  bottom: 16px;
+  font-family: Outfit, sans-serif;
+  font-size: 0.7rem;
+  opacity: 0.4;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.quote-card-actions {
+  padding: 20px;
+  display: flex;
+  gap: 12px;
+  background: #ffffff;
+  border-top: 1px solid #e2d6ca;
+}
+.quote-card-actions button {
+  flex: 1;
+}
+.floating-quote-btn {
+  position: fixed;
+  z-index: 98;
+  background: #c99d42;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-family: Outfit, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 20px rgba(201, 157, 66, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: auto;
+}
+.floating-quote-btn:hover {
+  transform: scale(1.05);
+}
+
+.reader-shell.midnight-gold .quote-card-box {
+  background: #19191c;
+  border: 1px solid #c99d42;
+}
+.reader-shell.midnight-gold .quote-card-actions {
+  background: #19191c;
+  border-top-color: #3e3e46;
+}
+
+/* Theme overrides for reader buttons */
+.reader-shell.midnight-gold .reader-btn {
+  border-color: #c99d42 !important;
+  color: #c99d42 !important;
+}
+.reader-shell.midnight-gold .reader-btn:hover {
+  background: rgba(201, 157, 66, 0.1) !important;
+}
+
+.reader-shell.royal-forest .reader-btn {
+  border-color: #3c5e47 !important;
+  color: #b3d2b2 !important;
+}
+.reader-shell.royal-forest .reader-btn:hover {
+  background: rgba(179, 210, 178, 0.1) !important;
+}
+
+
+
