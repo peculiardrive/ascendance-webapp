@@ -16,7 +16,7 @@ const BRAND_ASSETS = {
 };
 
 const NAV_TABS = [
-  ["community", "Community", "wallet"],
+  ["community", "Community", "community"],
   ["books", "Store", "store"],
   ["home", "Home", "home"],
   ["notices", "Gift", "gift"],
@@ -91,6 +91,16 @@ function Toast({ message }) {
 
 function NavIcon({ type }) {
   const icons = {
+    community: (
+      <>
+        <circle cx="12" cy="7" r="4" />
+        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+        <circle cx="6" cy="11" r="3" />
+        <path d="M2 21v-1a3 3 0 0 1 3-3h1" />
+        <circle cx="18" cy="11" r="3" />
+        <path d="M18 17h1a3 3 0 0 1 3 3v1" />
+      </>
+    ),
     wallet: (
       <>
         <path d="M4 7.5h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2Z" />
