@@ -4213,3 +4213,91 @@ textarea,
 .reader-body {
   padding-top: 140px !important; /* Clears the fixed topbar */
 }
+
+/* ==========================================
+   Desktop Navigation & Desktop View Polish
+   ========================================== */
+
+/* By default (on mobile), hide the desktop navigation */
+.desktop-nav {
+  display: none !important;
+}
+
+/* On screens 760px and wider (desktop breakpoint) */
+@media (min-width: 760px) {
+  /* Display desktop nav links in header */
+  .desktop-nav {
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  /* Style desktop nav buttons */
+  .desktop-nav-link {
+    background: transparent !important;
+    border: none !important;
+    color: var(--muted) !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    padding: 8px 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 20px !important;
+    text-decoration: none !important;
+    font-family: inherit !important;
+    line-height: 1.2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .desktop-nav-link:hover {
+    color: var(--brand) !important;
+    background: var(--brand-soft) !important;
+  }
+
+  .desktop-nav-link.is-active {
+    color: #ffffff !important;
+    background: var(--brand) !important;
+    font-weight: 800 !important;
+  }
+
+  /* Re-align the topbar for desktop flex display instead of layout-cluttering grid */
+  .topbar {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px 24px !important;
+    gap: 16px !important;
+  }
+
+  /* Hide the grid spacer element */
+  .topbar::before {
+    display: none !important;
+  }
+
+  /* Position logo to the left on desktop */
+  .brand-lockup {
+    flex: 0 0 auto !important;
+    width: 140px !important;
+    justify-self: start !important;
+    margin: 0 !important;
+  }
+
+  /* Hide mobile bottom nav tabs on desktop */
+  .nav-tabs {
+    display: none !important;
+  }
+
+  /* Remove bottom spacing from shell since tabs are hidden */
+  .shell {
+    padding-bottom: 0 !important;
+  }
+
+  /* Adjust home page scroll area bottom spacing on desktop */
+  .shell.view-home .main {
+    padding-bottom: 24px !important;
+  }
+}
+
