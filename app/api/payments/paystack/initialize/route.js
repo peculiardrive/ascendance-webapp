@@ -57,11 +57,19 @@ export async function POST(request) {
     const recipientEmail = String(payload.recipientEmail || "").toLowerCase().trim();
     if (product.productType === "gift-trilogy") {
       if (!recipientEmail) return json({ ok: false, error: "Recipient email is required." }, { status: 400 });
-      const purchaseCount = await prisma.purchase.count({
-        where: { userId, paymentStatus: "Successful" }
+      const ownsBook1OrTrilogy = await prisma.purchase.findFirst({
+        where: {
+          userId,
+          paymentStatus: "Successful",
+          OR: [
+            { productType: "trilogy" },
+            { productType: "gift-trilogy" },
+            { bookId: "book-1" }
+          ]
+        }
       });
-      if (!purchaseCount) {
-        return json({ ok: false, error: "Purchase at least one book before sending a gift." }, { status: 403 });
+      if (!ownsBook1OrTrilogy) {
+        return json({ ok: false, error: "You must purchase Book One or the Trilogy before you can send a gift." }, { status: 403 });
       }
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const recentGiftCount = await prisma.gift.count({

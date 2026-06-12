@@ -3,7 +3,11 @@ import "./globals.css";
 export const metadata = {
   title: "Ascendance - The Trilogy",
   description: "A premium PWA reading experience for Ascendance - The Trilogy.",
-  manifest: "/manifest.webmanifest"
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/assets/icon.svg",
+    apple: "/assets/icon.svg"
+  }
 };
 
 export const viewport = {

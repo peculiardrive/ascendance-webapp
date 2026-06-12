@@ -1,0 +1,392 @@
+diff --git a/app/page.jsx b/app/page.jsx
+index 7392bd1..69ffded 100644
+--- a/app/page.jsx
++++ b/app/page.jsx
+@@ -235,8 +235,10 @@ export default function Home() {
+           await refreshState();
+           if (!active) return;
+           setReady(true);
+-          setTimeout(() => {
+-            if (!active) return;
++          const onAdminRoute = window.location.pathname.startsWith("/admin");
++          const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
++
++          window.setTimeout(() => {
+             setSplashDone(true);
+             if (onAdminRoute) setView("admin");
+             else if (data.user?.onboardingStep === "done") setView(savedView);
+@@ -1183,6 +1185,13 @@ function AppShell({ children, view, setView }) {
+         <div className="brand-lockup">
+           <img src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
+         </div>
++        <nav className="desktop-nav">
++          {NAV_TABS.map(([key, label]) => (
++            <button key={key} className={`desktop-nav-link ${view === key ? "is-active" : ""}`} onClick={() => setView(key)}>
++              {label}
++            </button>
++          ))}
++        </nav>
+       </header>
+       <nav className="nav-tabs">
+         {NAV_TABS.map(([key, label, icon]) => (
+@@ -1247,6 +1256,46 @@ function LeaderList({ leaders, onSelect }) {
+   );
+ }
+ 
++function TiltCover({ src, alt, className = "" }) {
++  const cardRef = useRef(null);
++
++  const handleMouseMove = (e) => {
++    const card = cardRef.current;
++    if (!card) return;
++    const rect = card.getBoundingClientRect();
++    const x = e.clientX - rect.left;
++    const y = e.clientY - rect.top;
++    const centerX = rect.width / 2;
++    const centerY = rect.height / 2;
++    const rotateX = ((centerY - y) / centerY) * 15;
++    const rotateY = ((x - centerX) / centerX) * 15;
++    
++    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
++  };
++
++  const handleMouseLeave = () => {
++    const card = cardRef.current;
++    if (card) {
++      card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
++    }
++  };
++
++  return (
++    <div 
++      className="cover-3d-wrap"
++      onMouseMove={handleMouseMove}
++      onMouseLeave={handleMouseLeave}
++    >
++      <img 
++        ref={cardRef} 
++        src={src} 
++        alt={alt} 
++        className={`cover-3d ${className}`} 
++      />
++    </div>
++  );
++}
++
+ function HomeView({
+   books,
+   purchases,
+@@ -1282,7 +1331,7 @@ function HomeView({
+     <div className="home-screen">
+       <section className="featured-book" aria-labelledby="featured-book-title">
+         <div className="cover-stage">
+-          <img className="featured-cover" src={currentBook.cover} alt={`${currentBook.title} cover`} />
++          <TiltCover src={currentBook.cover} alt={`${currentBook.title} cover`} className="featured-cover" />
+           <button className="audio-drama-fab" onClick={playSummary} aria-label={`Listen to the summary of ${currentBook.title}`}>
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+@@ -1405,7 +1454,7 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
+             const continueChapter = flattenChapters([book]).find((item) => item.chapter.id === latestProgress?.chapterId) || first;
+             return (
+               <>
+-                <img src={book.cover} alt={`${book.title} cover`} className="store-cover" />
++                <TiltCover src={book.cover} alt={`${book.title} cover`} className="store-cover" />
+                 <div className="store-book-copy">
+                   <div className="store-book-topline">
+                     <span className="eyebrow">{book.subtitle}</span>
+@@ -1497,9 +1546,75 @@ function UnlockDialog({ book, onClose, onPurchase, onViewNotices }) {
+   );
+ }
+ 
++const GLOSSARY_CHARACTERS = [
++  {
++    name: "Elias",
++    role: "Protagonist",
++    bio: "A young, observant reader who discovers a forbidden warning and holds his mother's secret journal, setting off his journey into the mysteries of the inverted cross.",
++    avatar: "E"
++  },
++  {
++    name: "Ikenna",
++    role: "The Seeker",
++    bio: "A crucial figure in Book One whose mysterious fate the reader must uncover as he searches for truth beneath ordinary faith.",
++    avatar: "I"
++  },
++  {
++    name: "The Seagull",
++    role: "Hermit / Chronicler",
++    bio: "A mysterious author and chronicler of 'The Fall' (Book One, Section Two) who records hidden staircases and the secrets of the afraid.",
++    avatar: "S"
++  },
++  {
++    name: "Albatross",
++    role: "Guardian of the Fraternity",
++    bio: "The key author behind 'The Fraternity' (Book One, Section Three) who oversees the forbidden order's secret ceremonies and the witnesses who survive them.",
++    avatar: "A"
++  },
++  {
++    name: "Bloody Sniper",
++    role: "Merchant of the Ivory Towers",
++    bio: "A ruthless accounting master in the polished halls of influence, dealing in signatures, favors, and traded truths in 'The Fulcrum'.",
++    avatar: "B"
++  }
++];
++
+ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, onAutoScroll, onSpeak, onSave, onRead, onPurchase, purchases, user, onViewNotices }) {
+   const [settingsOpen, setSettingsOpen] = useState(false);
+   const [unlockOpen, setUnlockOpen] = useState(false);
++  const [glossaryOpen, setGlossaryOpen] = useState(false);
++  const [selectedText, setSelectedText] = useState("");
++  const [quotePosition, setQuotePosition] = useState(null);
++  const [showQuoteModal, setShowQuoteModal] = useState(false);
++
++  useEffect(() => {
++    const handleSelectionChange = () => {
++      const selection = window.getSelection();
++      const text = selection.toString().trim();
++      if (text && text.length > 5 && text.length < 200) {
++        try {
++          const range = selection.getRangeAt(0);
++          const rect = range.getBoundingClientRect();
++          if (rect.top !== 0 || rect.left !== 0) {
++            setQuotePosition({
++              top: rect.top + window.scrollY - 48,
++              left: rect.left + window.scrollX + rect.width / 2
++            });
++            setSelectedText(text);
++            return;
++          }
++        } catch (e) {}
++      }
++      if (!text) {
++        setQuotePosition(null);
++      }
++    };
++
++    document.addEventListener("selectionchange", handleSelectionChange);
++    return () => {
++      document.removeEventListener("selectionchange", handleSelectionChange);
++    };
++  }, []);
+   const index = chapters.findIndex((item) => item.chapter.id === activeChapter.chapter.id);
+   const prev = chapters[index - 1];
+   const next = chapters[index + 1];
+@@ -1528,6 +1643,9 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
+             <button className="reader-btn tts-btn" onClick={onSpeak}>
+               <span>TTS</span>
+             </button>
++            <button className="reader-btn glossary-btn" onClick={() => setGlossaryOpen(true)}>
++              <span>Glossary</span>
++            </button>
+             <button className="reader-btn save-btn" onClick={onSave}>
+               <span>Save</span>
+             </button>
+@@ -1559,9 +1677,9 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
+             <div style={{ display: 'grid', gap: '24px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <span style={{ fontWeight: 'bold' }}>Typography</span>
+-                <div style={{ display: 'flex', background: settings.theme === 'dark' ? '#333' : '#f1f1f1', borderRadius: '8px', padding: '4px' }}>
+-                  <button onClick={() => setSettings({ ...settings, font: 'Georgia' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font === 'Georgia' ? '#fff' : 'transparent', color: settings.font === 'Georgia' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Georgia, serif', cursor: 'pointer', boxShadow: settings.font === 'Georgia' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Serif</button>
+-                  <button onClick={() => setSettings({ ...settings, font: 'Inter' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font !== 'Georgia' ? '#fff' : 'transparent', color: settings.font !== 'Georgia' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Inter, sans-serif', cursor: 'pointer', boxShadow: settings.font !== 'Georgia' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Sans-serif</button>
++                <div style={{ display: 'flex', background: settings.theme === 'dark' || settings.theme === 'midnight-gold' || settings.theme === 'royal-forest' ? '#333' : '#f1f1f1', borderRadius: '8px', padding: '4px' }}>
++                  <button onClick={() => setSettings({ ...settings, font: 'Playfair Display' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '#fff' : 'transparent', color: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Playfair Display, Georgia, serif', cursor: 'pointer', boxShadow: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Serif</button>
++                  <button onClick={() => setSettings({ ...settings, font: 'Outfit' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font === 'Outfit' || settings.font === 'Inter' ? '#fff' : 'transparent', color: settings.font === 'Outfit' || settings.font === 'Inter' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Outfit, Inter, sans-serif', cursor: 'pointer', boxShadow: settings.font === 'Outfit' || settings.font === 'Inter' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Sans-serif</button>
+                 </div>
+               </div>
+ 
+@@ -1576,10 +1694,12 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
+ 
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <span style={{ fontWeight: 'bold' }}>Theme</span>
+-                <div style={{ display: 'flex', gap: '16px' }}>
+-                  <button onClick={() => setSettings({ ...settings, theme: 'light' })} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ffffff', border: settings.theme === 'light' ? '2px solid var(--app-purple)' : '1px solid #ccc', cursor: 'pointer' }} aria-label="Light"></button>
+-                  <button onClick={() => setSettings({ ...settings, theme: 'sepia' })} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f4ecd8', border: settings.theme === 'sepia' ? '2px solid var(--app-purple)' : '1px solid #ccc', cursor: 'pointer' }} aria-label="Sepia"></button>
+-                  <button onClick={() => setSettings({ ...settings, theme: 'dark' })} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#1c1c1e', border: settings.theme === 'dark' ? '2px solid var(--app-purple)' : '1px solid #555', cursor: 'pointer' }} aria-label="Dark"></button>
++                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
++                  <button onClick={() => setSettings({ ...settings, theme: 'light' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#ffffff', border: settings.theme === 'light' ? '2px solid var(--app-purple)' : '1px solid #ccc', cursor: 'pointer' }} aria-label="Light" title="Light"></button>
++                  <button onClick={() => setSettings({ ...settings, theme: 'sepia' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f4ecd8', border: settings.theme === 'sepia' ? '2px solid var(--app-purple)' : '1px solid #ccc', cursor: 'pointer' }} aria-label="Sepia" title="Sepia"></button>
++                  <button onClick={() => setSettings({ ...settings, theme: 'dark' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1c1c1e', border: settings.theme === 'dark' ? '2px solid var(--app-purple)' : '1px solid #555', cursor: 'pointer' }} aria-label="Dark" title="Dark"></button>
++                  <button onClick={() => setSettings({ ...settings, theme: 'midnight-gold' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#19191c', border: settings.theme === 'midnight-gold' ? '2px solid #c99d42' : '1px solid #555', cursor: 'pointer' }} aria-label="Midnight Gold" title="Midnight Gold"></button>
++                  <button onClick={() => setSettings({ ...settings, theme: 'royal-forest' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#14281a', border: settings.theme === 'royal-forest' ? '2px solid #3c5e47' : '1px solid #555', cursor: 'pointer' }} aria-label="Royal Forest" title="Royal Forest"></button>
+                 </div>
+               </div>
+ 
+@@ -1627,6 +1747,115 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
+         <button onClick={() => setSettingsOpen(true)} style={{ background: 'transparent', border: 'none', fontWeight: 'bold', fontSize: '1.2rem', color: settings.theme === 'dark' ? '#fff' : '#111', cursor: 'pointer' }}>Aa</button>
+       </div>
+       {unlockOpen ? <UnlockDialog book={next?.book || activeChapter.book} onClose={() => setUnlockOpen(false)} onPurchase={onPurchase} onViewNotices={onViewNotices} /> : null}
++
++      {/* 3. Glossary Drawer */}
++      {glossaryOpen && (
++        <div 
++          style={{
++            position: 'fixed',
++            inset: 0,
++            background: 'rgba(0,0,0,0.5)',
++            zIndex: 115
++          }}
++          onClick={() => setGlossaryOpen(false)}
++        />
++      )}
++      <aside className={`glossary-drawer ${glossaryOpen ? "is-open" : ""}`} aria-label="Character Glossary">
++        <div className="glossary-header">
++          <h2>Glossary & Lore</h2>
++          <button className="glossary-close" onClick={() => setGlossaryOpen(false)} aria-label="Close glossary">??</button>
++        </div>
++        <div className="glossary-content">
++          {GLOSSARY_CHARACTERS.map((char) => (
++            <div className="glossary-card" key={char.name}>
++              <div className="glossary-card-top">
++                <div className="glossary-avatar-circle">{char.avatar}</div>
++                <div className="glossary-card-info">
++                  <h3>{char.name}</h3>
++                  <span>{char.role}</span>
++                </div>
++              </div>
++              <p>{char.bio}</p>
++            </div>
++          ))}
++        </div>
++      </aside>
++
++      {/* 4. Quote Card Sharing Overlay */}
++      {quotePosition && (
++        <button 
++          className="floating-quote-btn"
++          style={{ 
++            top: `${quotePosition.top}px`, 
++            left: `${quotePosition.left}px`,
++            transform: 'translate(-50%, -100%)' 
++          }}
++          onClick={() => {
++            setShowQuoteModal(true);
++            setQuotePosition(null);
++          }}
++        >
++          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
++            <circle cx="18" cy="5" r="3" />
++            <circle cx="6" cy="12" r="3" />
++            <circle cx="18" cy="19" r="3" />
++            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
++            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
++          </svg>
++          Share Quote
++        </button>
++      )}
++
++      {showQuoteModal && (
++        <div className="quote-card-overlay" onMouseDown={() => setShowQuoteModal(false)}>
++          <div className="quote-card-box" onMouseDown={(e) => e.stopPropagation()}>
++            <div className="quote-card-preview">
++              <div className="quote-card-text">
++                ???{selectedText}???
++              </div>
++              <div className="quote-card-attribution">
++                ??? {activeChapter.book.title}
++              </div>
++              <div className="quote-card-watermark">
++                Ascendance: The Trilogy
++              </div>
++            </div>
++            <div className="quote-card-actions">
++              <button 
++                className="ghost-btn" 
++                onClick={() => {
++                  navigator.clipboard.writeText(`???${selectedText}??? ??? ${activeChapter.book.title} (Ascendance)`).then(() => {
++                    alert("Quote copied to clipboard!");
++                  });
++                }}
++              >
++                Copy
++              </button>
++              <button 
++                className="primary-btn" 
++                onClick={() => {
++                  if (navigator.share) {
++                    navigator.share({
++                      title: "Ascendance Quote",
++                      text: `???${selectedText}??? ??? ${activeChapter.book.title}`,
++                      url: window.location.origin
++                    });
++                  } else {
++                    alert("Sharing is not supported on this browser. Text copied!");
++                    navigator.clipboard.writeText(`???${selectedText}??? ??? ${activeChapter.book.title}`);
++                  }
++                  setShowQuoteModal(false);
++                }}
++              >
++                Share
++              </button>
++              <button className="ghost-btn" onClick={() => setShowQuoteModal(false)}>
++                Cancel
++              </button>
++            </div>
++          </div>
++        </div>
++      )}
+     </div>
+   );
+ }
+@@ -1727,9 +1956,6 @@ function CommunityView({
+             <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back">
+               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+             </button>
+-            {surface === "compose" ? (
+-              <button form="compose-form" type="submit" style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontWeight: "bold", fontSize: "1rem", cursor: "pointer", marginLeft: "12px" }}>Post</button>
+-            ) : null}
+             {surface === "history" ? (
+               <select value={historyType} onChange={(e) => setHistoryType(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: 'var(--app-purple)', color: 'white', fontWeight: 'bold' }}>
+                 <option value="posts">Posts ???</option>
+@@ -1783,7 +2009,7 @@ function CommunityView({
+               ))}
+             </div>
+           </div>
+-          <button onClick={() => setSurface("compose")} aria-label="Write a review" style={{ position: 'fixed', bottom: '80px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--app-purple) 0%, #7e22ce 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 8px 24px rgba(74, 14, 78, 0.3)', cursor: 'pointer', zIndex: 100 }}>
++          <button onClick={() => setComposerOpen(true)} aria-label="Write a review" style={{ position: 'fixed', bottom: '80px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--app-purple) 0%, #7e22ce 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 8px 24px rgba(74, 14, 78, 0.3)', cursor: 'pointer', zIndex: 100 }}>
+             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+           </button>
+         </>
+@@ -1891,22 +2117,29 @@ function CommunityView({
+         </section>
+       ) : null}
+ 
+-      {surface === "compose" ? (
+-        <section className="compose-screen" style={{ marginTop: '24px' }}>
+-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--app-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '2rem', fontFamily: 'Georgia, serif', lineHeight: 1 }}>
+-              ???
++      {composerOpen ? (
++        <div className="modal-backdrop" role="presentation" onMouseDown={() => setComposerOpen(false)} style={{ animation: 'fadeIn 0.3s ease-out' }}>
++          <section className="review-composer" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()} style={{ display: 'grid', gap: '20px', position: 'relative' }}>
++            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
++              <h2 style={{ color: 'var(--app-purple)', margin: 0, fontSize: '1.5rem', fontFamily: 'Georgia, serif' }}>Write a Review</h2>
++              <button className="circle-icon-btn" onClick={() => setComposerOpen(false)} aria-label="Close" type="button" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)' }}>
++                <svg viewBox="0 0 24 24" style={{ width: '24px', height: '24px' }}><path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
++              </button>
+             </div>
+-          </div>
+-          <form id="compose-form" className="review-composer" onSubmit={submitReview} style={{ display: 'grid', gap: '20px' }}>
+-            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Title
+-              <input name="title" maxLength={30} placeholder="What is the headline?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', fontSize: '1rem', outline: 'none' }} />
+-            </label>
+-            <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Review
+-              <textarea name="review" maxLength={250} placeholder="What is your experience?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', minHeight: '160px', fontSize: '1rem', resize: 'vertical', outline: 'none' }} />
+-            </label>
+-          </form>
+-        </section>
++            <form id="compose-form" onSubmit={submitReview} style={{ display: 'grid', gap: '20px' }}>
++              <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Title
++                <input name="title" maxLength={30} placeholder="What is the headline?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--app-line, rgba(0,0,0,0.1))', background: 'transparent', fontSize: '1rem', outline: 'none', color: 'var(--ink)' }} />
++              </label>
++              <label style={{ display: 'grid', gap: '8px', color: 'var(--app-purple)', fontWeight: 'bold' }}>Review
++                <textarea name="review" maxLength={250} placeholder="What is your experience?" required style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--app-line, rgba(0,0,0,0.1))', background: 'transparent', minHeight: '160px', fontSize: '1rem', resize: 'vertical', outline: 'none', color: 'var(--ink)' }} />
++              </label>
++              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
++                <button type="button" onClick={() => setComposerOpen(false)} style={{ padding: '10px 20px', borderRadius: '100px', border: '1px solid var(--app-line, rgba(0,0,0,0.15))', background: 'transparent', color: 'var(--ink)', fontWeight: '600', cursor: 'pointer', fontSize: '0.95rem' }}>Cancel</button>
++                <button type="submit" style={{ padding: '10px 24px', borderRadius: '100px', border: 'none', background: 'var(--app-purple)', color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 12px rgba(74, 14, 78, 0.2)' }}>Publish</button>
++              </div>
++            </form>
++          </section>
++        </div>
+       ) : null}
+ 
+       {surface === "sort" ? (

@@ -39,7 +39,7 @@ const defaultState = {
     bookTwoPrice: 4882,
     bookThreePrice: 4882,
     trilogyPrice: 8962,
-    giftPrice: 4882,
+    giftPrice: 6242,
     giftLimit: 5
   },
   readerSettings: {},
@@ -506,8 +506,11 @@ async function handleApi(request, response) {
         sendJson(response, 403, { ok: false, error: "Only verified readers can send gifts." });
         return true;
       }
-      if (!currentUserPurchases(state, userId).length) {
-        sendJson(response, 403, { ok: false, error: "Reader must purchase at least one book before gifting." });
+      const ownsBook1OrTrilogy = currentUserPurchases(state, userId).some((p) =>
+        p.productType === "trilogy" || p.productType === "gift-trilogy" || p.bookId === "book-1"
+      );
+      if (!ownsBook1OrTrilogy) {
+        sendJson(response, 403, { ok: false, error: "You must purchase Book One or the Trilogy before you can send a gift." });
         return true;
       }
       const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ascendance app icon">
+  <defs>
+    <linearGradient id="g" x1="72" y1="48" x2="440" y2="464" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6cf6b"/>
+      <stop offset="0.5" stop-color="#b01834"/>
+      <stop offset="1" stop-color="#151116"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#121014"/>
+  <path d="M112 402 236 92h42l122 310h-72l-24-66H210l-24 66h-74Zm118-122h54l-27-78-27 78Z" fill="url(#g)"/>
+  <path d="M180 414h152" stroke="#f4e6c4" stroke-width="22" stroke-linecap="round"/>
+</svg>

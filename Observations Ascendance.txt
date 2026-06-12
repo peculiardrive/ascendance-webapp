@@ -1,0 +1,51 @@
+Obserations
+
+1. Splash screen Make Title centered vertically on the page. Presented By and BrandZilla... are perfectly sized and positioned. 
+
+2. Login Page Please remove box around Forgot Password and Create Profile (making the page heavy). Let them stay as underlined buttons exact where they are.
+
+3. Home Page (with image of Book), Title and Footer should be fixed in the Home Page, so it doesn't move when page is scrolled. All other pages are okay, except the Home Page. 
+Home Page 
+i. Centralize the book cover horizontally (along x-axis) this will require 
+ii. Reducing size of audio button and shifting it a bit to right (please make space between book edge and screen edge equal). 
+Also move the reduced audio button to middle, let it sit next to the book at the middle (y-axis) of the book's height.
+Let button start/stop play.
+iii. View All text button. Make the button sit on one line only.
+
+4. Book Summary.
+This content cannot be read. The popup needs a background frame. The dark transparent cover is okay, but the text area that has the buttons Listen and Stop requires a white box to make the text visible.
+
+5. Book Reader Page.
+Love that we replaced the Title with control buttons. 
+i. Can we make this control plate fixed, so it doesn't vanish when Reader scrolls up. This is necessary so Reader can see Chapter title changing when they tap on Next or Previous button. 
+ii. Switch the Placement of Chapter | Chapter Description - Make Chapter display where we have Description now, so the description will show in its place e.g.
+- The Formation 
+- Chapter One
+So that The Book Description (The Formation) stays same through Chapter 1 to 14 in Disciples of the Inverted Cross.> Header Description will have 
+- Disciples of the Inverted Cross
+- Reading: The Formation - Chapter 1
+
+iii. Since Settings button is same function as AA button, let us remove Settings button. Keep all buttons (TTS, Glossary and Save) the way they are. 
+iv. Audio autoplay is not necessary if it's for the audio drama. Replace this with Auto-scroll switch.
+v. Auto-scroll speed slider is missing in the Reader Settings popup up menu. Please add it back.
+vi. What is Page Turning Layout?
+
+6. Community Page.
+History Page.
+I. Please check the font Size of History and Notifications it's bigger than Community 
+Please let the back button be removed from current placement, it's not looking professional. We can 1. use an Arrow button above History in upper left position or 2. a Back box at lower left above the Footer late (just like Previous button in Reader page), 3. Move Posts/Comments button next to History (Page Title so Back can be on extreme right), But I prefer #1 or 2. any one but this.
+ii. Information button on Community Page (i), use the same dark transparency over the page and white box to show instruction text when (i) is tapped. 
+
+7. Help. At the Footer, 
+i. Change this button to Gift. 
+ii. Let us make the price $4.59. 
+Please remember that only Reader who unlocked the first book (Disciples of the Inverted Cross) or paid for the Trilogy can send a Gift. 
+iii. Please update this also in Paystack.
+- I thought about it that people may want to exploit the price difference to Gift the book to themselves, rather than pay 6.59, they'll gift to self with an alternate email for 3.59.
+- But this logic of buying first book checks that (2.59 + 4.59) = $7.18 (as against 3.59, if they do not need to buy first book or 6.18, if Gift is 3.59) So, this Gift Price encourages Trilogy purchase, which is the decision we want them to take.
+
+8. Store.
+Please remove the text Description for the book above the names, e.g. Book One: The Formation. That is wrong Description, Disciples of the Inverted Cross has 3 Books (Parts) - The Formation, The Fall and The Fraternity. 
+
+Correction in Price display p…
+Please, it's important they unlock First book or trilogy once before they can send Gift. So when they tap on Send gift, system checks db to be be sure they have purchased (unlocked book) before permitting user to send gift.

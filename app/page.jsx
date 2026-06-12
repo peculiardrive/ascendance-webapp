@@ -19,7 +19,7 @@ const NAV_TABS = [
   ["community", "Community", "wallet"],
   ["books", "Store", "store"],
   ["home", "Home", "home"],
-  ["notices", "Help", "help"],
+  ["notices", "Gift", "gift"],
   ["profile", "Profile", "profile"]
 ];
 
@@ -112,6 +112,15 @@ function NavIcon({ type }) {
         <path d="M10 21v-6h4v6" />
       </>
     ),
+    gift: (
+      <>
+        <path d="M20 12v10H4V12" />
+        <path d="M2 7h20v5H2z" />
+        <line x1="12" y1="22" x2="12" y2="7" />
+        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+      </>
+    ),
     help: (
       <>
         <path d="M4 5h10a4 4 0 0 1 4 4v9H8a4 4 0 0 1-4-4V5Z" />
@@ -154,6 +163,7 @@ function InfoIcon() {
 
 export default function Home() {
   const [ready, setReady] = useState(false);
+  const [splashFade, setSplashFade] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
   const [view, setView] = useState("auth");
@@ -180,7 +190,8 @@ export default function Home() {
     line: 1.72,
     theme: "light",
     align: "left",
-    scrollSpeed: 2
+    scrollSpeed: 2,
+    autoScrollEnabled: false
   });
   const autoScrollRef = useRef(null);
 
@@ -208,6 +219,7 @@ export default function Home() {
             onboardingStep: "done"
           });
           setReady(true);
+          setSplashFade(true);
           setSplashDone(true);
           setView(previewView);
           return;
@@ -239,15 +251,20 @@ export default function Home() {
           const savedView = localStorage.getItem(LAST_VIEW_KEY) || "home";
 
           window.setTimeout(() => {
-            setSplashDone(true);
+            setSplashFade(true);
             if (onAdminRoute) setView("admin");
             else if (data.user?.onboardingStep === "done") setView(savedView);
             else setShowTrailer(true);
-          }, 1300);
+
+            window.setTimeout(() => {
+              setSplashDone(true);
+            }, 520);
+          }, 450);
         } catch (error) {
           console.error("Auth session fetch failed:", error);
           if (!active) return;
           setReady(true);
+          setSplashFade(true);
           setSplashDone(true);
           setShowTrailer(true);
         }
@@ -255,6 +272,7 @@ export default function Home() {
         console.error("Fatal bootstrap error:", fatalError);
         if (!active) return;
         setReady(true);
+        setSplashFade(true);
         setSplashDone(true);
         setShowTrailer(true);
       }
@@ -601,6 +619,9 @@ export default function Home() {
   }
 
   async function sendGift(formData) {
+    if (!ownsBook(user?.id, purchases, "book-1")) {
+      return notify("You must purchase Book One or the Trilogy before you can send a gift.");
+    }
     const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -668,17 +689,36 @@ export default function Home() {
     await refreshState();
   }
 
-  function toggleAutoScroll() {
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
-      autoScrollRef.current = null;
-      notify("Auto-scroll paused.");
-      return;
+  useEffect(() => {
+    if (readerSettings.autoScrollEnabled) {
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
+      }
+      autoScrollRef.current = setInterval(() => {
+        const el = document.querySelector(".reader-shell");
+        if (el) {
+          el.scrollBy({ top: readerSettings.scrollSpeed || 2, behavior: "auto" });
+        }
+      }, 40);
+    } else {
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
+        autoScrollRef.current = null;
+      }
     }
-    autoScrollRef.current = setInterval(() => {
-      window.scrollBy({ top: readerSettings.scrollSpeed, behavior: "smooth" });
-    }, 55);
-    notify("Auto-scroll started.");
+    return () => {
+      if (autoScrollRef.current) {
+        clearInterval(autoScrollRef.current);
+      }
+    };
+  }, [readerSettings.scrollSpeed, readerSettings.autoScrollEnabled]);
+
+  function toggleAutoScroll() {
+    setReaderSettings(prev => {
+      const nextEnabled = !prev.autoScrollEnabled;
+      notify(nextEnabled ? "Auto-scroll started." : "Auto-scroll paused.");
+      return { ...prev, autoScrollEnabled: nextEnabled };
+    });
   }
 
   function speakActiveChapter() {
@@ -720,7 +760,7 @@ export default function Home() {
 
   return (
     <>
-      {!splashDone ? <Splash /> : null}
+      {!splashDone ? <Splash hidden={splashFade} /> : null}
       {showTrailer && (!user || !isOnboarded) ? (
         <TrailerIntro onEnter={(shouldPlay) => { setAutoplayAudio(shouldPlay); setShowTrailer(false); setView("auth"); }} />
       ) : !user || !isOnboarded ? (
@@ -1180,7 +1220,7 @@ function AudioPlayer({ autoplay }) {
 
 function AppShell({ children, view, setView }) {
   return (
-    <div className={`shell ${view === "reader" ? "is-reading" : ""}`}>
+    <div className={`shell ${view === "reader" ? "is-reading" : ""} view-${view}`}>
       <header className="topbar" aria-label="Ascendance">
         <div className="brand-lockup">
           <img src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
@@ -1310,6 +1350,7 @@ function HomeView({
   onViewLeaderboard
 }) {
   const [showSummary, setShowSummary] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const ownedBooks = books.filter((book) => ownsBook(user?.id, purchases, book.id));
   const currentBook = ownedBooks.at(-1) || books[0];
   const firstChapter = flattenChapters([currentBook])[0];
@@ -1319,12 +1360,32 @@ function HomeView({
 
   const leaders = getCommunityLeaders(posts).slice(0, 5);
 
-  function playSummary() {
+  useEffect(() => {
+    return () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  function togglePlaySummary() {
     if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(currentBook.blurb);
-    speech.rate = 0.95;
-    window.speechSynthesis.speak(speech);
+    if (isAudioPlaying) {
+      window.speechSynthesis.cancel();
+      setIsAudioPlaying(false);
+    } else {
+      window.speechSynthesis.cancel();
+      const speech = new SpeechSynthesisUtterance(currentBook.blurb);
+      speech.rate = 0.95;
+      speech.onend = () => {
+        setIsAudioPlaying(false);
+      };
+      speech.onerror = () => {
+        setIsAudioPlaying(false);
+      };
+      window.speechSynthesis.speak(speech);
+      setIsAudioPlaying(true);
+    }
   }
 
   return (
@@ -1332,12 +1393,18 @@ function HomeView({
       <section className="featured-book" aria-labelledby="featured-book-title">
         <div className="cover-stage">
           <TiltCover src={currentBook.cover} alt={`${currentBook.title} cover`} className="featured-cover" />
-          <button className="audio-drama-fab" onClick={playSummary} aria-label={`Listen to the summary of ${currentBook.title}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-            </svg>
+          <button className="audio-drama-fab" onClick={togglePlaySummary} aria-label={isAudioPlaying ? "Stop listening to the summary" : `Listen to the summary of ${currentBook.title}`}>
+            {isAudioPlaying ? (
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+            )}
           </button>
         </div>
         <div className="featured-copy">
@@ -1364,7 +1431,7 @@ function HomeView({
               <p style={{ margin: '4px 0 0', fontSize: "0.85rem", color: "var(--muted)" }}>Readers making the biggest contribution this week</p>
             </div>
           </div>
-          <button onClick={onViewLeaderboard} style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer", padding: 0 }}>
+          <button onClick={onViewLeaderboard} style={{ background: "transparent", border: "none", color: "var(--app-purple)", fontSize: "0.85rem", fontWeight: "bold", cursor: "pointer", padding: 0, whiteSpace: "nowrap", flexShrink: 0 }}>
             View All
           </button>
         </div>
@@ -1372,19 +1439,19 @@ function HomeView({
       </section>
 
       {showSummary && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); window.speechSynthesis?.cancel(); }}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }}>
           <div className="modal-card" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()} style={{ padding: "24px", display: "grid", gap: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h2 style={{ margin: 0, fontSize: "1.4rem", color: "var(--brand)" }}>Book Summary</h2>
-              <button className="modal-close" onClick={() => { setShowSummary(false); window.speechSynthesis?.cancel(); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
+              <button className="modal-close" onClick={() => { setShowSummary(false); window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{currentBook.title}</h3>
             <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6 }}>{currentBook.blurb}</p>
             <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
-              <button className="primary-btn" onClick={playSummary} style={{ flex: 1 }}>
-                Listen (TTS)
+              <button className="primary-btn" onClick={togglePlaySummary} style={{ flex: 1 }}>
+                {isAudioPlaying ? "Stop (TTS)" : "Listen (TTS)"}
               </button>
-              <button className="ghost-btn" onClick={() => window.speechSynthesis?.cancel()} style={{ flex: 1 }}>
+              <button className="ghost-btn" onClick={() => { window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }} style={{ flex: 1 }}>
                 Stop
               </button>
             </div>
@@ -1408,7 +1475,6 @@ function BookCard({ book, user, purchases, progress, onRead, onPurchase }) {
       <img src={book.cover} alt={`${book.title} cover`} />
       <div className="book-card-body">
         <div className="chapter-meta">
-          <span>{book.subtitle}</span>
           <span>{owned ? "Unlocked" : preview ? "Preview" : "Locked"}</span>
           <ReaderPrice usdAmount={usdBookPrice(book)} />
         </div>
@@ -1457,7 +1523,6 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
                 <TiltCover src={book.cover} alt={`${book.title} cover`} className="store-cover" />
                 <div className="store-book-copy">
                   <div className="store-book-topline">
-                    <span className="eyebrow">{book.subtitle}</span>
                     <ReaderPrice usdAmount={usdBookPrice(book)} />
                   </div>
                   <h2>{book.title}</h2>
@@ -1571,7 +1636,7 @@ const GLOSSARY_CHARACTERS = [
     bio: "The key author behind 'The Fraternity' (Book One, Section Three) who oversees the forbidden order's secret ceremonies and the witnesses who survive them.",
     avatar: "A"
   },
-  {
+{
     name: "Bloody Sniper",
     role: "Merchant of the Ivory Towers",
     bio: "A ruthless accounting master in the polished halls of influence, dealing in signatures, favors, and traded truths in 'The Fulcrum'.",
@@ -1586,6 +1651,13 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
   const [selectedText, setSelectedText] = useState("");
   const [quotePosition, setQuotePosition] = useState(null);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+
+  useEffect(() => {
+    const el = document.querySelector(".reader-shell");
+    if (el) {
+      el.scrollTop = 0;
+    }
+  }, [activeChapter]);
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -1660,7 +1732,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
         <div className="reader-topbar-row-2">
           <div className="reader-meta-info">
             <h1>{activeChapter.book.title}</h1>
-            <span>Reading: {activeChapter.chapter.title} - {activeChapter.chapter.subtitle}</span>
+            <span>Reading: {activeChapter.section.title} - {activeChapter.chapter.title}</span>
           </div>
         </div>
       </header>
@@ -1704,17 +1776,19 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold' }}>Page turning layout</span>
+                <span style={{ fontWeight: 'bold' }}>Auto-scroll</span>
                 <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <input type="checkbox" style={{ appearance: 'none', width: '44px', height: '24px', background: '#ccc', borderRadius: '12px', position: 'relative', transition: '0.3s' }} className="toggle-switch" />
+                  <input type="checkbox" checked={settings.autoScrollEnabled || false} onChange={onAutoScroll} style={{ appearance: 'none', width: '44px', height: '24px', background: settings.autoScrollEnabled ? 'var(--app-purple)' : '#ccc', borderRadius: '12px', position: 'relative', transition: '0.3s', outline: 'none' }} className="toggle-switch active-purple" />
                 </label>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold' }}>Audio auto-play</span>
-                <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={settings.autoplay} onChange={(e) => setSettings({ ...settings, autoplay: e.target.checked })} style={{ appearance: 'none', width: '44px', height: '24px', background: settings.autoplay ? 'var(--app-purple)' : '#ccc', borderRadius: '12px', position: 'relative', transition: '0.3s' }} className="toggle-switch active-purple" />
-                </label>
+              <div>
+                <span style={{ fontWeight: 'bold', display: 'block', marginBottom: '12px' }}>Auto-scroll Speed</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Slow</span>
+                  <input type="range" min="1" max="10" value={settings.scrollSpeed || 2} onChange={(event) => setSettings({ ...settings, scrollSpeed: Number(event.target.value) })} style={{ flex: 1, accentColor: 'var(--app-purple)' }} />
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Fast</span>
+                </div>
               </div>
             </div>
           </aside>
@@ -1722,8 +1796,8 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
       )}
       
       <article className="reader-body" style={{ fontFamily: settings.font, fontSize: settings.size, lineHeight: settings.line, textAlign: settings.align, paddingBottom: '100px' }}>
-        <p className="eyebrow">{activeChapter.chapter.title}</p>
-        <h2>{activeChapter.chapter.subtitle}</h2>
+        <p className="eyebrow">{activeChapter.section.title}</p>
+        <h2>{activeChapter.chapter.title} {activeChapter.chapter.subtitle ? `— ${activeChapter.chapter.subtitle}` : ""}</h2>
         <div 
           className="chapter-content-html"
           dangerouslySetInnerHTML={{ 
@@ -1881,6 +1955,7 @@ function CommunityView({
   const [historyType, setHistoryType] = useState("posts");
   const [query, setQueryState] = useState(initialQuery);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [showCommunityInfo, setShowCommunityInfo] = useState(false);
 
   const setSurface = (val) => {
     setSurfaceState(val);
@@ -1930,32 +2005,31 @@ function CommunityView({
 
   return (
     <div className="community-screen">
-      <header className="community-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
-        {surface === "feed" ? (
-          <>
-            <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0, fontSize: '1.8rem' }}>Community</h1>
-            <div className="topbar-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <button onClick={() => setSearchOpen(!searchOpen)} aria-label="Search" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              </button>
-              <button onClick={() => setSurface("notifications")} aria-label="Notifications" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"></path></svg>
-              </button>
-              <button onClick={() => setSurface("history")} aria-label="History" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              </button>
-            </div>
-          </>
-        ) : (
-          <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0 }}>
-            {surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
-          </h1>
-        )}
+      <header className="community-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 24px', background: 'transparent', position: 'relative' }}>
         {surface !== "feed" && (
-          <div className="community-tools">
-            <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back">
-              <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <button className="circle-icon-btn" onClick={() => { setSurface("feed"); setSelectedPost(null); }} aria-label="Back" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+        )}
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', margin: 0, fontSize: '1.8rem', textAlign: 'left' }}>
+            {surface === "feed" ? "Community" : surface === "notifications" ? "Notifications" : surface === "history" ? "History" : surface === "leaderboard" ? "Leaderboard" : surface === "compose" ? "Write a Review" : surface === "sort" ? "Update Feed" : surface === "review" ? "Reviews" : "Community"}
+          </h1>
+        </div>
+        {surface === "feed" ? (
+          <div className="topbar-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <button onClick={() => setSearchOpen(!searchOpen)} aria-label="Search" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
+            <button onClick={() => setSurface("notifications")} aria-label="Notifications" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"></path></svg>
+            </button>
+            <button onClick={() => setSurface("history")} aria-label="History" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', padding: '4px' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </button>
+          </div>
+        ) : (
+          <div className="community-tools" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {surface === "history" ? (
               <select value={historyType} onChange={(e) => setHistoryType(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: 'var(--app-purple)', color: 'white', fontWeight: 'bold' }}>
                 <option value="posts">Posts ▼</option>
@@ -1979,12 +2053,40 @@ function CommunityView({
                   <p style={{ margin: '4px 0 0', fontSize: "0.85rem", color: "var(--muted)" }}>Readers making the biggest contribution this week</p>
                 </div>
               </div>
-              <div style={{ color: 'var(--muted)', opacity: 0.7, cursor: 'pointer' }} onClick={() => setSurface("leaderboard")}>
+              <div style={{ color: 'var(--muted)', opacity: 0.7, cursor: 'pointer' }} onClick={() => setShowCommunityInfo(true)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
               </div>
             </div>
             <LeaderList leaders={getCommunityLeaders(posts)} onSelect={() => setSurface("leaderboard")} />
           </section>
+
+          {showCommunityInfo && (
+            <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowCommunityInfo(false)}>
+              <div className="modal-card" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()} style={{ display: "grid", gap: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h2 style={{ margin: 0, fontSize: "1.3rem", color: "var(--brand)", fontWeight: "bold" }}>Community Leaderboard</h2>
+                  <button className="modal-close" onClick={() => setShowCommunityInfo(false)} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
+                </div>
+                <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6, fontSize: "0.95rem" }}>
+                  The community leaderboard celebrates readers making the biggest contributions to the discussion this week.
+                </p>
+                <div style={{ display: "grid", gap: "12px", background: "rgba(0,0,0,0.02)", padding: "16px", borderRadius: "8px", border: "1px solid var(--line)" }}>
+                  <strong style={{ fontSize: "0.95rem" }}>How to earn points:</strong>
+                  <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "0.9rem", display: "grid", gap: "8px", color: "var(--ink)" }}>
+                    <li><strong>Write a review:</strong> +25 points</li>
+                    <li><strong>Receive a reply:</strong> +20 points per reply</li>
+                    <li><strong>Receive a like:</strong> +10 points per like</li>
+                  </ul>
+                </div>
+                <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.85rem" }}>
+                  The leaderboard resets weekly. Keep reading and sharing your thoughts to climb the ranks!
+                </p>
+                <button className="primary-btn" onClick={() => { setShowCommunityInfo(false); setSurface("leaderboard"); }} style={{ width: "100%" }}>
+                  View Leaderboard
+                </button>
+              </div>
+            </div>
+          )}
 
           <div style={{ padding: '0 12px' }}>
             <div className={`feed-toolbar ${searchOpen ? "has-search" : ""}`} style={{ marginTop: '24px', marginBottom: '16px' }}>
