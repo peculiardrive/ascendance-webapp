@@ -209,6 +209,20 @@ export default function Home() {
   const activeChapter = chapters.find((item) => item.chapter.id === activeChapterId) || chapters[0];
   const isOnboarded = user?.onboardingStep === "done";
 
+  // Reader-facing views always show only active (non-deleted) content,
+  // even when the admin session has loaded includeDeleted=true books.
+  const readerBooks = useMemo(() =>
+    books
+      .filter(b => !b.deleted)
+      .map(b => ({
+        ...b,
+        sections: (b.sections || [])
+          .filter(s => !s.deleted)
+          .map(s => ({ ...s, chapters: (s.chapters || []).filter(c => !c.deleted) }))
+      })),
+    [books]
+  );
+
   useEffect(() => {
     let active = true;
     async function bootstrap() {
@@ -789,7 +803,7 @@ export default function Home() {
         }}>
           {view === "home" && (
             <HomeView
-              books={books}
+              books={readerBooks}
               purchases={purchases}
               user={user}
               posts={posts}
@@ -811,7 +825,7 @@ export default function Home() {
             />
           )}
           {view === "books" && (
-            <BooksView books={books} purchases={purchases} user={user} progress={progress} onRead={openChapter} onPurchase={purchase} />
+            <BooksView books={readerBooks} purchases={purchases} user={user} progress={progress} onRead={openChapter} onPurchase={purchase} />
           )}
           {view === "reader" && (
             <ReaderView
