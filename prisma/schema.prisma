@@ -63,6 +63,7 @@ model Book {
   status             String            @default("Draft")
   freePreviewEnabled Boolean           @default(false) @map("free_preview_enabled")
   createdAt          DateTime          @default(now()) @map("created_at")
+  deletedAt          DateTime?         @map("deleted_at")
   chapters           Chapter[]
   communityPosts     CommunityPost[]
   purchases          Purchase[]
@@ -84,6 +85,7 @@ model Section {
   ttsEnabled      Boolean           @default(true) @map("tts_enabled")
   ttsVoice        String?           @map("tts_voice")
   createdAt       DateTime          @default(now()) @map("created_at")
+  deletedAt       DateTime?         @map("deleted_at")
   chapters        Chapter[]
   purchases       Purchase[]
   readingProgress ReadingProgress[]
@@ -106,6 +108,7 @@ model Chapter {
   status          String            @default("Draft")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
+  deletedAt       DateTime?         @map("deleted_at")
   book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
   section         Section?          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   readingProgress ReadingProgress[]

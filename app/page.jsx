@@ -215,6 +215,9 @@ export default function Home() {
       try {
         const onAdminRoute = window.location.pathname.startsWith("/admin");
         setAdminRoute(onAdminRoute);
+        if (typeof window !== "undefined") {
+          window.__confirmBypass = new URLSearchParams(window.location.search).get("confirmBypass") === "true";
+        }
         const previewView = process.env.NODE_ENV !== "production"
           ? new URLSearchParams(window.location.search).get("preview")
           : null;
@@ -254,7 +257,7 @@ export default function Home() {
           setUser(data.user || null);
           setAdmin(data.admin || null);
           setAdminTwoFactorPending(Boolean(data.adminChallengePending && !data.admin));
-          await refreshState();
+          await refreshState(Boolean(data.admin));
           if (!active) return;
           setReady(true);
           const onAdminRoute = window.location.pathname.startsWith("/admin");
@@ -339,9 +342,10 @@ export default function Home() {
     window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }, [ready, user?.id, isOnboarded]);
 
-  async function refreshState() {
+  async function refreshState(includeDeleted = false) {
+    const booksUrl = includeDeleted ? "/api/books?includeDeleted=true" : "/api/books";
     const [booksResponse, postsResponse, stateResponse] = await Promise.all([
-      fetch("/api/books"),
+      fetch(booksUrl),
       fetch("/api/community/posts"),
       fetch("/api/state")
     ]);
@@ -667,7 +671,7 @@ export default function Home() {
     setAdmin(data.admin);
     setAdminTwoFactorPending(false);
     notify("Admin login successful.");
-    await refreshState();
+    await refreshState(true);
   }
 
   async function verifyAdminTwoFactor(formData) {
@@ -681,14 +685,14 @@ export default function Home() {
     setAdmin(data.admin);
     setAdminTwoFactorPending(false);
     notify("Admin login successful.");
-    await refreshState();
+    await refreshState(true);
   }
 
   async function adminLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
     setAdmin(null);
     setAdminTwoFactorPending(false);
-    await refreshState();
+    await refreshState(false);
     notify("Admin logged out.");
   }
 
@@ -761,7 +765,7 @@ export default function Home() {
           onLogout={adminLogout}
           onModeratePost={moderatePost}
           onAdminReply={adminReply}
-          onRefresh={refreshState}
+          onRefresh={() => refreshState(true)}
         />
         <Toast message={toast} />
       </>
@@ -2582,11 +2586,35 @@ function RichTextEditor({ name, defaultValue, placeholder }) {
 function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModeratePost, onAdminReply, onRefresh }) {
   const [activeTab, setActiveTab] = useState("overview");
   const revenue = purchases.reduce((sum, purchase) => sum + Number(purchase.amount || 0), 0);
-  const [selectedBookId, setSelectedBookId] = useState(books[0]?.id || "");
-  const [selectedSectionId, setSelectedSectionId] = useState("");
   const [editingItem, setEditingItem] = useState(null);
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const activeBooks = useMemo(() => books.filter(b => !b.deleted), [books]);
+  const deletedBooks = useMemo(() => books.filter(b => b.deleted), [books]);
+  
+  const deletedSections = useMemo(() => {
+    return books.filter(b => !b.deleted).flatMap(b => 
+      (b.sections || []).filter(s => s.deleted).map(s => ({ ...s, bookTitle: b.title, bookId: b.id }))
+    );
+  }, [books]);
+
+  const deletedChapters = useMemo(() => {
+    return books.filter(b => !b.deleted).flatMap(b => 
+      (b.sections || []).filter(s => !s.deleted).flatMap(s => 
+        (s.chapters || []).filter(c => c.deleted).map(c => ({ ...c, sectionTitle: s.title, bookId: b.id, sectionId: s.id }))
+      )
+    );
+  }, [books]);
+
+  const [selectedBookId, setSelectedBookId] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
+
+  useEffect(() => {
+    if (activeBooks.length > 0 && !selectedBookId) {
+      setSelectedBookId(activeBooks[0].id);
+    }
+  }, [activeBooks, selectedBookId]);
 
   useEffect(() => {
     if (activeTab === "users" && users.length === 0) {
@@ -2605,20 +2633,88 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   }, [activeTab]);
 
   const handleDelete = async (type, id) => {
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    const label = type === 'section' ? 'series' : type;
+    const warningText = type === 'book' 
+      ? `Are you sure you want to delete this book? This will also soft-delete all series and chapters under it.`
+      : type === 'section'
+      ? `Are you sure you want to delete this series? This will also soft-delete all chapters under it.`
+      : `Are you sure you want to delete this chapter?`;
+      
+    if (typeof window !== "undefined" && !window.__confirmBypass && !window.confirm(warningText)) return;
     try {
-      const res = await fetch(`/api/admin/${type}s/${id}`, { method: "DELETE" });
-      if (res.ok) { onRefresh(); setEditingItem(null); } else { alert(await res.text()); }
-    } catch (e) { console.error(e); }
+      const endpointMap = {
+        book: `/api/admin/books/${id}`,
+        section: `/api/admin/sections/${id}`,
+        chapter: `/api/admin/chapters/${id}`
+      };
+      const res = await fetch(endpointMap[type], { method: "DELETE" });
+      if (res.ok) { 
+        onRefresh(); 
+        setEditingItem(null); 
+      } else { 
+        alert(await res.text()); 
+      }
+    } catch (e) { 
+      console.error(e); 
+    }
+  };
+
+  const handleRestore = async (type, id) => {
+    const label = type === 'section' ? 'series' : type;
+    if (typeof window !== "undefined" && !window.__confirmBypass && !window.confirm(`Are you sure you want to restore this ${label}?`)) return;
+    try {
+      const endpointMap = {
+        book: `/api/admin/books/${id}/restore`,
+        section: `/api/admin/sections/${id}/restore`,
+        chapter: `/api/admin/chapters/${id}/restore`
+      };
+      const res = await fetch(endpointMap[type], { method: "POST" });
+      if (res.ok) {
+        onRefresh();
+        setEditingItem(null);
+      } else {
+        alert(await res.text());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handlePermanentDelete = async (type, id) => {
+    const label = type === 'section' ? 'series' : type;
+    if (typeof window !== "undefined" && !window.__confirmBypass && !window.confirm(`WARNING: This will permanently delete this ${label} and all its nested content. This action CANNOT be undone. Are you sure you want to proceed?`)) return;
+    try {
+      const endpointMap = {
+        book: `/api/admin/books/${id}?permanent=true`,
+        section: `/api/admin/sections/${id}?permanent=true`,
+        chapter: `/api/admin/chapters/${id}?permanent=true`
+      };
+      const res = await fetch(endpointMap[type], { method: "DELETE" });
+      if (res.ok) {
+        onRefresh();
+        setEditingItem(null);
+      } else {
+        alert(await res.text());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const formatDeletedAt = (isoString) => {
+    if (!isoString) return "Unknown date";
+    const date = new Date(isoString);
+    return date.toLocaleString();
   };
 
   useEffect(() => {
     if (selectedBookId) {
-      const bk = books.find((b) => b.id === selectedBookId);
-      if (bk?.sections?.length) {
+      const bk = activeBooks.find((b) => b.id === selectedBookId);
+      const activeSections = bk?.sections?.filter(s => !s.deleted) || [];
+      if (activeSections.length) {
         setSelectedSectionId((prev) => {
-          const exists = bk.sections.some((s) => s.id === prev);
-          return exists ? prev : bk.sections[0].id;
+          const exists = activeSections.some((s) => s.id === prev);
+          return exists ? prev : activeSections[0].id;
         });
       } else {
         setSelectedSectionId("");
@@ -2626,7 +2722,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
     } else {
       setSelectedSectionId("");
     }
-  }, [selectedBookId, books]);
+  }, [selectedBookId, activeBooks]);
 
   return (
     <div className="admin-layout" style={{ flexDirection: "column" }}>
@@ -2641,6 +2737,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
             <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
             <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")} style={{ padding: "8px 16px" }}>Users</button>
+            <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")} style={{ padding: "8px 16px" }}>Recycle Bin</button>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -2652,7 +2749,17 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
 
       <main className="admin-content">
         <div className="admin-header-bar">
-          <h1>{activeTab === "overview" ? "Overview" : activeTab === "library" ? "Library Management" : "Community Moderation"}</h1>
+          <h1>
+            {activeTab === "overview"
+              ? "Overview"
+              : activeTab === "library"
+              ? "Library Management"
+              : activeTab === "trash"
+              ? "Recycle Bin"
+              : activeTab === "users"
+              ? "Users Management"
+              : "Community Moderation"}
+          </h1>
           <button className="ghost-btn" onClick={onRefresh} style={{ background: "white" }}>Refresh Data</button>
         </div>
 
@@ -2730,7 +2837,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {books.map((book) => (
+                {activeBooks.map((book) => (
                   <div key={book.id} className="admin-book-item" style={{ border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "16px" }}>
                     <div className="admin-book-header" style={{ display: "flex", justifyContent: "space-between" }}>
                       <div>
@@ -2742,19 +2849,19 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                         <button className="danger-btn" onClick={() => handleDelete('book', book.id)} style={{ minHeight: "auto", padding: "4px 8px", fontSize: "0.8rem", background: "transparent", color: "var(--danger)" }}>Delete</button>
                       </div>
                     </div>
-                    {book.sections && book.sections.length > 0 && (
+                    {book.sections && book.sections.filter(sec => !sec.deleted).length > 0 && (
                       <div className="admin-sections-list" style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "16px", borderLeft: "2px solid rgba(0,0,0,0.05)" }}>
-                        {book.sections.map((sec) => (
+                        {book.sections.filter(sec => !sec.deleted).map((sec) => (
                           <div key={sec.id}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <strong style={{ fontSize: "0.95rem" }}>{sec.title}</strong>
+                              <strong style={{ fontSize: "0.95rem" }}>Series: {sec.title}</strong>
                               <div style={{ display: "flex", gap: "8px" }}>
                                 <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', item: sec, bookId: book.id })} style={{ minHeight: "auto", padding: "2px 6px", fontSize: "0.75rem" }}>Edit</button>
                                 <button className="danger-btn" onClick={() => handleDelete('section', sec.id)} style={{ minHeight: "auto", padding: "2px 6px", fontSize: "0.75rem", background: "transparent", color: "var(--danger)" }}>Delete</button>
                               </div>
                             </div>
                             <div style={{ paddingLeft: "12px", marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                              {sec.chapters?.map((ch) => (
+                              {sec.chapters?.filter(ch => !ch.deleted).map((ch) => (
                                 <button key={ch.id} onClick={() => setEditingItem({ type: 'chapter', item: ch, bookId: book.id, sectionId: sec.id })} style={{ background: "rgba(0,0,0,0.04)", border: "none", padding: "4px 8px", borderRadius: "4px", fontSize: "0.8rem", cursor: "pointer" }}>
                                   {ch.chapterNumber}. {ch.title}
                                 </button>
@@ -2836,7 +2943,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                   <div className="two-col">
                     <label>Select Book
                       <select name="bookId" defaultValue={editingItem.bookId} required disabled={!editingItem.isNew}>
-                        {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
+                        {activeBooks.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
                     <label>Series Title<input name="title" defaultValue={editingItem.item?.title} required /></label>
@@ -2885,13 +2992,13 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                     <label>Select Book
                       <select value={selectedBookId} onChange={(e) => setSelectedBookId(e.target.value)} required disabled={!editingItem.isNew}>
                         <option value="" disabled>-- Choose Book --</option>
-                        {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
+                        {activeBooks.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
                     <label>Select Series
                       <select name="sectionId" value={selectedSectionId} onChange={(e) => setSelectedSectionId(e.target.value)} required disabled={!editingItem.isNew}>
                         <option value="" disabled>-- Choose Series --</option>
-                        {(books.find(b => b.id === selectedBookId)?.sections || []).map(s => (
+                        {(activeBooks.find(b => b.id === selectedBookId)?.sections || []).filter(s => !s.deleted).map(s => (
                           <option key={s.id} value={s.id}>{s.title}</option>
                         ))}
                       </select>
@@ -2920,6 +3027,84 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 </form>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "trash" && (
+          <div className="admin-tab-pane" style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+            
+            <div className="admin-library-card">
+              <h2 style={{ color: "var(--app-purple)", marginBottom: "16px" }}>Deleted Books</h2>
+              {deletedBooks.length === 0 ? (
+                <p className="muted" style={{ padding: "12px 0" }}>No deleted books in the Recycle Bin.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {deletedBooks.map((book) => (
+                    <div key={book.id} className="admin-book-item" style={{ border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <strong style={{ fontSize: "1.1rem", display: "block", color: "var(--ink)" }}>{book.subtitle}: {book.title}</strong>
+                        <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                          Author: {book.author || "Stanley Ohanugo"} · Deleted: {formatDeletedAt(book.deletedAt)}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "12px" }}>
+                        <button className="primary-btn" onClick={() => handleRestore('book', book.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "var(--app-purple)", color: "white", border: "none", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Restore</button>
+                        <button className="danger-btn" onClick={() => handlePermanentDelete('book', book.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "transparent", color: "var(--danger)", border: "1px solid var(--danger)", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Delete Permanently</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="admin-library-card">
+              <h2 style={{ color: "var(--app-purple)", marginBottom: "16px" }}>Deleted Series</h2>
+              {deletedSections.length === 0 ? (
+                <p className="muted" style={{ padding: "12px 0" }}>No deleted series in the Recycle Bin.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {deletedSections.map((sec) => (
+                    <div key={sec.id} className="admin-book-item" style={{ border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <strong style={{ fontSize: "1.1rem", display: "block", color: "var(--ink)" }}>{sec.title}</strong>
+                        <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                          Parent Book: {sec.bookTitle} · Deleted: {formatDeletedAt(sec.deletedAt)}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "12px" }}>
+                        <button className="primary-btn" onClick={() => handleRestore('section', sec.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "var(--app-purple)", color: "white", border: "none", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Restore</button>
+                        <button className="danger-btn" onClick={() => handlePermanentDelete('section', sec.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "transparent", color: "var(--danger)", border: "1px solid var(--danger)", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Delete Permanently</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="admin-library-card">
+              <h2 style={{ color: "var(--app-purple)", marginBottom: "16px" }}>Deleted Chapters</h2>
+              {deletedChapters.length === 0 ? (
+                <p className="muted" style={{ padding: "12px 0" }}>No deleted chapters in the Recycle Bin.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {deletedChapters.map((ch) => (
+                    <div key={ch.id} className="admin-book-item" style={{ border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <strong style={{ fontSize: "1.1rem", display: "block", color: "var(--ink)" }}>Chapter {ch.chapterNumber}: {ch.title}</strong>
+                        <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                          Parent Series: {ch.sectionTitle} · Deleted: {formatDeletedAt(ch.deletedAt)}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "12px" }}>
+                        <button className="primary-btn" onClick={() => handleRestore('chapter', ch.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "var(--app-purple)", color: "white", border: "none", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Restore</button>
+                        <button className="danger-btn" onClick={() => handlePermanentDelete('chapter', ch.id)} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", background: "transparent", color: "var(--danger)", border: "1px solid var(--danger)", cursor: "pointer", borderRadius: "100px", fontWeight: "600" }}>Delete Permanently</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 

@@ -71,6 +71,8 @@ export async function DELETE(request, { params }) {
     }
 
     const { chapterId } = await params;
+    const permanent = new URL(request.url).searchParams.get("permanent") === "true";
+
     const state = await readState();
 
     let deleted = false;
@@ -80,7 +82,12 @@ export async function DELETE(request, { params }) {
         const chapters = state.books[i].sections[j].chapters || [];
         const cIdx = chapters.findIndex(c => c.id === chapterId);
         if (cIdx !== -1) {
-          chapters.splice(cIdx, 1);
+          if (permanent) {
+            chapters.splice(cIdx, 1);
+          } else {
+            chapters[cIdx].deleted = true;
+            chapters[cIdx].deletedAt = new Date().toISOString();
+          }
           deleted = true;
           break;
         }

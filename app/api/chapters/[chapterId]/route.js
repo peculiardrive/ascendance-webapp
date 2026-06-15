@@ -16,7 +16,20 @@ export async function GET(request, { params }) {
     }));
   }
   const { chapterId } = await params;
-  const match = flattenChapters(state.books).find((item) => item.chapter.id === chapterId);
+
+  const activeBooks = state.books
+    .filter((book) => !book.deleted)
+    .map((book) => {
+      const activeSections = (book.sections || [])
+        .filter((sec) => !sec.deleted)
+        .map((sec) => {
+          const activeChapters = (sec.chapters || []).filter((ch) => !ch.deleted);
+          return { ...sec, chapters: activeChapters };
+        });
+      return { ...book, sections: activeSections };
+    });
+
+  const match = flattenChapters(activeBooks).find((item) => item.chapter.id === chapterId);
 
   if (!match) return json({ ok: false, error: "Chapter not found." }, { status: 404 });
   if (!hasChapterAccess(state, userId, match.book, match.chapter)) {

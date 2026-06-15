@@ -55,6 +55,8 @@ export async function DELETE(request, { params }) {
     }
 
     const { sectionId } = await params;
+    const permanent = new URL(request.url).searchParams.get("permanent") === "true";
+
     const state = await readState();
 
     let deleted = false;
@@ -62,7 +64,20 @@ export async function DELETE(request, { params }) {
       if (!state.books[i].sections) continue;
       const secIndex = state.books[i].sections.findIndex(s => s.id === sectionId);
       if (secIndex !== -1) {
-        state.books[i].sections.splice(secIndex, 1);
+        if (permanent) {
+          state.books[i].sections.splice(secIndex, 1);
+        } else {
+          state.books[i].sections[secIndex].deleted = true;
+          state.books[i].sections[secIndex].deletedAt = new Date().toISOString();
+
+          // Soft-delete child chapters as well
+          if (state.books[i].sections[secIndex].chapters) {
+            state.books[i].sections[secIndex].chapters.forEach((ch) => {
+              ch.deleted = true;
+              ch.deletedAt = new Date().toISOString();
+            });
+          }
+        }
         deleted = true;
         break;
       }

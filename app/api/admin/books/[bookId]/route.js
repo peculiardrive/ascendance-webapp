@@ -49,15 +49,36 @@ export async function DELETE(request, { params }) {
     }
 
     const { bookId } = await params;
+    const permanent = new URL(request.url).searchParams.get("permanent") === "true";
+
     const state = await readState();
     const bookIndex = state.books.findIndex((b) => b.id === bookId);
     if (bookIndex === -1) {
       return json({ ok: false, error: "Book not found." }, { status: 404 });
     }
 
-    state.books.splice(bookIndex, 1);
+    if (permanent) {
+      state.books.splice(bookIndex, 1);
+    } else {
+      state.books[bookIndex].deleted = true;
+      state.books[bookIndex].deletedAt = new Date().toISOString();
+
+      // Soft-delete child sections and chapters as well
+      if (state.books[bookIndex].sections) {
+        state.books[bookIndex].sections.forEach((sec) => {
+          sec.deleted = true;
+          sec.deletedAt = new Date().toISOString();
+          if (sec.chapters) {
+            sec.chapters.forEach((ch) => {
+              ch.deleted = true;
+              ch.deletedAt = new Date().toISOString();
+            });
+          }
+        });
+      }
+    }
+
     await writeState(state);
-    
     return json({ ok: true });
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: error.status || 400 });
