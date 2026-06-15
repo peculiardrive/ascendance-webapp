@@ -2601,6 +2601,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [activeTab, setActiveTab] = useState("overview");
   const revenue = purchases.reduce((sum, purchase) => sum + Number(purchase.amount || 0), 0);
   const [editingItem, setEditingItem] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
@@ -2845,6 +2846,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <h2 style={{ margin: 0 }}>Books Library</h2>
                 <div style={{ display: "flex", gap: "8px" }}>
+                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'import-book' })} style={{ color: "var(--app-purple)", borderColor: "var(--app-purple)" }}>+ Import Book</button>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'book', isNew: true })}>+ Book</button>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', isNew: true })}>+ Series</button>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'chapter', isNew: true })}>+ Chapter</button>
