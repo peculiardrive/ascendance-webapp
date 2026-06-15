@@ -2846,9 +2846,9 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <h2 style={{ margin: 0 }}>Books Library</h2>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'import-book' })} style={{ color: "var(--app-purple)", borderColor: "var(--app-purple)" }}>+ Import Book</button>
-                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'book', isNew: true })}>+ Book</button>
-                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', isNew: true })}>+ Series</button>
+                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'import-book' })} style={{ color: "var(--app-purple)", borderColor: "var(--app-purple)" }}>+ Import Series</button>
+                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'book', isNew: true })}>+ Series</button>
+                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', isNew: true })}>+ Book</button>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'chapter', isNew: true })}>+ Chapter</button>
                 </div>
               </div>
@@ -2870,7 +2870,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                         {book.sections.filter(sec => !sec.deleted).map((sec) => (
                           <div key={sec.id}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <strong style={{ fontSize: "0.95rem" }}>Series: {sec.title}</strong>
+                              <strong style={{ fontSize: "0.95rem" }}>Book: {sec.title}</strong>
                               <div style={{ display: "flex", gap: "8px" }}>
                                 <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', item: sec, bookId: book.id })} style={{ minHeight: "auto", padding: "2px 6px", fontSize: "0.75rem" }}>Edit</button>
                                 <button className="danger-btn" onClick={() => handleDelete('section', sec.id)} style={{ minHeight: "auto", padding: "2px 6px", fontSize: "0.75rem", background: "transparent", color: "var(--danger)" }}>Delete</button>
@@ -2892,9 +2892,60 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               </div>
             </div>
 
+            {editingItem && editingItem.type === 'import-book' && (
+              <div className="admin-library-card">
+                <h2>Bulk Import Series</h2>
+                <div style={{ background: "rgba(102, 51, 153, 0.05)", border: "1px solid rgba(102, 51, 153, 0.2)", padding: "16px", borderRadius: "8px", marginBottom: "24px", fontSize: "0.9rem", color: "var(--ink)", lineHeight: 1.6 }}>
+                  <strong style={{ color: "var(--app-purple)", display: "block", marginBottom: "8px" }}>Document Formatting Rules:</strong>
+                  Upload a <strong>.docx</strong> or <strong>.txt</strong> file containing the entire series. The system will automatically split it into Books and Chapters based on your headings:
+                  <ul style={{ margin: "8px 0 0 24px", padding: 0 }}>
+                    <li><strong>Book Headings:</strong> Must start with "Book", "Part", "Series", or "Section" (e.g., <em>"Book One: The Formation"</em>).</li>
+                    <li><strong>Chapter Headings:</strong> Must start with "Chapter" (e.g., <em>"Chapter 1"</em> or <em>"CHAPTER ONE: The Beginning"</em>).</li>
+                    <li>Everything else will be treated as the content of the preceding chapter.</li>
+                  </ul>
+                </div>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsImporting(true);
+                  try {
+                    const fd = new FormData(e.currentTarget);
+                    const res = await fetch("/api/admin/books/import", { method: "POST", body: fd });
+                    const data = await res.json();
+                    if (data.ok) { onRefresh(); setEditingItem(null); alert("Series imported successfully!"); } 
+                    else { alert(data.error); }
+                  } catch (err) { console.error(err); alert("Failed to upload series."); }
+                  finally { setIsImporting(false); }
+                }} className="form-grid">
+                  <div className="two-col">
+                    <label>Series File (.docx or .txt)<input type="file" name="file" accept=".docx,.txt" required disabled={isImporting} /></label>
+                    <label>Series Title<input name="title" placeholder="e.g., Disciples of the Inverted Cross" required disabled={isImporting} /></label>
+                    <label>Subtitle<input name="subtitle" disabled={isImporting} /></label>
+                    <label>Author<input name="author" defaultValue="BrandZilla Technologies" required disabled={isImporting} /></label>
+                    <label>Cover URL<input name="cover" defaultValue="/assets/books/disciples-inverted-cross.jpeg" disabled={isImporting} /></label>
+                    <label>Price (NGN)<input name="price" type="number" defaultValue="0" disabled={isImporting} /></label>
+                    <label>USD Price<input name="usdPrice" type="number" step="0.01" defaultValue="0.00" disabled={isImporting} /></label>
+                    <label>Status
+                      <select name="status" defaultValue="Published" disabled={isImporting}>
+                        <option value="Published">Published</option><option value="Draft">Draft</option><option value="Hidden">Hidden</option>
+                      </select>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row", marginTop: "24px" }}>
+                      <input name="preview" type="checkbox" value="true" disabled={isImporting} />
+                      <span>Available as Preview</span>
+                    </label>
+                  </div>
+                  <label>Blurb<textarea name="blurb" placeholder="Short description of the series..." disabled={isImporting} style={{ minHeight: "80px", width: "100%", padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "inherit" }} /></label>
+                  <div style={{ display: "flex", gap: "12px" }}>
+                    <button className="primary-btn" disabled={isImporting}>{isImporting ? "Parsing & Importing..." : "Import Series"}</button>
+                    <button className="ghost-btn" type="button" onClick={() => setEditingItem(null)} disabled={isImporting}>Cancel</button>
+                  </div>
+                </form>
+              </div>
+            )}
+
             {editingItem && editingItem.type === 'book' && (
               <div className="admin-library-card">
-                <h2>{editingItem.isNew ? "Create Book" : "Edit Book"}</h2>
+                <h2>{editingItem.isNew ? "Create Series" : "Edit Series"}</h2>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const fd = new FormData(e.currentTarget);
@@ -2930,7 +2981,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                   </div>
                   <label>Blurb<textarea name="blurb" defaultValue={editingItem.item?.blurb} style={{ minHeight: "80px", width: "100%", padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "inherit" }} /></label>
                   <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="primary-btn">Save Book</button>
+                    <button className="primary-btn">Save Series</button>
                     <button className="ghost-btn" type="button" onClick={() => setEditingItem(null)}>Cancel</button>
                   </div>
                 </form>
@@ -2939,7 +2990,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
 
             {editingItem && editingItem.type === 'section' && (
               <div className="admin-library-card">
-                <h2>{editingItem.isNew ? "Create Series" : "Edit Series"}</h2>
+                <h2>{editingItem.isNew ? "Create Book" : "Edit Book"}</h2>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const fd = new FormData(e.currentTarget);
@@ -2957,13 +3008,13 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                   } catch (err) { console.error(err); }
                 }} className="form-grid">
                   <div className="two-col">
-                    <label>Select Book
+                    <label>Select Series
                       <select name="bookId" defaultValue={editingItem.bookId} required disabled={!editingItem.isNew}>
                         {activeBooks.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
-                    <label>Series Title<input name="title" defaultValue={editingItem.item?.title} required /></label>
-                    <label>Series Subtitle<input name="subtitle" defaultValue={editingItem.item?.subtitle} /></label>
+                    <label>Book Title<input name="title" defaultValue={editingItem.item?.title} required /></label>
+                    <label>Book Subtitle<input name="subtitle" defaultValue={editingItem.item?.subtitle} /></label>
                     <label>Price (NGN)<input name="price" type="number" defaultValue={editingItem.item?.price} /></label>
                     <label>Order<input name="order" type="number" defaultValue={editingItem.item?.order || 1} /></label>
                     <label>Voice
@@ -3005,15 +3056,15 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                   } catch (err) { console.error(err); }
                 }} className="form-grid">
                   <div className="two-col">
-                    <label>Select Book
+                    <label>Select Series
                       <select value={selectedBookId} onChange={(e) => setSelectedBookId(e.target.value)} required disabled={!editingItem.isNew}>
-                        <option value="" disabled>-- Choose Book --</option>
+                        <option value="" disabled>-- Choose Series --</option>
                         {activeBooks.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
-                    <label>Select Series
+                    <label>Select Book
                       <select name="sectionId" value={selectedSectionId} onChange={(e) => setSelectedSectionId(e.target.value)} required disabled={!editingItem.isNew}>
-                        <option value="" disabled>-- Choose Series --</option>
+                        <option value="" disabled>-- Choose Book --</option>
                         {(activeBooks.find(b => b.id === selectedBookId)?.sections || []).filter(s => !s.deleted).map(s => (
                           <option key={s.id} value={s.id}>{s.title}</option>
                         ))}
