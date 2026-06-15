@@ -5,8 +5,8 @@ export const metadata = {
   description: "A premium PWA reading experience for Ascendance - The Trilogy.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/assets/icon.svg",
-    apple: "/assets/icon.svg"
+    icon: "/assets/icon.png",
+    apple: "/assets/icon.png"
   }
 };
 

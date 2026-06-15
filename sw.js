@@ -5,7 +5,7 @@ const APP_SHELL = [
   "./css/styles.css",
   "./js/app.js?v=2",
   "./manifest.webmanifest",
-  "./assets/icon.svg",
+  "./assets/icon.png",
   "./assets/cover-book-1.svg",
   "./assets/cover-book-2.svg",
   "./assets/cover-book-3.svg"

@@ -941,6 +941,7 @@ function Splash({ hidden = false }) {
   return (
     <div className={`splash ${hidden ? "is-hidden" : ""}`}>
       <div className="splash-inner">
+        <div className="splash-spacer" />
         <img className="splash-logo" src={BRAND_ASSETS.lockup} alt="Ascendance The Trilogy" />
         <div className="splash-presenter">
           <span className="presented-by">Presented by</span>
@@ -1290,15 +1291,15 @@ function getCommunityLeaders(posts) {
 
 function LeaderList({ leaders, onSelect }) {
   return (
-    <div className="leader-strip" role="list" aria-label="Top community contributors" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px', msOverflowStyle: 'none', scrollbarWidth: 'none', paddingLeft: '24px', paddingRight: '24px', margin: '0 -24px' }}>
+    <div className="leader-strip" role="list" aria-label="Top community contributors" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px 12px', padding: '0 12px', overflow: 'visible' }}>
       {leaders.map((leader, index) => (
-        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: '80px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-          <div className="leader-avatar" aria-hidden="true" style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(74, 14, 78, 0.2)' }}>
+        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <div className="leader-avatar" aria-hidden="true" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(74, 14, 78, 0.2)' }}>
             {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--ink)', width: '80px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{leader.name}</span>
-            <span style={{ display: 'inline-block', fontSize: '0.65rem', color: 'var(--muted)', background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', fontWeight: '600' }}>{leader.points} Pts {leader.country}</span>
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--ink)', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{leader.name}</span>
+            <span style={{ display: 'inline-block', fontSize: '0.6rem', color: 'var(--muted)', background: 'rgba(0,0,0,0.05)', padding: '1px 4px', borderRadius: '4px', marginTop: '2px', fontWeight: '600', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.points} Pts {leader.country}</span>
           </div>
         </button>
       ))}
@@ -1532,22 +1533,22 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
               <>
                 <TiltCover src={book.cover} alt={`${book.title} cover`} className="store-cover" />
                 <div className="store-book-copy">
-                  <div className="store-book-topline">
-                    <ReaderPrice usdAmount={usdBookPrice(book)} />
-                  </div>
                   <h2>{book.title}</h2>
                   <p className="included-books">{BOOK_SECTION_LABELS[book.id]}</p>
                   <p>{book.blurb}</p>
                   <p className={`availability ${state.owned ? "is-owned" : state.requiresPrevious ? "is-disabled" : ""}`}>
                     {state.owned ? "Unlocked and ready to read" : state.requiresPrevious ? `Unlock Book ${book.order - 1} first` : "Available to unlock"}
                   </p>
-                  <button
-                    className={state.owned ? "primary-btn" : "ghost-btn"}
-                    disabled={Boolean(state.requiresPrevious)}
-                    onClick={() => state.owned ? onRead(continueChapter) : onPurchase(book)}
-                  >
-                    {state.owned ? "Read" : state.requiresPrevious ? "Locked" : "Unlock"}
-                  </button>
+                  <div className="store-book-footer">
+                    <button
+                      className={state.owned ? "primary-btn" : "ghost-btn"}
+                      disabled={Boolean(state.requiresPrevious)}
+                      onClick={() => state.owned ? onRead(continueChapter) : onPurchase(book)}
+                    >
+                      {state.owned ? "Read" : state.requiresPrevious ? "Locked" : "Unlock"}
+                    </button>
+                    <ReaderPrice usdAmount={usdBookPrice(book)} />
+                  </div>
                 </div>
               </>
             );
@@ -1637,13 +1638,13 @@ const GLOSSARY_CHARACTERS = [
   {
     name: "The Seagull",
     role: "Hermit / Chronicler",
-    bio: "A mysterious author and chronicler of 'The Fall' (Book One, Section Two) who records hidden staircases and the secrets of the afraid.",
+    bio: "A mysterious author and chronicler of 'The Fall' (Book One, Series Two) who records hidden staircases and the secrets of the afraid.",
     avatar: "S"
   },
   {
     name: "Albatross",
     role: "Guardian of the Fraternity",
-    bio: "The key author behind 'The Fraternity' (Book One, Section Three) who oversees the forbidden order's secret ceremonies and the witnesses who survive them.",
+    bio: "The key author behind 'The Fraternity' (Book One, Series Three) who oversees the forbidden order's secret ceremonies and the witnesses who survive them.",
     avatar: "A"
   },
 {
@@ -1732,12 +1733,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
               <span>Save</span>
             </button>
           </div>
-          <button className={`reader-gear-btn ${settingsOpen ? "is-active" : ""}`} onClick={() => setSettingsOpen(!settingsOpen)} aria-label="Reading settings">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </button>
+          <div style={{ width: '40px' }} /> {/* Spacer to balance back button and keep controls centered */}
         </div>
         <div className="reader-topbar-row-2">
           <div className="reader-meta-info">
@@ -1747,8 +1743,8 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
         </div>
       </header>
       {settingsOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }} onClick={() => setSettingsOpen(false)}>
-          <aside className="settings-drawer" aria-label="Reading settings" style={{ background: settings.theme === 'dark' ? '#1c1c1e' : '#fff', padding: '24px', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', color: settings.theme === 'dark' ? '#fff' : '#111' }} onClick={(e) => e.stopPropagation()}>
+        <div className="reader-settings-overlay" onClick={() => setSettingsOpen(false)}>
+          <aside className="settings-drawer" aria-label="Reading settings" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'Georgia, serif' }}>Reader Settings</h2>
               <button onClick={() => setSettingsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}>
@@ -1759,9 +1755,9 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
             <div style={{ display: 'grid', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 'bold' }}>Typography</span>
-                <div style={{ display: 'flex', background: settings.theme === 'dark' || settings.theme === 'midnight-gold' || settings.theme === 'royal-forest' ? '#333' : '#f1f1f1', borderRadius: '8px', padding: '4px' }}>
-                  <button onClick={() => setSettings({ ...settings, font: 'Playfair Display' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '#fff' : 'transparent', color: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Playfair Display, Georgia, serif', cursor: 'pointer', boxShadow: settings.font === 'Playfair Display' || settings.font === 'Georgia' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Serif</button>
-                  <button onClick={() => setSettings({ ...settings, font: 'Outfit' })} style={{ padding: '8px 16px', border: 'none', borderRadius: '4px', background: settings.font === 'Outfit' || settings.font === 'Inter' ? '#fff' : 'transparent', color: settings.font === 'Outfit' || settings.font === 'Inter' ? '#111' : 'inherit', fontWeight: 'bold', fontFamily: 'Outfit, Inter, sans-serif', cursor: 'pointer', boxShadow: settings.font === 'Outfit' || settings.font === 'Inter' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>Sans-serif</button>
+                <div className="typography-toggle-container">
+                  <button onClick={() => setSettings({ ...settings, font: 'Playfair Display' })} className={`font-select-btn ${settings.font === 'Playfair Display' || settings.font === 'Georgia' ? 'is-active' : ''}`} style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>Serif</button>
+                  <button onClick={() => setSettings({ ...settings, font: 'Outfit' })} className={`font-select-btn ${settings.font === 'Outfit' || settings.font === 'Inter' ? 'is-active' : ''}`} style={{ fontFamily: 'Outfit, Inter, sans-serif' }}>Sans-serif</button>
                 </div>
               </div>
 
@@ -1788,7 +1784,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 'bold' }}>Auto-scroll</span>
                 <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={settings.autoScrollEnabled || false} onChange={onAutoScroll} style={{ appearance: 'none', width: '44px', height: '24px', background: settings.autoScrollEnabled ? 'var(--app-purple)' : '#ccc', borderRadius: '12px', position: 'relative', transition: '0.3s', outline: 'none' }} className="toggle-switch active-purple" />
+                  <input type="checkbox" checked={settings.autoScrollEnabled || false} onChange={onAutoScroll} className="toggle-switch" />
                 </label>
               </div>
 
@@ -1823,24 +1819,19 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
         </div>
       </article>
 
-      <div className="reader-bottom-bar" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: settings.theme === 'dark' ? '#111' : '#fff', borderTop: '1px solid rgba(128,105,90,0.2)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 50 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontWeight: 'bold', color: settings.theme === 'dark' ? '#fff' : '#111' }}>
-          Audio auto-play
-          <input type="checkbox" checked={settings.autoplay} onChange={(e) => setSettings({ ...settings, autoplay: e.target.checked })} style={{ appearance: 'none', width: '44px', height: '24px', background: settings.autoplay ? 'var(--app-purple)' : '#ccc', borderRadius: '12px', position: 'relative' }} className="toggle-switch active-purple" />
+      <div className="reader-bottom-bar">
+        <label className="reader-bottom-bar-label">
+          Auto-scroll
+          <input type="checkbox" checked={settings.autoScrollEnabled || false} onChange={onAutoScroll} className="toggle-switch" />
         </label>
-        <button onClick={() => setSettingsOpen(true)} style={{ background: 'transparent', border: 'none', fontWeight: 'bold', fontSize: '1.2rem', color: settings.theme === 'dark' ? '#fff' : '#111', cursor: 'pointer' }}>Aa</button>
+        <button className="reader-bottom-bar-btn" onClick={() => setSettingsOpen(true)}>Aa</button>
       </div>
       {unlockOpen ? <UnlockDialog book={next?.book || activeChapter.book} onClose={() => setUnlockOpen(false)} onPurchase={onPurchase} onViewNotices={onViewNotices} /> : null}
 
       {/* 3. Glossary Drawer */}
       {glossaryOpen && (
         <div 
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 115
-          }}
+          className="reader-glossary-overlay"
           onClick={() => setGlossaryOpen(false)}
         />
       )}
@@ -2466,6 +2457,13 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onChangePass
           <button onClick={onLogout} className="danger-btn" style={{ padding: '8px 16px', borderRadius: '8px' }}>Sign Out</button>
         </div>
       </section>
+
+      <footer className="profile-footer" style={{ marginTop: '48px', paddingBlock: '24px 12px', borderTop: '1px solid rgba(128, 105, 90, 0.15)', textAlign: 'center', display: 'grid', gap: '8px' }}>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--muted)' }}>For support, inquiries or assistance, email us at:</p>
+        <a href="mailto:ascendance-trilogy@gmail.com" style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--app-purple)', textDecoration: 'none', transition: 'opacity 0.2s' }} className="support-email-link">
+          ascendance-trilogy@gmail.com
+        </a>
+      </footer>
     </div>
   );
 }
@@ -2727,7 +2725,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 <h2 style={{ margin: 0 }}>Books Library</h2>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'book', isNew: true })}>+ Book</button>
-                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', isNew: true })}>+ Section</button>
+                  <button className="ghost-btn" onClick={() => setEditingItem({ type: 'section', isNew: true })}>+ Series</button>
                   <button className="ghost-btn" onClick={() => setEditingItem({ type: 'chapter', isNew: true })}>+ Chapter</button>
                 </div>
               </div>
@@ -2818,7 +2816,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
 
             {editingItem && editingItem.type === 'section' && (
               <div className="admin-library-card">
-                <h2>{editingItem.isNew ? "Create Section" : "Edit Section"}</h2>
+                <h2>{editingItem.isNew ? "Create Series" : "Edit Series"}</h2>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const fd = new FormData(e.currentTarget);
@@ -2841,8 +2839,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                         {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
-                    <label>Section Title<input name="title" defaultValue={editingItem.item?.title} required /></label>
-                    <label>Section Subtitle<input name="subtitle" defaultValue={editingItem.item?.subtitle} /></label>
+                    <label>Series Title<input name="title" defaultValue={editingItem.item?.title} required /></label>
+                    <label>Series Subtitle<input name="subtitle" defaultValue={editingItem.item?.subtitle} /></label>
                     <label>Price (NGN)<input name="price" type="number" defaultValue={editingItem.item?.price} /></label>
                     <label>Order<input name="order" type="number" defaultValue={editingItem.item?.order || 1} /></label>
                     <label>Voice
@@ -2856,7 +2854,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                     </label>
                   </div>
                   <div style={{ display: "flex", gap: "12px" }}>
-                    <button className="primary-btn">Save Section</button>
+                    <button className="primary-btn">Save Series</button>
                     <button className="ghost-btn" type="button" onClick={() => setEditingItem(null)}>Cancel</button>
                   </div>
                 </form>
@@ -2890,9 +2888,9 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                         {books.map(b => <option key={b.id} value={b.id}>{b.subtitle}: {b.title}</option>)}
                       </select>
                     </label>
-                    <label>Select Section
+                    <label>Select Series
                       <select name="sectionId" value={selectedSectionId} onChange={(e) => setSelectedSectionId(e.target.value)} required disabled={!editingItem.isNew}>
-                        <option value="" disabled>-- Choose Section --</option>
+                        <option value="" disabled>-- Choose Series --</option>
                         {(books.find(b => b.id === selectedBookId)?.sections || []).map(s => (
                           <option key={s.id} value={s.id}>{s.title}</option>
                         ))}
