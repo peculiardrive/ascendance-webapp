@@ -38,72 +38,78 @@ export async function POST(request) {
     let currentSection = null;
     let currentChapter = null;
     let sectionOrder = 1;
-    let chapterOrder = 1;
 
-    // Helper to ensure we have a section to put chapters into
-    const ensureSection = () => {
-      if (!currentSection) {
-        currentSection = {
-          id: uid("section"),
-          title: "Book One", // Default title if none provided
-          subtitle: "",
-          price: 0,
-          order: sectionOrder++,
-          tts: true,
-          voice: "Female",
-          chapters: []
-        };
-        parsedSections.push(currentSection);
-      }
+    const NUMBER_WORDS_MAP = {
+      "PROLOGUE": 0,
+      "ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9, "TEN": 10,
+      "ELEVEN": 11, "TWELVE": 12, "THIRTEEN": 13, "FOURTEEN": 14, "FIFTEEN": 15, "SIXTEEN": 16, "SEVENTEEN": 17, "EIGHTEEN": 18, "NINETEEN": 19, "TWENTY": 20,
+      "TWENTYONE": 21, "TWENTYTWO": 22, "TWENTYTHREE": 23, "TWENTYFOUR": 24, "TWENTYFIVE": 25, "TWENTYSIX": 26, "TWENTYSEVEN": 27, "TWENTYEIGHT": 28, "TWENTYNINE": 29, "THIRTY": 30,
+      "THIRTYONE": 31, "THIRTYTWO": 32, "THIRTYTHREE": 33, "THIRTYFOUR": 34, "THIRTYFIVE": 35, "THIRTYSIX": 36, "THIRTYSEVEN": 37, "THIRTYEIGHT": 38, "THIRTYNINE": 39, "FORTY": 40,
+      "FORTYONE": 41, "FORTYTWO": 42, "FORTYTHREE": 43, "FORTYFOUR": 44, "FORTYFIVE": 45, "FORTYSIX": 46, "FORTYSEVEN": 47, "FORTYEIGHT": 48, "FORTYNINE": 49, "FIFTY": 50
     };
 
-    // Helper to ensure we have a chapter to put content into
-    const ensureChapter = () => {
-      ensureSection();
-      if (!currentChapter) {
-        currentChapter = {
-          id: uid("chapter"),
-          title: "Prologue", // Default if text appears before first chapter heading
-          subtitle: "",
-          chapterNumber: chapterOrder++,
-          content: [],
-          order: currentSection.chapters.length + 1,
-          isPreview: false,
-          status: "Published"
-        };
-        currentSection.chapters.push(currentChapter);
-      }
+    const isSeriesHeading = (line) => {
+      return /^(book\s+one|book\s+two|book\s+three|part|series|section)/i.test(line);
     };
 
-    const isSeriesHeading = (line) => /^(book|part|series|section)\s/i.test(line);
-    const isChapterHeading = (line) => /^chapter\s/i.test(line);
+    const getChapterNumber = (line) => {
+      const normalized = line.replace(/[\s-]/g, "").toUpperCase();
+      if (NUMBER_WORDS_MAP[normalized] !== undefined) {
+        return NUMBER_WORDS_MAP[normalized];
+      }
+      return null;
+    };
 
     for (let line of lines) {
       const trimmed = line.trim();
-      if (!trimmed) continue; // Skip blank lines
+      if (!trimmed) continue;
 
       if (isSeriesHeading(trimmed)) {
-        // Start a new section
+        const isBookOne = /book\s+one/i.test(trimmed);
+        
+        // Skip duplicate BOOK ONE section heading if the default section exists
+        if (isBookOne && parsedSections.some(s => /book\s+one/i.test(s.title))) {
+          currentChapter = null;
+          continue;
+        }
+
         currentSection = {
           id: uid("section"),
           title: trimmed,
           subtitle: "",
-          price: 0,
+          price: parsedSections.length > 0 ? 1500 : 0, // Book 1 (Section 1) is free, others are 1500
           order: sectionOrder++,
           tts: true,
           voice: "Female",
           chapters: []
         };
         parsedSections.push(currentSection);
-        currentChapter = null; // Reset chapter for new section
-      } else if (isChapterHeading(trimmed)) {
-        // Start a new chapter
-        ensureSection();
+        currentChapter = null;
+        continue;
+      }
+
+      const chNum = getChapterNumber(trimmed);
+      if (chNum !== null) {
+        // Enforce default Section if missing
+        if (!currentSection) {
+          currentSection = {
+            id: uid("section"),
+            title: "BOOK ONE: THE FORMATION",
+            subtitle: "",
+            price: 0,
+            order: sectionOrder++,
+            tts: true,
+            voice: "Female",
+            chapters: []
+          };
+          parsedSections.push(currentSection);
+        }
+
         currentChapter = {
           id: uid("chapter"),
-          title: trimmed,
+          title: trimmed === "PROLOGUE" ? "Prologue" : `Chapter ${trimmed}`,
           subtitle: "",
-          chapterNumber: chapterOrder++,
+          chapterNumber: chNum,
           content: [],
           order: currentSection.chapters.length + 1,
           isPreview: false,
@@ -111,10 +117,9 @@ export async function POST(request) {
         };
         currentSection.chapters.push(currentChapter);
       } else {
-        // Regular content
-        ensureChapter();
-        // Convert plain text paragraph to HTML paragraph format used by reader
-        currentChapter.content.push(`<p>${trimmed}</p>`);
+        if (currentChapter) {
+          currentChapter.content.push(`<p>${trimmed}</p>`);
+        }
       }
     }
 

@@ -2,7 +2,7 @@
   "users": [],
   "books": [
     {
-      "id": "book-b859a0dd-cc7a-4c69-94d5-8b565dd3ea21",
+      "id": "book-8f7133de-9fd6-4a60-a324-490ac560d8af",
       "title": "Disciples of the Inverted Cross",
       "subtitle": "",
       "author": "Ikenna Obiajulu",
@@ -15,8 +15,8 @@
       "order": 1,
       "sections": [
         {
-          "id": "section-974d669c-2fc3-4329-bda0-c8e4d4a94545",
-          "title": "Book One",
+          "id": "section-f806aa3b-f38d-4344-80da-a3d9878e2b87",
+          "title": "BOOK ONE: THE FORMATION",
           "subtitle": "",
           "price": 0,
           "order": 1,
@@ -24,15 +24,11 @@
           "voice": "Female",
           "chapters": [
             {
-              "id": "chapter-3502f383-a9f2-4799-a267-a4080c379039",
+              "id": "chapter-bae7a488-f719-42c8-9a0f-9a512cb011ae",
               "title": "Prologue",
               "subtitle": "",
-              "chapterNumber": 1,
+              "chapterNumber": 0,
               "content": [
-                "<p>Disciples of the Inverted Cross</p>",
-                "<p>Disciples of the Inverted Cross</p>",
-                "<p>Stanley Ohanugo</p>",
-                "<p>PROLOGUE</p>",
                 "<p>Perhaps the most troubling question for young people of my age is how to make good their dreams. Yet, apart from being anxious about our future aspirations, we are all rattled by the age-old mixture of joy and gloom usually associated with the event that culminates our ordeal at Dennis Memorial Grammar School – the rapture of attaining yet another milestone as we strive for academic excellence and the poignancy of the end of a six-year fraternity.</p>",
                 "<p>But unlike my mates, the expectation of my family’s arrival to witness our valedictory service casts a shadow over my day, a day that ought to be the happiest moment of my life.</p>",
                 "<p>When our final results were published last week, I was formally announced as this year’s valedictorian. Although we had waited nearly three weeks to know our overall rating, our continuous assessment clearly showed that I had the overall best result. It had been a long, arduous contest for intellectual superiority.</p>",
@@ -81,26 +77,13 @@
               "order": 1,
               "isPreview": true,
               "status": "Published"
-            }
-          ]
-        },
-        {
-          "id": "section-2b69831a-2100-47c0-880a-1ed5befd55e1",
-          "title": "BOOK ONE: THE FORMATION",
-          "subtitle": "",
-          "price": 0,
-          "order": 2,
-          "tts": true,
-          "voice": "Female",
-          "chapters": [
+            },
             {
-              "id": "chapter-c60786b5-ed2b-4338-afb1-b9a02e57248a",
-              "title": "Prologue",
+              "id": "chapter-97180112-541c-49d8-a9b2-60bf9e5cd122",
+              "title": "Chapter ONE",
               "subtitle": "",
-              "chapterNumber": 2,
+              "chapterNumber": 1,
               "content": [
-                "<p>Ikenna Obiajulu</p>",
-                "<p>ONE</p>",
                 "<p>My passion for the medical sciences is sustained by the photograph of Elizabeth, my elder sister. The photograph was taken when she turned five, but she died at the age of seven. I was only three years old and so apart from this photograph I wouldn’t know what she really looked like.</p>",
                 "<p>It’s obvious I take much after her. She had slightly prominent cheekbones, rounded chin and full lips, and a pair of strong, bright eyes staring at me from the photograph. But in contrast to my sturdy neck, hers is long and slender. I think she’d have grown up to be as tall as I am. Lizzy, as she’s fondly called, would have become the most beautiful woman in the world if she had survived the sickness that claimed her life, if my father hadn’t acted so presumptuously. I hope I’ll find it in my heart to forgive him.</p>",
                 "<p>This photograph is perhaps the only thing that keeps her memory alive. It’s only a matter of time, when the university entrance exam results are released, then I’ll have the opportunity to console myself for our severed bond. I promised Elizabeth, posthumously – I’ll find a cure for the sickness that claimed her life.</p>",
@@ -223,8 +206,18 @@
                 "<p>Needless to say, she won’t. Nkay fears him. No one dares Ifeanyi.</p>",
                 "<p>“Boy, get ready. We’re leaving tomorrow morning.” he says with finality and a grin on his face. Then he rises to his feet and leisurely walks to the door leaving the room.</p>",
                 "<p>I feel goose pimples all over.</p>",
-                "<p>In the uneasy silence Ifeanyi left behind, Nkeonyere and I stare at each other forever.</p>",
-                "<p>TWO</p>",
+                "<p>In the uneasy silence Ifeanyi left behind, Nkeonyere and I stare at each other forever.</p>"
+              ],
+              "order": 2,
+              "isPreview": true,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-01c0f060-793d-4097-9fdd-3d63b1acadde",
+              "title": "Chapter TWO",
+              "subtitle": "",
+              "chapterNumber": 2,
+              "content": [
                 "<p>Because of my phobia for flying, we opted to travel by land. The motor park is an awkward assemblage of all sorts of vehicles – saloon and estate cars, minivans, minibuses and coaches. It is situated at the foot of a cloverleaf bridge connecting four highways. One of the highways links the Niger Bridge, which spans across the River Niger, the only route in and out of the eastern part of the country westward.</p>",
                 "<p>A few inter-city commercialised motorcyclists popularly called okada are up early to take passengers to every nook and cranny of the town.</p>",
                 "<p>Arriving the motor park at five-thirty, a beehive of activity is already underway. But in spite of the wooden boards on the rooftop of loading vehicles indicating their destinations, the park is perpetually kept noisy by persistent shouting of numerous touts who call out the designated destinations to prospective commuters. However, their voice is doused by loud music from hawkers of pirated audiotapes.</p>",
@@ -257,8 +250,18 @@
                 "<p>“Boy, you’ve not been listening to me,” Ifeanyi interrupts my thoughts. The intrepid explorer has been doing a commentary on some towns along our route, but I’m too lost in thought to pay attention.</p>",
                 "<p>“I uh – I’m sorry,” I mumble.</p>",
                 "<p>He raises his hand over my shoulder and pulls me to himself, “It’s okay I.K., everything will be all right you’ll see…trust me.”</p>",
-                "<p>I do.</p>",
-                "<p>THREE</p>",
+                "<p>I do.</p>"
+              ],
+              "order": 3,
+              "isPreview": true,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-fc8ff0f9-20ef-4caf-bcf0-679ba4e5704e",
+              "title": "Chapter THREE",
+              "subtitle": "",
+              "chapterNumber": 3,
+              "content": [
                 "<p>The orange glow of the setting sun casts a shadow of tall trees planted on each side of the streets and the lush vegetation of fenceless compounds gives the environment an inviting serenity. The government reservation area, or simply called G.R.A., has been, as a matter of tradition, a highbrow residential domain designated to those in authority, statesmen and policymakers, and until recently the well to do in the society.</p>",
                 "<p>Typical of such areas, which played host to the British lords before the independence, the streets are dominated by archaic brick houses nearly covered by overgrown ivy plants, relics of the colonial era.</p>",
                 "<p>But since the advent of political activities after the liberation of the country, and the exit of its original occupants, the G.R.A. has become synonymous with, not necessarily the class-conscious, but the well-heeled who for obvious reasons prefer to pitch their tents here. And for that reason, the newly built-up areas are easily distinguishable from the Victorian architecture of the Britons.</p>",
@@ -389,8 +392,18 @@
                 "<p>The chime of the wall clock indicates it’s six o’clock, yet the neighbourhood is as quiet as a ghost town. By this time in Onitsha, the morning criers would have succeeded in awakening the entire neighbourhood with loud squawks of unlistened-to sermon blaring from their megaphones demanding of sinners to repent, reminding them of the coming wrath of God and urging everyone to prepare for the coming of Jesus. Not even the cut-throat traders on their way to buy wares, which they will eventually sell at exorbitant prices twitch at their message. Their voices are occasionally doused by taxis and buses honking indiscriminately either to beckon early-risers who chatter noisily on their way to heaven-knows-where, or just for the fun of it.</p>",
                 "<p>And by this time, my mother’s banging at the door for the morning devotion would have knocked off the early morning drowsiness. Then we all would cluster around the Bishop, as Ifeanyi calls him, like sheep gathers around their shepherd, for a lengthy rhetoric aimed at keeping us sober in the course of our pilgrimage on earth, after which I return to my room and daydream until I snooze.</p>",
                 "<p>The sky is becoming brighter. But there won’t be any morning devotion today, maybe never until I visit Onitsha again. I lost the art of praying on my own, which I once learnt from my sister, Nkeonyere. I can imagine she’d be under fire for being privy to my sudden run-away. But my father will quickly exonerate her involvement in the plan. He hardly finds any fault in her. Ifeanyi, the black sheep, will take all the blame as usual.</p>",
-                "<p>The fact that barely twelve hours after my arrival to Jos I still don’t have an inkling of the direction I’m headed makes me sick. Ifeanyi’s enigmatic style of doing things makes me sick too. I suddenly cherish the memory of the austere way of life I used to know and I’m homesick. I drift back to sleep.</p>",
-                "<p>FOUR</p>",
+                "<p>The fact that barely twelve hours after my arrival to Jos I still don’t have an inkling of the direction I’m headed makes me sick. Ifeanyi’s enigmatic style of doing things makes me sick too. I suddenly cherish the memory of the austere way of life I used to know and I’m homesick. I drift back to sleep.</p>"
+              ],
+              "order": 4,
+              "isPreview": true,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-443028a9-a5fc-4bc9-8c35-cc50c125fdae",
+              "title": "Chapter FOUR",
+              "subtitle": "",
+              "chapterNumber": 4,
+              "content": [
                 "<p>I don’t know whether it is the loud sound of reggae music filtering into the room or the continual tapping of the basketball against the backboard that woke me up at quarter-past-nine. Ifeanyi is no longer in bed, and he’s not in the room either. He is a habitual early-riser.</p>",
                 "<p>It is so bright outside the room, but unlike the east, the weather is cool. Julia is playing basketball alone at the makeshift court, the driveway into the garage. She’s kitted in a Chicago Bulls sleeveless jersey and trunks with the number twenty-three boldly printed on it. I imagine playing against her wearing the Houston Rocket number thirty-four.</p>",
                 "<p>Julia is nearly as tall as I am, she’s a six-footer. At most two inches less than I am. She’s eighteen, and a few months older than I am, precisely seven months ahead of me. She and Nkeonyere are students at Metropolitan University. Julia is reading English and will be ascending to the second year when school resumes, while Nkeonyere will be going to her third year in Economics.</p>",
@@ -541,8 +554,18 @@
                 "<p>I glance at it and then I turn to Ifeanyi. “What if Uncle Dike comes back and is upset about the death of Florence?” I ask him as he turns the door handle.</p>",
                 "<p>“There won’t be any problems as long as none of the girls know about the window. You’ve given me another impression about you…I’m happy you’re not as stupid as to tell anyone else about it,” he opens the door, leaves the room and gently closes it.</p>",
                 "<p>I trust Ifeanyi to keep this secret between us and I’m relieved that neither the girls nor Uncle Dike will ever know how Florence really died. But I’m disturbed about his lack of conscience…and I am anxious that I am beginning to have that attitude too.</p>",
-                "<p>Maybe Ifeanyi is right. It’s Sod’s law I left the window open…I’m not responsible for her death after all.</p>",
-                "<p>FIVE</p>",
+                "<p>Maybe Ifeanyi is right. It’s Sod’s law I left the window open…I’m not responsible for her death after all.</p>"
+              ],
+              "order": 5,
+              "isPreview": true,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-3b9e75b9-6d3e-40df-ab4e-8852359ee670",
+              "title": "Chapter FIVE",
+              "subtitle": "",
+              "chapterNumber": 5,
+              "content": [
                 "<p>My admission into the Metropolitan University has suffered a kick in the teeth. First, the personnel at the admissions office demanded a huge sum of money as kickback. It is painful that it came down to this, offering bribes to secure admission despite that my score in the joint admissions and matriculation exam is well above the cut-off score for admission into biochemistry. However, Ifeanyi was able to come up with the specified amount.</p>",
                 "<p>Afterwards, the registry mentioned something about the quota for my state being exhausted and kicked against the inclusion of my name in the supplementary list.</p>",
                 "<p>The quota system was introduced by the Ministry of Education with the aim of narrowing the margin between educationally-advantaged and educationally-disadvantaged states in the enrolment of candidates into federal- and state-owned institutions; candidates applying for admission from states with long-standing weak academic performance are given leverage by reserving specified number of slots during admission into such institutions.</p>",
@@ -579,8 +602,18 @@
                 "<p>A sleek black Honda Prelude stops at the gate and the driver steps down and goes to open the trunk for the routine check. When Ifeanyi sights him, he honks at him.</p>",
                 "<p>He drives across the gate and pulls over when he’s done with the security, and then he comes to meet Ifeanyi. He is dressed in a white brocade caftan that is exquisitely embroidered around the neck. Ifeanyi introduces him as Dickson Shak, a lecturer in the university, but he has the carriage of a tycoon rather than a university staff.</p>",
                 "<p>When Ifeanyi narrates our plight to Dickson, he escorts Ifeanyi to the security post at the gate and vouches for him. They eventually allow us to pass. They chat and cackle noisily to Dickson’s Honda. Ifeanyi greets the lady held fast in the car by the seatbelt with a handshake and they chat briefly while Dickson goes to the driver’s seat.</p>",
-                "<p>The Honda roars and honks and Dickson is on his way. Ifeanyi waves him goodbye and returns to the car smiling. He looks at his watch and then eyes me. I smile at him lightly. He turns on the ignition and screeches off.</p>",
-                "<p>SIX</p>",
+                "<p>The Honda roars and honks and Dickson is on his way. Ifeanyi waves him goodbye and returns to the car smiling. He looks at his watch and then eyes me. I smile at him lightly. He turns on the ignition and screeches off.</p>"
+              ],
+              "order": 6,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-2beceaf0-7b89-44a6-8e65-daf5978ef86a",
+              "title": "Chapter SIX",
+              "subtitle": "",
+              "chapterNumber": 6,
+              "content": [
                 "<p>The period of mourning is over and the house has returned to the usual early morning blast of reggae music courtesy of Rebecca. Julia and I are digging out routine practice on the makeshift court.</p>",
                 "<p>The University Games is nearly three months away, in order to have the best possible crop of players, the basketball coaching crew have organized several preliminary mock competitions to hunt for talents. Nearly two hundred and fifty players have indicated interest to compete for the slot of eighteen players that will make up the squad to represent the school at the competition. The number will certainly rise when a few more players among the first-year students arrive.</p>",
                 "<p>Before I started training with Julia, I’ve not handled the ball in six clear months. But, I’ve not only recovered much of my form in the game, I’m also helping Julia improve her skills so as to secure a place in the team.</p>",
@@ -675,8 +708,18 @@
                 "<p>Another frosty bottle of Star lager beer is placed before me beside the last one I was served. It appears to me as if they are six green bottles. I think Ifeanyi whispered something to the waiter and he lifts three bottles from the table. I try to hold them back and I tip the bottle and the drink spills on the table.</p>",
                 "<p>I am feeling dizzy and I’m having a nauseating feeling. I am definitely intoxicated. Ifeanyi stopped the waiter from serving me any more beer. I sit there observing the events from faraway.</p>",
                 "<p>At the fall of the last green bottle, Dickson Shak announces the venue of the next fellowship of the spirits to the house, De Roof nightclub, the fellows are unanimously organising a send-forth party in honour of Ifeanyi.</p>",
-                "<p>I find myself lying on the bed with my head spinning slowly. The chime of the blurry overlapping image of the wall clock tells me it’s midnight. Ifeanyi flicks the bedside switch, my pupils dilate and I shut my eyes.</p>",
-                "<p>SEVEN</p>",
+                "<p>I find myself lying on the bed with my head spinning slowly. The chime of the blurry overlapping image of the wall clock tells me it’s midnight. Ifeanyi flicks the bedside switch, my pupils dilate and I shut my eyes.</p>"
+              ],
+              "order": 7,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-545a82cb-1902-4f82-9cf8-e444112e4316",
+              "title": "Chapter SEVEN",
+              "subtitle": "",
+              "chapterNumber": 7,
+              "content": [
                 "<p>Rays of green, red, yellow and blue spotlights flash on the dance floor where a herd of spellbound dancers display exotic dance steps in conformity with the deafening reggae music blasting from giant loudspeakers in the hall. Three bare-bodied men with dreadlocks dressed in tight trousers and three ladies wearing skimpy dresses frenziedly gyrate to the fast drumbeat. Ifeanyi calls me to come to the dance floor, but Julia pulls me back making me sit with her at the table.</p>",
                 "<p>My head aches from a terrible hangover as I open my eyes to find Ifeanyi standing by the bed with his towel tied around his waist. I squint my eyes against the brightness of the sun, and then at the clock, it’s seven-thirty. As usual, Rebecca’s habitual early morning reggae music filters into the room.</p>",
                 "<p>“Boy, how are you this morning?” he asks grinning.</p>",
@@ -796,8 +839,18 @@
                 "<p>“I see you guys are getting pretty close. It’s good enough if it doesn’t go beyond this.”</p>",
                 "<p>“I don’t have such an intention,” I growl.</p>",
                 "<p>“People usually don’t, but when they finally fall into the temptation, they blame it on the devil and claim not to know how it happened…you better be careful with Julia,” he says in a brisk tone.</p>",
-                "<p>I’m really appalled he could imagine I’ll have an affair with my cousin, but I do not intend to argue about it.</p>",
-                "<p>EIGHT</p>",
+                "<p>I’m really appalled he could imagine I’ll have an affair with my cousin, but I do not intend to argue about it.</p>"
+              ],
+              "order": 8,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-cb3fe4c6-756b-4dc9-b7c6-11d8a2bbaa72",
+              "title": "Chapter EIGHT",
+              "subtitle": "",
+              "chapterNumber": 8,
+              "content": [
                 "<p>Coach Barry, the team coach is saddled with the task of raising a formidable squad to represent the school in the competition. In order to actualise that, he sent out scouts to recruit players who have participated in secondary school competitions to compete with the present members of the team for a place. I’ve always known Coach Barry to be high-handed, but his style of coaching obviously isn’t going down well with the older team-mates.</p>",
                 "<p>I got the hint that although Dele Tanko, his assistant, is in charge of the girls’ team, he single-handedly recruited nearly all the guys called up for the mock matches.</p>",
                 "<p>Following the result of two trial matches, it is certain most of the current players will be replaced with the new players Coach Barry is recruiting. Some of them who are sure they won’t don the jersey have already threatened to lynch him if he dares exclude them from participating in the epic competition.</p>",
@@ -840,8 +893,18 @@
                 "<p>“Sometimes it doesn’t matter if the team wins or not as long as you win your own game,” he says in a low tone. “It’s the same reason some good players never make the team, because they are not willing to play the coach’s game. Sometimes it becomes necessary to make sacrifices to see a dream come true, what do you think?”</p>",
                 "<p>I stare impatiently ahead of me knowing what he’s driving at. Bastard! You’ll never have her if that’s what you want.</p>",
                 "<p>Julia told me Dele asked her out the next day after the mock match, but she declined. He swore that she’d never make the team despite her impressive performance. I informed Coach Barry about it, although I asked him not to make any fuss about it, it’s possible he discussed it with him. Coach Barry told me there had been several similar complaints by the girls that Dreck told them point-blank that if they’re not willing to rise up to his indecent proposal, they could as well forget about NUGA.</p>",
-                "<p>Clenching my fist angrily, I glare at him as he walks away with his right hand dangling in the sleeve of his flannel shirt.</p>",
-                "<p>NINE</p>",
+                "<p>Clenching my fist angrily, I glare at him as he walks away with his right hand dangling in the sleeve of his flannel shirt.</p>"
+              ],
+              "order": 9,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-6ccff6cb-9793-4453-b4c0-d272e627c431",
+              "title": "Chapter NINE",
+              "subtitle": "",
+              "chapterNumber": 9,
+              "content": [
                 "<p>It’s nearly half past eight and I’m gussied up for the matriculation in my new black Italian suit Ifeanyi bought for me, which I reserved for the occasion. I’m not excited about the event anymore. My enthusiasm about becoming an undergraduate has been burnt off as I reflected on the import of Daddy’s weighty letter – he has formally disinherited me for rejecting God’s will for me, and he put that in writing. He’s bitter about the way I secretly left home to chase the wind, the way he put it. I will never succeed in my chosen career, he said firmly. He ended the letter with a stern warning that I should never return to his house, and that God will judge me and my accomplice for rebelling against His will.</p>",
                 "<p>The letter was sent through Nkeonyere when she returned to school at the end of the holiday. It’s my father’s reply to the letter I wrote to my parents informing them that after considering my father’s position about my original ambition and the trouble it had caused the family, I changed my mind about reading medicine (with the intention of pacifying them, especially my father). I also informed them about the matriculation and how delighted I’d be if they could come.</p>",
                 "<p>The knock on the door jerks me up from my thoughtss. The door’s handle squeaks but won’t open because I locked it. She bangs on the door furiously and turns the handle again. “Iyke, Iyke,” she calls.</p>",
@@ -991,8 +1054,18 @@
                 "<p>“How could you be so mean …you selfish bitch,” Rebecca blasts at her.</p>",
                 "<p>Julia stands up angrily and gives her a hot slap, “Don’t you ever talk to me like that. Are you out of your mind?”</p>",
                 "<p>Rebecca sighs and leaves the table angrily. Anita’s eyes are bloodshot, but she remains silent. I doubt if she’ll be able to utter a sentence at this rate. I am struck with a feeling of guilt for the death of Florence, and regret for telling her the truth.</p>",
-                "<p>I should have listened to Ifeanyi. She’ll certainly tell them how Florence died, that I’m responsible for her death. I think it’s better for me to just leave this house.</p>",
-                "<p>TEN</p>",
+                "<p>I should have listened to Ifeanyi. She’ll certainly tell them how Florence died, that I’m responsible for her death. I think it’s better for me to just leave this house.</p>"
+              ],
+              "order": 10,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-d3cb9e42-4352-4ea8-bd71-f05e0e19728f",
+              "title": "Chapter TEN",
+              "subtitle": "",
+              "chapterNumber": 10,
+              "content": [
                 "<p>Apart from the hoop at the garage where I slogged through the drill in preparation for the university tournament, which I miss, I consider my leaving Uncle Dike’s house an advantage to my bid for a place in the school team – it has given me the much-needed focus and frame of mind. Although, on the downside, I have to travel some twelve kilometres to get to where I practise, with the locals, but generally speaking, my game has improved tremendously within a few days.</p>",
                 "<p>My drill now includes sprints and workout every morning. In the evening, I jog my way to the grotesque basketball pitch where I engage the local basketball players who know very little about the rules of the game, and even if they do, they consider it an obstruction to our very physical kind of game. Perhaps the most salient objective in our court is to get the ball past the opponent by all means and pass it through the ring, which as one would expect, has neither a net nor a backboard.</p>",
                 "<p>It was when I started playing with the group that I introduced the office of an umpire, a secondary school student, who looks forward to coming to watch me play, but he is always reminded at the start of each match by the locals not to interrupt the game unnecessarily or they’ll take the whistle from him. Hence our game looks more like a rugby match than a basketball contest. What a way to train!</p>",
@@ -1014,8 +1087,18 @@
                 "<p>As we walk into the court for the last minute of play, Coach Barry beckons on me, “Don’t do it,” he says.</p>",
                 "<p>“I hear you Coach. I won’t,” I reply.</p>",
                 "<p>The Rockets have a record of winning the league five times and are dreaded in the national basketball league. If we win them here, it’ll be an affront to the coach, not the players that a mere college side beat the state champions. I will give Coach Barry his due respect. And no one must hear our little gossip, Coach Barry and me.</p>",
-                "<p>Although our team will lose the friendly match, I have won my game. And I’ve also won the hearts of the fans here.</p>",
-                "<p>ELEVEN</p>",
+                "<p>Although our team will lose the friendly match, I have won my game. And I’ve also won the hearts of the fans here.</p>"
+              ],
+              "order": 11,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-d19b2b14-c625-4332-be92-68c776c7aa63",
+              "title": "Chapter ELEVEN",
+              "subtitle": "",
+              "chapterNumber": 11,
+              "content": [
                 "<p>“I call that superlative. No one has ever played like this after Dreck,” Dele says smugly.</p>",
                 "<p>“Thanks Dreck.”</p>",
                 "<p>“You won the game,” he says.</p>",
@@ -1146,8 +1229,18 @@
                 "<p>Two library attendants come in to see about the altercation. “What is all the noise about, what is happening here?” one of them asks.</p>",
                 "<p>“There’s no problem sir,” Bitty replies smiling, “Everything is all right now.”</p>",
                 "<p>Femi picks up his notebooks from the table and leaves the room accompanied by his friend.</p>",
-                "<p>The library attendants glare at Bitty and me and leave the room. The boy sitting next to my table begins to clap his hands, several seats shift noisily, and the clapping of hands intensifies. Then they all stand in ovation. Bitty and I smile at each other.</p>",
-                "<p>TWELVE</p>",
+                "<p>The library attendants glare at Bitty and me and leave the room. The boy sitting next to my table begins to clap his hands, several seats shift noisily, and the clapping of hands intensifies. Then they all stand in ovation. Bitty and I smile at each other.</p>"
+              ],
+              "order": 12,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-1b6f0011-8901-4e65-a3f3-39c3faea8293",
+              "title": "Chapter TWELVE",
+              "subtitle": "",
+              "chapterNumber": 12,
+              "content": [
                 "<p>He is so well informed about campus cult groups that I wonder what tickles his interest about their deplorable clandestine activities. Bitty’s commentary on campus fraternities is also giving me the impression he’s nursing the interest of joining the cult. His down-to-earth nature is completely out of place for a blue blood. I’m beginning to think it’s an expression of his low self-esteem.</p>",
                 "<p>“No one is allowed to join the team if he hasn’t signed up with the Golgotha fraternity,” Bitty says as he drives me back to my apartment in his car. “Do you know why Dreck insists on that?”</p>",
                 "<p>“No.”</p>",
@@ -1356,8 +1449,18 @@
                 "<p>“Shoot me please…shoot me,” I whisper to Richard.</p>",
                 "<p>“That’ll be a waste. I’m sure after this you’ll reconsider our proposal,” Femi replies as he pulls down his trousers.</p>",
                 "<p>I turn my eyes away from looking at him and bow my head to the floor. “Shoot me please,” I mumble.</p>",
-                "<p>If I survive this, if I ever survive this, I’ll make them pay for this. I’ll surely avenge her no matter where they run to. I’ll hunt them and kill them all, I mutter under my breath.</p>",
-                "<p>THIRTEEN</p>",
+                "<p>If I survive this, if I ever survive this, I’ll make them pay for this. I’ll surely avenge her no matter where they run to. I’ll hunt them and kill them all, I mutter under my breath.</p>"
+              ],
+              "order": 13,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-52b929b4-cb99-4454-95b3-5b1bc434090e",
+              "title": "Chapter THIRTEEN",
+              "subtitle": "",
+              "chapterNumber": 13,
+              "content": [
                 "<p>As soon as the aircraft touches down on the runway and the overhead loudspeakers in the arrival lounge announce it’s the flight from Bangkok, Anita’s eyes light up.</p>",
                 "<p>“Is it Daddy’s flight?” Rebecca asks.</p>",
                 "<p>“Yes Becky... I think so,” I reply flabbily.</p>",
@@ -1479,8 +1582,18 @@
                 "<p>“It’s a date.”</p>",
                 "<p>“When I was in the university, the cult wasn’t very common, but I was privileged to be involved in the formation of the Black Knights. When we return, I’ll put you through on what it takes to start a fraternity. I want you to execute my kind of justice on those bastards.”</p>",
                 "<p>“Judgment is without mercy to him that shows no mercy,” I say with a gruff.</p>",
-                "<p>He stands on his feet and walks to the door leaving the room. I slip into the duvet.</p>",
-                "<p>FOURTEEN</p>",
+                "<p>He stands on his feet and walks to the door leaving the room. I slip into the duvet.</p>"
+              ],
+              "order": 14,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-b4814f5c-a50d-497b-ad89-dd1305973818",
+              "title": "Chapter FOURTEEN",
+              "subtitle": "",
+              "chapterNumber": 14,
+              "content": [
                 "<p>Had the police acted upon our report about the rape charge we brought against Femi and his colleagues, I would never have settled on personally avenging Julia’s rape, neither would I have changed my mind about the fraternity. It would definitely not have crossed my mind to get involved with the cult.</p>",
                 "<p>The police dismissed our allegation as lacking in proof and frustrated all our efforts to bring Femi and his friends to book, because of his father’s position in the Government. Bitty felt humiliated at their attitude and talked about getting his cousin Dickson involved, but I disagreed.</p>",
                 "<p>Big Brother Dickson was the one, I believe, that suggested to Ifeanyi to sturdily dissuade me from getting entangled in the cult, which he enforced by making me swear an oath. I figured it out when Bitty finally confessed his real reason for not participating in the games – Dickson threatened to personally kill him if he dares go near the basketball court.</p>",
@@ -1566,29 +1679,27 @@
                 "<p>Bitty and I brainstorm on a couple of options that would attract the least attention, such as, clubbing him to death. Bitty shudders and says it’s too cruel.</p>",
                 "<p>Sheer mischief is what inspired my idea on how best to handle Dreck. When I narrated the details to Bitty, he immediately acknowledged there couldn’t be a better option. And so we eventually agreed on a D-day to carry out our plan.</p>"
               ],
-              "order": 1,
+              "order": 15,
               "isPreview": false,
               "status": "Published"
             }
           ]
         },
         {
-          "id": "section-f3bfc78b-2a51-4aaa-8c5f-d751905b20e9",
+          "id": "section-75f57e5d-0ef1-453f-b3d7-3e556273900b",
           "title": "BOOK TWO: THE FALL",
           "subtitle": "",
-          "price": 0,
-          "order": 3,
+          "price": 1500,
+          "order": 2,
           "tts": true,
           "voice": "Female",
           "chapters": [
             {
-              "id": "chapter-3d55ebdf-494e-4cb8-838e-ffa097f0aaca",
-              "title": "Prologue",
+              "id": "chapter-374323b6-f73c-4ea8-ad75-756403509c5e",
+              "title": "Chapter FIFTEEN",
               "subtitle": "",
-              "chapterNumber": 3,
+              "chapterNumber": 15,
               "content": [
-                "<p>The Seagull</p>",
-                "<p>FIFTEEN</p>",
                 "<p>After taking care of Dreck, we saddled ourselves, me and Bitty, with the task of organizing the group. We agreed from the onset that initiation into the fraternity was going to be thorough. No sentiments whatsoever would be entertained. And unlike the method employed by most clandestine groups, whereby prospective members are lured, coerced or hoodwinked into it, being a disciple of the Inverted Cross Fraternity will be by the member’s volition. This is to ensure that, in the future, the right calibre of members are recruited.</p>",
                 "<p>First, I personally contacted the eleven other disciples one on one and shared the vision with them. Most of them are victims of Dreck’s hard-line attitude to selection of players into the basketball team, so they immediately bought the idea, although at this time Dreck was dead, they were determined to see Golgotha fraternity buried for good.</p>",
                 "<p>One disciple whose selection raised Bitty’s eyebrow is Terna Akuma. He is an estranged member of Golgotha fraternity. He and Dreck had severe disagreement over the inclusion of my name in the team list. When I announced my exit from the NUGA squad, he eventually opted out of the basketball team as well. Dreck ordered his immediate excommunication from the Golgotha fraternity.</p>",
@@ -1713,8 +1824,18 @@
                 "<p>She shakes her head disappointedly and whispers, “Don’t tell me you’re a member of the Inverted Cross Fraternity?”</p>",
                 "<p>“I won’t be long okay,” I reply ignoring her question. I try to kiss her but she moves her head away from me. Then I turn and walk slowly to the door.</p>",
                 "<p>Dewy-eyed she says coldly, “You won’t find me here when you return. And please don’t come looking for me.”</p>",
-                "<p>Without turning back to her, or saying a word, I open the door and leave the room. Bitty’s eyes blaze furiously at me against the dark night. He quietly turns and walks away. Terna Akuma gawps at me, and then follows him. I gather myself and tag along.</p>",
-                "<p>SIXTEEN</p>",
+                "<p>Without turning back to her, or saying a word, I open the door and leave the room. Bitty’s eyes blaze furiously at me against the dark night. He quietly turns and walks away. Terna Akuma gawps at me, and then follows him. I gather myself and tag along.</p>"
+              ],
+              "order": 1,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-6eb28c93-71f1-4c97-9eaa-06b62f7c979e",
+              "title": "Chapter SIXTEEN",
+              "subtitle": "",
+              "chapterNumber": 16,
+              "content": [
                 "<p>Harlem is the general fraternal parlance for our meeting place. I also adopted the slang fellowship of the spirit as codename for our meetings. The fellowship of the spirit could be convened in a pub, a lecture room or any of the school’s cafeterias depending on the urgency of the meeting, the level of secrecy it demands and how many disciples are expected to attend such a meeting.</p>",
                 "<p>For security reasons, especially if a full house is expected, the fellowship of the spirit is convened in Goshen, the family’s meeting ground in a forest. But if for any reason the fellowship is convened elsewhere, it is made to appear as casual as possible so that it doesn’t attract attention of the public, and it must be concluded in the shortest possible time. For the same reason, the fraternity forbids convening the fellowship of the spirit in a disciple’s house or hostel room.</p>",
                 "<p>It is also forbidden, for security reasons, with the exception of meetings held in public places, for disciples to address one another by their real names during the fellowship of the spirit. It is an ancient practice among cult groups, especially in the bush, to address one another by false names that had earlier been assigned to them. In the Inverted Cross Fraternity, it is the High Priest’s responsibility to codename each disciple at their induction. A disciple’s false name is his ivy. However, these names are never, under any circumstance, supposed to be used anywhere else among family members except during our secret meetings.</p>",
@@ -1895,8 +2016,18 @@
                 "<p>I halt and suddenly turn around to face two men right behind me. One of them grabs the waistline of my trousers while the other brings out an identity card from his breast pocket and flashes it to my face.</p>",
                 "<p>“Police officers,” he announces, “You are Ikenna Obiajulu, aren’t you?” he asks.</p>",
                 "<p>“Yes I am.”</p>",
-                "<p>“You are under arrest for the murder of Sephia Rwang,” he says in clipped military tone. His colleague, the one that showed me his ID immediately brings out a handcuff and fastens it on my wrists.</p>",
-                "<p>SEVENTEEN</p>",
+                "<p>“You are under arrest for the murder of Sephia Rwang,” he says in clipped military tone. His colleague, the one that showed me his ID immediately brings out a handcuff and fastens it on my wrists.</p>"
+              ],
+              "order": 2,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-e52cccd5-03f9-4928-8ebf-f83774682303",
+              "title": "Chapter SEVENTEEN",
+              "subtitle": "",
+              "chapterNumber": 17,
+              "content": [
                 "<p>There is no distinction between those in custody awaiting trial and those serving their sentence at the Katampe Maximum Prison. As far as the warder is concerned, we are all guilty and condemned to death until the judge, if we are lucky to get a trial at all, decides otherwise.</p>",
                 "<p>Katampe Maximum Prison is located in the desert area of southern Kaduna, the prison is popularly referred to as the last bus stop, and there’s a myth that only a handful of detainees have been privileged to leave the gaol alive. They say it takes a miracle to get out of here alive. Inmates are seldom arraigned in court, and when they get the chance, it’s a mere formality or in the words of the warder, ‘to fulfil all righteousness’.</p>",
                 "<p>Because of the slow judicial process, most inmates who have been lucky enough to get a trial do not stay long enough to hear the Judge’s verdict.</p>",
@@ -1956,8 +2087,18 @@
                 "<p>“One day, when we’re out of here and it’s just the two of us in a restaurant, I’ll tell you all about me.”</p>",
                 "<p>“Take care of yourself.”</p>",
                 "<p>We are quickly summoned into the waiting Black Maria one after the other. Supro Afem turns away from my stare gazing steadily into space. I hold back tears as I watch Steve turn his back without waving goodbye.</p>",
-                "<p>The door of the Black Maria is shut and its siren wails. We are transported to an undisclosed venue of our assignment.</p>",
-                "<p>EIGHTEEN</p>",
+                "<p>The door of the Black Maria is shut and its siren wails. We are transported to an undisclosed venue of our assignment.</p>"
+              ],
+              "order": 3,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-15dd57ed-4a67-4685-b989-ea06be4c5dac",
+              "title": "Chapter EIGHTEEN",
+              "subtitle": "",
+              "chapterNumber": 18,
+              "content": [
                 "<p>“Left right, left right…hop high…hop high…att – en – tion!” My heart sinks at the sound of soldiers on parade. Their harsh voice gradually fades out as we take a sharp right bend and the ramshackle truck cranks away.</p>",
                 "<p>Suddenly the van stops, the door opens and the guards usher us out. My God! We’re in a military barracks.</p>",
                 "<p>The duplex where we are detailed to work is littered with debris of wood and bricks from ongoing refurbishing work. Young cadets who are obviously excited to own a rifle and eager to prove their skill with the ammunition hanging on their shoulders are guarding the building. They are keeping watchful eyes on everyone of us. Escorted by three prison guards that came with us, the foreman takes us around the building and designates us to where we are required to work.</p>",
@@ -2105,8 +2246,18 @@
                 "<p>He shakes his head. “I’m not making any promises, but as long as you cooperate with me, I’ll do the best I can to see that you get a fair trial,” he pauses, “And by God’s grace acquitted…if you’re innocent.”</p>",
                 "<p>I indicate my consent by raising my right hand with open palms.</p>",
                 "<p>He brings out the packet of cigarette, locks the black leather attaché case and comes to where I’m sitting. “Give it to your neighbours, a redemption gift. You’ll need their prayers too,” he says as he put the packet of cigarette in my breast pocket. “I strongly recommend a haircut. And shave your beards too. I’ll be back next week Tuesday okay.”</p>",
-                "<p>He rattles at the door for the security to open the door.</p>",
-                "<p>NINETEEN</p>",
+                "<p>He rattles at the door for the security to open the door.</p>"
+              ],
+              "order": 4,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-be196607-a26c-4ea5-8a20-0b6117baa838",
+              "title": "Chapter NINETEEN",
+              "subtitle": "",
+              "chapterNumber": 19,
+              "content": [
                 "<p>The consequence of transgressing the laws of the GODs is severe, but my experience since I’ve been here has caused me to question the authority of the Order over my life. How could they have abandoned me this long? Against my will, I had my hair sheared and my beards cut off. For nearly five years, I’ve neither shaved nor barbed my hair, in compliance with the oath I swore as a star bearer.</p>",
                 "<p>The myth that trials are a mere formality has given me a complex about the judicial system – that the verdict is reached by the Judges ever before trials begin, especially if it is a murder charge, and if the accused person is detained at Katampe maximum security prison. Detainees arraigned from here are treated with barefaced prejudice.</p>",
                 "<p>In spite of that, I’m up against a principal odd, the ethnic and religious interplay of the characters involved in my trial. I am Ibo, and I’ll swear to be a Christian, the Judge, Justice Adamu Kachalla is a northerner, an Hausa, and a Muslim Mallam. Segun Babade is from the west, a Yoruba and seemingly a Christian. I’m not sure about Sephia’s religious inclination, but being a northerner, it may certainly stir a lot of sentiments and sway the judge’s verdict.</p>",
@@ -2325,8 +2476,18 @@
                 "<p>“Maybe,” Agatha replies.</p>",
                 "<p>Felix turns to the Judge and announces, “My lord, that’ll be all for the witness.”</p>",
                 "<p>The next prosecution witness is the prison warder, Mr. Sanusi. But he’s not in court. Felix tenders a written excuse to the Judge for his absence – that he is unavoidably absent because of his busy duty schedule at the prison. He promises to make him available at the next hearing.</p>",
-                "<p>I think the Judge was begging for it. He announces the case is adjourned to the thirty-first of August, and calls for the next case.</p>",
-                "<p>TWENTY</p>",
+                "<p>I think the Judge was begging for it. He announces the case is adjourned to the thirty-first of August, and calls for the next case.</p>"
+              ],
+              "order": 5,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-744f6093-00d5-407c-aed6-2e1312c67f6b",
+              "title": "Chapter TWENTY",
+              "subtitle": "",
+              "chapterNumber": 20,
+              "content": [
                 "<p>There has been an outbreak of cholera in the prison. After barely five days since the first patient was diagnosed, the killer disease has already claimed seven lives and left nearly a third of the population of inmates in severe condition. The environment is littered with food particles vomited by the infirm.</p>",
                 "<p>Harry hasn’t visited since the outbreak of the disease. I thought it was the fear of catching the bug that kept him away until I learnt the prison authority is turning visitors back. Because of their cavalier attitude to get medical aid for affected inmates, I suspect their reason is not to prevent visitors from contracting the disease, but to forestall the possibility of spreading a scandal about the outbreak that has reached epidemic proportion.</p>",
                 "<p>The privilege to leave the prison premises offers me some respite from the horrific experience here, and also the opportunity to get some medications for Steve. Thanks to Segun’s generosity, he helps me buy drugs prescribed by his doctor for the disease.</p>",
@@ -2421,8 +2582,18 @@
                 "<p>“Court rise!” the clerk shouts.</p>",
                 "<p>We all rise as the police orderlies usher the Judge out of the courtroom.</p>",
                 "<p>Felix leaves the court in a hurry escorted by Mike Okonta who is carrying his briefcase. Mrs. Bimbo Eleru carefully and slowly arranges her bag and joins the crowd noisily streaming out of the courtroom while Segun and Frank arrange their documents.</p>",
-                "<p>I am handcuffed and led away to the limo.</p>",
-                "<p>TWENTY-ONE</p>",
+                "<p>I am handcuffed and led away to the limo.</p>"
+              ],
+              "order": 6,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-a751a0fa-7caf-4b95-89de-9c52083ff402",
+              "title": "Chapter TWENTY-ONE",
+              "subtitle": "",
+              "chapterNumber": 21,
+              "content": [
                 "<p>His right leg is crossed over the left and he’s wagging a shiny black shoe following the rhythm of the pen he’s tapping on the table. He’s letting out his fury. As soon as the prison attendants lock the door to the visitor’s room, the pen-tapping stops and the wagging foot is stilled.</p>",
                 "<p>The two lawyers representing me, Segun Babade and Frank Odikpo, have contrasting attributes, but it is a tremendous advantage in the proceeding. Segun is surly, exuberant and irascible, while Frank is calm and unruffled. If Segun were representing me single-handedly that old horse would have outwitted him. Frank had been in the profession long enough to realize how detrimental it is for a lawyer to blow his top during proceedings. Felix probably noticed Segun’s ill temper early enough and quickly devised the tactics of pushing him to the brink of losing his temper. Frank calms him down and restrains him from getting worked up at the prosecutor’s tailored derisive comments.</p>",
                 "<p>Frank Odikpo talks so slowly and with few words that, at first, I wondered why he chose the legal profession. He was called to the bar nearly fifteen years ago, at the age of twenty-four. His face is constantly etched with a dim-witted smile that smothers the enormous acumen he’s gifted with.</p>",
@@ -2545,8 +2716,18 @@
                 "<p>“Objection overruled.”</p>",
                 "<p>“It is my profession and I know what I am saying,” Dr. Idris responds.</p>",
                 "<p>“I have no further questions my Lord,” Segun concludes glaring at him.</p>",
-                "<p>Felix scowls at Segun as Dr. Idris is led out of the witness box. He’s the last witness on the prosecutor’s list.</p>",
-                "<p>TWENTY-TWO</p>",
+                "<p>Felix scowls at Segun as Dr. Idris is led out of the witness box. He’s the last witness on the prosecutor’s list.</p>"
+              ],
+              "order": 7,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-c6552135-13ed-48af-b3ac-c09bb7b73451",
+              "title": "Chapter TWENTY-TWO",
+              "subtitle": "",
+              "chapterNumber": 22,
+              "content": [
                 "<p>At eight-forty on the dot, the prison limo enters the court premises and I am escorted into the court building by a band of armed policemen for the defence session, which will commence, as usual by nine o’clock.</p>",
                 "<p>Segun tells me my trial is gathering a lot of attention locally. I’m least impressed. He says it is tagged the trial of the most dangerous cultist. Is it in the news? Not yet he says. I hope the publicity doesn’t go beyond this. I don’t want the news to reach my father.</p>",
                 "<p>“Guess who our first witness is?” he asks.</p>",
@@ -2639,8 +2820,18 @@
                 "<p>“Thank you very much Dr. Idanusa for sparing the time to come and witness.” Turning to the Judge he submits, “I have no further questions for the witness my lord.”</p>",
                 "<p>Quite unlike Felix, he spares Dr. Idanusa the opportunity to go and take care of whatever has kept him looking at his watch every now and then. He makes Dr. Idanusa answer two short questions and then concludes. Even Judge Kachallah couldn’t help raising his eyebrows and wondering, has Ruthless Gee has suddenly lost steam.</p>",
                 "<p>Judge Kachallah rattles the gavel to signal another adjournment and quickly leaves his seat and out of sight. Felix and his male colleague, Mike Okonta, slowly pack their bags, while Miss Bimbo Eleru goggles at me.</p>",
-                "<p>If she’s thinking what I’m thinking, she’s probably contemplating why the law affords criminals like me the chance to escape being punished on the guise of proving a crime beyond reasonable doubt. Besides, I’m pondering, who could have done such a gruesome thing to such an innocent girl?</p>",
-                "<p>TWENTY-THREE</p>",
+                "<p>If she’s thinking what I’m thinking, she’s probably contemplating why the law affords criminals like me the chance to escape being punished on the guise of proving a crime beyond reasonable doubt. Besides, I’m pondering, who could have done such a gruesome thing to such an innocent girl?</p>"
+              ],
+              "order": 8,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-dbcb6f1a-292b-44b1-a09e-1bfa20cab201",
+              "title": "Chapter TWENTY-THREE",
+              "subtitle": "",
+              "chapterNumber": 23,
+              "content": [
                 "<p>We are told that the Ministry of Health has finally waded into the situation in the prison and has promised to send medical aid to arrest the outbreak of cholera that has claimed fourteen lives and threatening to wipe out the entire prisoners.</p>",
                 "<p>I don’t believe them.</p>",
                 "<p>They fight everything, corruption, poverty, HIV/AIDS, malaria and polio, everything. Just name the disease, government will tell you they’re fighting it. But nothing works! It’s always the same old story. Those in charge of the sector pretend to be so concerned about an epidemic situation and blow it out of proportions in order to arouse the sympathy of the international community so that grants may be disbursed, not because they have compassion for the infirmed. As soon as they lay their hands on the money, they share it among themselves and afterwards they start telling stories.</p>",
@@ -2850,8 +3041,18 @@
                 "<p>“Are you re-examining the witness Mr. Segun?”</p>",
                 "<p>“No my lord.”</p>",
                 "<p>The clerk escorts me out of the dock.</p>",
-                "<p>Judge Kachallah looks at his watch and announces, “The court will go for an adjournment. We will resume hearing on the twelfth. At that time, the court will hear the summations of the trial form both counsels.” He rattles the gavel twice signalling the conclusion of the proceeding for the day.</p>",
-                "<p>TWENTY-FOUR</p>",
+                "<p>Judge Kachallah looks at his watch and announces, “The court will go for an adjournment. We will resume hearing on the twelfth. At that time, the court will hear the summations of the trial form both counsels.” He rattles the gavel twice signalling the conclusion of the proceeding for the day.</p>"
+              ],
+              "order": 9,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-288f16ea-d9b2-48a2-9da3-4d6614706fa7",
+              "title": "Chapter TWENTY-FOUR",
+              "subtitle": "",
+              "chapterNumber": 24,
+              "content": [
                 "<p>The gallery is bursting with a herd of audience listening with rapt attention to Felix’s speech as he is called upon by the Judge to render his summation first.</p>",
                 "<p>“My lord the prosecution’s case is that on the fourteenth of February nineteen ninety-three, the accused person brutally murdered his fellow student, Miss Sephia Rwang in his room. In the course of carrying out this dastardly act, he went the extra mile by forcefully deflowering the lady of virtue, thereby bringing an otherwise promising future to an abrupt end and consequently throwing her family into mourning.</p>",
                 "<p>“First and foremost, I wish to state that the absence of the investigating team, namely, the police force is not an omission, neither is it deliberate. The Police was duly invited as a witness by the prosecution, namely, Inspector James Kala and Sergeant Saeed Ombo who carried out the arrest of the accused that night. But regrettably, for reasons best known to them, they turned down our invitation. We were forced to carry on the course of pursuing justice. We are aware that this has created a loophole for the defence.</p>",
@@ -2934,8 +3135,18 @@
                 "<p>A higher calling indeed! Harry never hinted he was a lawyer.</p>",
                 "<p>“There’s no higher calling than the privilege of defending the rights of the oppressed,” Segun says beaming and hugging me. “What do you say, Iyke?”</p>",
                 "<p>“Yeah,” I mutter hazily.</p>",
-                "<p>My mind goes back to Nkeonyere’s warning about my turning away from the vow of consecration of my father. But how can I forgive him for placing such a curse on me? How can I return back to him scorned, broken and empty?</p>",
-                "<p>TWENTY- FIVE</p>",
+                "<p>My mind goes back to Nkeonyere’s warning about my turning away from the vow of consecration of my father. But how can I forgive him for placing such a curse on me? How can I return back to him scorned, broken and empty?</p>"
+              ],
+              "order": 10,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-55084412-d886-49d6-8b60-611494db2bae",
+              "title": "Chapter TWENTY- FIVE",
+              "subtitle": "",
+              "chapterNumber": 25,
+              "content": [
                 "<p>At the moment, I’m putting up with a guy I recently made acquaintance with, Osas Ishaya. I met him while I was hunting for a job. Osas gladly introduced me to his manager when I indicated interest in a job, any kind of job. Because it’s the kind that hardly requires intellectual skills – my physical fitness was of paramount concern to my employer – once I was considered fit enough for it, I was offered the job right away.</p>",
                 "<p>But the meagre stipend I’m paid for a day’s job can hardly buy me a decent three-square meal let alone renting an accommodation, so Osas took me in to stay with him. We are illegally occupying a three-bedroom bungalow in a government-developed residential estate. The initiative was introduced to alleviate the problem of housing for the middle and low-income earners, but that purpose was defeated. Most of the houses have not been rented because the cost is beyond their reach. Consequently, most of the houses are illegally occupied by tramps like us.</p>",
                 "<p>At first, I was worried about the arrangement, but Osas assured me there was no need to be scared, he himself has lived here for three and a half years without any government or security agents ever bothering him.</p>",
@@ -3072,8 +3283,18 @@
                 "<p>He grabs the coin in the air and stares askance at me.</p>",
                 "<p>“You can be the head at all times…take a look,” I say pointing at his palm.</p>",
                 "<p>He drops his head to the coin in his palm. The face of the coin shows a head. He looks up and smiles at me. I smile back smugly. He takes a gaze at his palm again. When he looks up a second time, his face is in a grimace. The face of the coin in his palm has changed to a tail.</p>",
-                "<p>“Who are you?” he gasps.</p>",
-                "<p>TWENTY-SIX</p>",
+                "<p>“Who are you?” he gasps.</p>"
+              ],
+              "order": 11,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-a313adf1-a1a8-4b94-b688-0ba3b6a17f0b",
+              "title": "Chapter TWENTY-SIX",
+              "subtitle": "",
+              "chapterNumber": 26,
+              "content": [
                 "<p>After brief inquiry about my personal life, Chief Amanze employed me to coach Ugo in his studies. Ugo suggested that I tell his father I am a youth corper. He said his father has always preferred them as his private tutors. So I lied to him about being a youth corper, and also about how distant my house is from here. Consequently, he offered that I stay in the boys’ quarters behind the main building.</p>",
                 "<p>I seldom come to the living room, but whenever I do, and if no one is present, I feast my imagination on the ravishing beauty of Chief Amanze’s only daughter, which is so conspicuous in the life-size family portrait. Lately, my devotion for her has become my major inspiration to go back to school. Considering how seriously Chief Amanze takes education, I doubt if he’d give his daughter off in marriage to a drop out. I need to work very hard towards actualizing my dream.</p>",
                 "<p>She’s fondly called Uzii, she’s eighteen, and she’s a second year student of sociology. Maybe in the future we’d pool our talent together and set up a hospital…will she accept to marry me…will her parents consent to give their daughter to a pauper like me…? I ponder.</p>",
@@ -3236,8 +3457,18 @@
                 "<p>“Uzii please just hear me out,” I plead.</p>",
                 "<p>“I don’t have time to listen to your bloody lies.” She stands up and walks out on me facing the door.</p>",
                 "<p>“Aren’t you forgetting something Uzii?” I ask her shaking the car key.</p>",
-                "<p>She sighs, walks back to the table. Knowing how daring Uzii can be, I withhold the key and plead with her to at least let me drive her home, but she threatens to report me to her parents if I refuse to give her the car key. She angrily snatches the key from me and leaves the restaurant. I pray she doesn’t run herself into another vehicle or run over passers-by.</p>",
-                "<p>TWENTY-SEVEN</p>",
+                "<p>She sighs, walks back to the table. Knowing how daring Uzii can be, I withhold the key and plead with her to at least let me drive her home, but she threatens to report me to her parents if I refuse to give her the car key. She angrily snatches the key from me and leaves the restaurant. I pray she doesn’t run herself into another vehicle or run over passers-by.</p>"
+              ],
+              "order": 12,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-986497d2-ed0b-472b-9c01-3ce5c1eececb",
+              "title": "Chapter TWENTY-SEVEN",
+              "subtitle": "",
+              "chapterNumber": 27,
+              "content": [
                 "<p>The Amanzes are class-conscious crowd-pleasers. I was detailed by Mrs. Amanze to see that everything is well arranged for the evening. The bottom line of the preparation is to make sure the guests are not disappointed, that the party goes on without a hitch, and of course that everyone regardless of their age or gender is well attended to.</p>",
                 "<p>So far, they are pleased to find that the occasion is going well. The palatial home is besieged by a herd of guests – older family friends and Ugo and Uzii’s friends – who have come to celebrate with Uzii. Mrs. Amanze welcomes them and renders a short speech extolling her eighteen year-old daughter, and then leaves the stage for the youngsters who are eager to get on with the shindig. She’s such an orator and a bag of humour in contrast with her hard-to-please, arrogant husband who seldom smiles, and whose few words are rebukes and sharp criticisms. He won’t show up, I know.</p>",
                 "<p>As soon as Mrs. Amanze leaves the stage, I also disappear from the party to my room. I have decided to keep my distance and stay indoors until the party is over to avoid any possible embarrassment in front of her friends.</p>",
@@ -3324,8 +3555,18 @@
                 "<p>“Really?”</p>",
                 "<p>“I want to share a bit of my heart with you as you go. I want you to think about me and know that there’s someone who cares for you.”</p>",
                 "<p>I grin awkwardly at her.</p>",
-                "<p>“Some times in our lives, we all have pain, we all have so – or – row. But if we are wise, we’ll know that there’s, always tomorrow. Lean on me, when you’re not strong, I’ll be your friend, I’ll help you ca – ar – ry on. For it won’t be long till I’m gonna need somebody to lean on…”</p>",
-                "<p>TWENTY- EIGHT</p>",
+                "<p>“Some times in our lives, we all have pain, we all have so – or – row. But if we are wise, we’ll know that there’s, always tomorrow. Lean on me, when you’re not strong, I’ll be your friend, I’ll help you ca – ar – ry on. For it won’t be long till I’m gonna need somebody to lean on…”</p>"
+              ],
+              "order": 13,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-fd766679-3701-469a-ac76-c1b05001dfe8",
+              "title": "Chapter TWENTY- EIGHT",
+              "subtitle": "",
+              "chapterNumber": 28,
+              "content": [
                 "<p>My stay with the Amanzes prepared me for reintegration into family life and reunion with my family after nearly one decade. For nearly a decade I’ve put up a great deal of ego and inner will contending with the notion that my father is responsible for my misery and misfortune. It was a difficult decision for me to come back home at this time. But for Uzii, I would have changed my mind again after we squared off.</p>",
                 "<p>She asked me to swallow my pride and persuaded me to go home immediately and apologize to my father. Uzii is not very religious though, but she cited the story of the Prodigal son, a very popular story in the Bible, which I know so well. She also assured me that my father will accept me again no matter how severely strained our relationship may have been.</p>",
                 "<p>I learn from our neighbours that my parents had gone to the mission for fellowship. They are elated to see me again after such a long time, and willingly accepted my request to stay in their house and wait for my parents return since our house is locked and I can’t gain access.</p>",
@@ -3482,8 +3723,18 @@
                 "<p>“Don’t cry uncle, mummy loves you.”</p>",
                 "<p>“I know Junior, I know and I love you all too.” I embrace the kids. Then I give in to my emotions in the deathly hush as all eyes are on the kids and me. “I have done so much evil…my hands are stained with blood. I beg you all to forgive me…please forgive me,” I sob my heart out shedding tears.</p>",
                 "<p>Mummy is already in tears. My father cuddles her to stop her from weeping. Nkeonyere breaks down and starts weeping too. Olusola goes to her and pats her shoulder. Nkeonyere’s younger daughter starts wailing.</p>",
-                "<p>Daddy leaves her as soon as the bell rings to answer the door. Unable to contain the surge of anger at the sight of Uncle Dike, I leave the kids and rise to my feet frowning at him as he exchanges pleasantries with my father.</p>",
-                "<p>TWENTY- NINE</p>",
+                "<p>Daddy leaves her as soon as the bell rings to answer the door. Unable to contain the surge of anger at the sight of Uncle Dike, I leave the kids and rise to my feet frowning at him as he exchanges pleasantries with my father.</p>"
+              ],
+              "order": 14,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-2f350e3f-6107-4e78-95be-59b04f3832f0",
+              "title": "Chapter TWENTY- NINE",
+              "subtitle": "",
+              "chapterNumber": 29,
+              "content": [
                 "<p>I learnt from my mother it was Nkeonyere’s idea to use this occasion to reconcile my father’s differences with him. The two brothers haven’t seen each other in over two decades. His resentment for my father has to do with his inclination to the Christian faith and his vocal condemnation of Dike’s devilish acts. I know the man of God will not cease to speak against him even if they eventually make up.</p>",
                 "<p>Typical of Dike’s affectations, he has succeeded in deceiving everybody into believing he has come to make peace with his only brother. But considering his choice of a companion, I’m sure he’s here, not to make up with my father, but he wants to see me. He is escorted by a member of his evil occult society, the cross bearer of the GODs and Shepherd of the Inverted Cross Fraternity. His real name is Nosa Fregene.</p>",
                 "<p>As soon as the get-together is over and the Bishop says the closing prayer and blesses the family, Uncle Dike asks my father’s permission to have me follow them to show him a good hotel where they’ll pass the night. My father is ill at ease with the idea, but in order not to appear suspicious or unfeeling by telling his brother to go groping around town for a place to lay his head, he grants Uncle Dike’s wish. I’m suspicious of his request because I know he is seeking opportunity to talk privately with me.</p>",
@@ -3572,29 +3823,27 @@
                 "<p>“Dad you’ve always been right about your choice for me. I stubbornly refused what God has predestined for me and like Jonah I’ve suffered the terrible consequence of my rebellion all these years, but through my meditation in the Scriptures, and constant communion in prayer, the Lord has revealed that purpose to me and I’ve personally accepted the responsibility of fulfilling my calling…to honour the vow that you made to God, my Heavenly Father.”</p>",
                 "<p>They glance at each other in surprise. Daddy takes a glance at the Bible in my hand and asks me to give it to him. He takes a pen from his breast pocket and writes on the fly page, ‘This Book will keep you from sin or sin will keep you from this Book’.</p>"
               ],
-              "order": 1,
+              "order": 15,
               "isPreview": false,
               "status": "Published"
             }
           ]
         },
         {
-          "id": "section-60abe037-03c9-4485-b124-e954bf69bb75",
+          "id": "section-821d29b3-f7c1-4fb4-a296-9c0de6a903c4",
           "title": "BOOK THREE: THE FRATERNITY",
           "subtitle": "",
-          "price": 0,
-          "order": 4,
+          "price": 1500,
+          "order": 3,
           "tts": true,
           "voice": "Female",
           "chapters": [
             {
-              "id": "chapter-c70ad048-66a4-463c-949e-180ba6ae3e6c",
-              "title": "Prologue",
+              "id": "chapter-3fa13632-693f-4aab-8d6a-787865fcafff",
+              "title": "Chapter THIRTY",
               "subtitle": "",
-              "chapterNumber": 4,
+              "chapterNumber": 30,
               "content": [
-                "<p>Albatross</p>",
-                "<p>THIRTY</p>",
                 "<p>Right now I’m trying to fit into the classroom regime. I hate schedules, and I can’t stand the lousy class timetable. Rules, order and the paraphernalia of systematic way of doing things make me nervy. And as a matter of habit, I hardly keep an appointment at agreed times – it makes me feel vulnerable. Mum describes that character in extreme terms, as unpredictable. Miriam, my ex-girlfriend tells me I’m the most unorganised man under the sun. But I like to be that way, to exude an air of mystery.</p>",
                 "<p>Miriam sneers at my jingoistic style of dressing and taunts at my constant use of Pidgin English. It was when she began mocking me in the presence of my friends, whom she refers to as people of the ghetto, that I asked her to stop seeing me.</p>",
                 "<p>It wasn’t long after we parted that I discovered who she really is, a hopeless faker and an opportunist. She had been two-timing me with a pauper who lives on her street in downtown Kay Dee. He goes by the name Tim. The only edge he has over me is that he’s in the university, and I suspect he’s in the cult because he’s always in the company of rugged guys who talked hard and always chatted about the brotherhood. I felt humiliated that I’ve been carrying a torch for Miriam, and I felt used when I discovered Tim was milking a fortune of me through her.</p>",
@@ -3762,8 +4011,18 @@
                 "<p>“Oh yeah, how about this?” He pulls a pistol out from his waistline and presses it hard against my nose.</p>",
                 "<p>“Will you stop piercing my nose with this empty barrel?”</p>",
                 "<p>“If you know what’s good for you stay away from her,” he threatens.</p>",
-                "<p>“Why don’t you tie her to your balls in that case?” I engage the gear and screech off.</p>",
-                "<p>THIRTY -ONE</p>",
+                "<p>“Why don’t you tie her to your balls in that case?” I engage the gear and screech off.</p>"
+              ],
+              "order": 1,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-4c17a16e-f655-4f8e-8cd7-99f648ef62c0",
+              "title": "Chapter THIRTY -ONE",
+              "subtitle": "",
+              "chapterNumber": 31,
+              "content": [
                 "<p>It’s hard for me to tell whether Lizzy really loves me, or whether she’s only interested in the relationship for what she can get. If the latter is the case, she’s playing her cards well, but then she’s also playing with fire because I’ll make her pay dearly for it. I hope I’m not infatuated with her. I’m serious about taking her along on vacation, if her visa application goes through.</p>",
                 "<p>Although Lizzy’s giving me the impression she cares less about affluence, her friend’s comportment tells otherwise. Most girls are despairing and will fall for any guy that’s serious about taking them abroad, even if they have no iota of affection for him. They’ll give anything for that, anything – body and soul – for that opportunity. She’ll be taken aback if she comes to realize how serious I am about my promise.</p>",
                 "<p>I can’t believe my first date with her is turning out to be a flop. I’ve been sitting here for more than one hour and now I’m not sure if she’ll still show up. I bring out her international passport from the envelope and open the page that has her passport photograph. I’ve been gazing at her pretty face every now and then since I collected the renewed booklet from the immigration office. It will be a very pleasant surprise to her. And if she knows what’s good for her she’d better start thinking seriously about ditching that scumbag she calls her boyfriend.</p>",
@@ -3880,8 +4139,18 @@
                 "<p>“My regards to Emem. And please don’t let her know I told you about my conversation with her okay.”</p>",
                 "<p>“I can keep secrets too.”</p>",
                 "<p>“I can imagine. Sweet dreams.”</p>",
-                "<p>“Goodnight.”</p>",
-                "<p>THIRTY-TWO</p>",
+                "<p>“Goodnight.”</p>"
+              ],
+              "order": 2,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-b4390a06-9d5d-43cb-b7f8-62e68066fcef",
+              "title": "Chapter THIRTY-TWO",
+              "subtitle": "",
+              "chapterNumber": 32,
+              "content": [
                 "<p>When I called my mother to ask if they’ll be coming for my matriculation, she sounded grave. When she asked me, ‘who for God’s sake is Lizzy,’ I knew the travel agent had betrayed me in spite of my plea to keep our transaction confidential. She seized the passport and informed me that she and Dad have decided on withdrawing me from the university and sending me abroad to further my studies. When I told her Lizzy is my fiancée, the line went dead.</p>",
                 "<p>My mother can be cynical when it comes to my relationship with girls. She contributed to breaking my relationship with Miriam when she made her stop coming to the house, which eventually prompted my going to visit her. That’s how I discovered she was cheating on me. She accused Miriam of being the one instigating me into pilfering and shoplifting. Although I thought she was unreasonably overprotective, she actually bailed me out of the shackles of that crook. How would I have known of her relationship with Tim?</p>",
                 "<p>She called back later to inform me she was on her way to Lagos and asked me to come to her hotel room and see her in the evening. If she’s still in a state about our previous discussion on the phone it is to severely censure me. I’ve made up my mind not to see her.</p>",
@@ -4005,8 +4274,18 @@
                 "<p>“That means he’s a disciple of Jesus.”</p>",
                 "<p>She’s short of words.</p>",
                 "<p>My father is the first to express his satisfaction when the banquet is over. He particularly enjoyed the pounded yam and that surprised my mother who knows how choosey he can be with food. Even the kids can’t hold back their feelings – some of them break down and start whimpering that they want to stay with Uncle Jehoshaphat when they’re told it’s time to go home.</p>",
-                "<p>And for the third time he tells him to look after me and gives him a gift of ten thousand Naira. He deserves it.</p>",
-                "<p>THIRTY-THREE</p>",
+                "<p>And for the third time he tells him to look after me and gives him a gift of ten thousand Naira. He deserves it.</p>"
+              ],
+              "order": 3,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-145de8b3-2416-4c94-8599-73e7fb3ac68a",
+              "title": "Chapter THIRTY-THREE",
+              "subtitle": "",
+              "chapterNumber": 33,
+              "content": [
                 "<p>As soon as my parents and the guests left, I race to her apartment. I know she’d be worried-sick by now. I’m already one hour behind our scheduled meeting and the party is expected to be underway three hours from now. Yet there are still too many things to be done, and the time is so short. How on earth am I going to coordinate all these?</p>",
                 "<p>Jshap has proven on two occasions to be very good with organising things, which happens to be my greatest weakness. If it were possible, I would have asked him to help me put things in order for Lizzy’s party. But considering his strong inclination to the faith, it’s needless even thinking about it.</p>",
                 "<p>When I apologize to Lizzy for my lateness, she accepts it with ease and tells me she anticipated it. She says she was able to get Steel to help her out in my absence. She commends my parents for taking the time to come all the way from Kaduna. I am tempted to ask after her family – why they didn’t come? But I refrain. It’s not the right time.</p>",
@@ -4091,8 +4370,18 @@
                 "<p>Sitting in the backseat silently, I contemplate what to do next after they drove off. Going back to the hotel to fetch Emem will not be such a good idea – by now the police would have surrounded the area and anybody found loitering around the area may likely be arrested, branded a suspect and detained. The thought of Lizzy comes back to my mind. “When is this nightmare going to end,” I mutter to myself.</p>",
                 "<p>I’m too muddled up to figure out what to do about Lizzy as I drive back home. “So this is what she had been afraid of…but how could she die like that?” I ponder. I park the car and muster up some courage. Then I step out of the car and trudge on to the front door. I can hear Jshap’s voice faintly. Is he still praying? I move closer to the house. His voice is more audible with every step I take closer to the door. Then I realize he isn’t praying. I think he’s talking to somebody. Maybe he was able to get some help eventually, I wonder. He’s talking to a doctor perhaps. But what about Lizzy, is she well?</p>",
                 "<p>I knock at the door and turn the handle. I am amazed to find two of them sitting down with the Bible in their hands. Jshap gives me an impassive glance. Lizzy smiles at me. Words fail me.</p>",
-                "<p>She ignores me and smirks at Jshap.</p>",
-                "<p>THIRTY-FOUR</p>",
+                "<p>She ignores me and smirks at Jshap.</p>"
+              ],
+              "order": 4,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-216f01ef-df69-45b3-a8d7-fa1a846a7536",
+              "title": "Chapter THIRTY-FOUR",
+              "subtitle": "",
+              "chapterNumber": 34,
+              "content": [
                 "<p>Campus strong man hamstrung is the lead caption of the campus journal, Enclave. Bad news travels so fast. The newspaper stand is teeming with students who are captivated by the story of what happened yesterday night. Depending on the perspective from which each person is judging the incident – causative or otherwise – everyone here is affected differently towards the victims of the shootout. And everyone is eager to air his opinion.</p>",
                 "<p>The gist is that some are suggesting that the celebrant, who was conspicuously absent at her own party, connived with the group that carried out the attack. She is prime suspect and should be arrested and interrogated, and if possible detained. Others argue that the authority is too lenient over the cult menace, and suggest that stricter measures be taken to clamp down on their activities, such as rusticating any student suspected to be a cultist and sentencing confirmed members of the fraternity to death by execution or electrocution. I pay for a copy of the newspaper and silently leave the scene.</p>",
                 "<p>Disappointingly the report is a far cry from the truth, a hurriedly fabricated version, which evidently is a mere deduction from a generally acclaimed liable motivating factor that sparks off such hostilities – woman palaver.</p>",
@@ -4188,8 +4477,18 @@
                 "<p>This is not the first time Jshap and I are discussing about this subject of the kingdom of God, but he’s never been so profound on the subject as he is today. And I’ve never been so impacted by his words as I am now. Besides, unlike previous times he has never sought my opinion about accepting Jesus as my Lord.</p>",
                 "<p>I gather myself, let out a deep breath and mutter, “I’ll think about it.”</p>",
                 "<p>“I am convinced that God allowed you to come to this point in order for you to take this crucial decision. Today as you hear His voice, do not harden your heart, Ugo,” he says in a low tone, takes the empty glass and stands up. “I hope you think about it.”</p>",
-                "<p>Jshap leaves me sitting on the couch, bemused.</p>",
-                "<p>THIRTY-FIVE</p>",
+                "<p>Jshap leaves me sitting on the couch, bemused.</p>"
+              ],
+              "order": 5,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-b763c00b-0ec6-490b-9acb-8cae4db2602e",
+              "title": "Chapter THIRTY-FIVE",
+              "subtitle": "",
+              "chapterNumber": 35,
+              "content": [
                 "<p>He’s never told me the details of his past life or how he came to the decision to serve God, with such intensity, but I’m getting the picture that he practically dined with the devil before he repented. But for Lizzy, he almost succeeded in getting me converted…how can I leave Lizzy now…she’s so luscious a babe to let go of just like that…no…this is definitely not the right time for this.</p>",
                 "<p>I’m particularly disturbed about Jshap’s premonition that Steel will attack me. What if he’s right…what am I going to do? I ponder.</p>",
                 "<p>When Jshap was speaking about Cain and Abel, it reawakened the guilt feeling of Kelechi’s death I thought I had overcome. Does Jshap know about Kelechi…did Uzii tell him about it…but why would she tell a stranger about our family…if she did, I’ll deal with her…I’ll…God! I wish it never happened.</p>",
@@ -4337,8 +4636,18 @@
                 "<p>“What do you think, Sammy?”</p>",
                 "<p>“I think he’s a traitor, Steel…he’s insinuating his way into us.”</p>",
                 "<p>“I wouldn’t have bothered myself with what is happening between you and whoever it is that attacked you yesterday, I’m only concerned about the rumour making rounds that I’m a member of that group,” I take a pause, “I’m not here to convince you about my connection with the group, but to ask you to get your men off my tail.” I stand up to leave.</p>",
-                "<p>Steel and I shake hands, but Sammy declines, instead, he opens the door for me to leave.</p>",
-                "<p>THIRTY-SIX</p>",
+                "<p>Steel and I shake hands, but Sammy declines, instead, he opens the door for me to leave.</p>"
+              ],
+              "order": 6,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-4ae1008c-a6a0-4d86-b736-9771d8a918a1",
+              "title": "Chapter THIRTY-SIX",
+              "subtitle": "",
+              "chapterNumber": 36,
+              "content": [
                 "<p>Based on my personal observation, by spotting guys who hang out with Steel and Sammy, I notice that the fraternity is a blend of people of different calibre, attributes and attitudes – the indigent and indignant, the prosperous and proud, and the plucky and creampuffs. And even a midget like Steel could head such a powerful group, and he’s dreaded for that matter. Observing their association from outside, I find the secrecy of their fraternization unusually interesting.</p>",
                 "<p>By my personal observation also, I’ve been able to identify about twenty-seven guys who I suspect to be likely members of the cult group. But, how could this one have escaped my notice?</p>",
                 "<p>My contact is escorted by another quiet fellow who I see around campus regularly. Pretending to be shaking hands with me, he slips a tiny black coffin-shaped card into my palm, and in a gruff tone, he instructs me that nobody else must see the card, and if possible, I should hide it from God. He also warns me not to come near the rendezvous if for any reason I lose the card. Then they fade away as unnoticed as they had come.</p>",
@@ -4414,8 +4723,18 @@
                 "<p>One of the masked men referred to as the High Priest comes to us and addresses us. He calls the names of six of the candidates lying down with me, including the one with a broken head, and asks them to stand up. Four masked men who came with the High Priest lead them away from us – they have failed the test. Two of them had passed out during the drill and were only resuscitated hours later.</p>",
                 "<p>The High Priest congratulates us and tells us that we have done well and that we have qualified for the next stage of the initiation – a test of intelligence, which will take place in three days time. He also warns us sternly that neither angels nor any other mortal must know where we had been or hear about what happened here.</p>",
                 "<p>We are sent home before the dawn of the day, at fifteen minutes past four with the charge to think over again if we really want to join the brotherhood, otherwise such a person is free to excuse himself from the second stage.</p>",
-                "<p>Before going for the initiation, I had taken the decision to go to my new apartment instead of returning to meet Jshap. He’d demand an explanation for the contusion on my face and the cuts on my body.</p>",
-                "<p>THIRTY-SEVEN</p>",
+                "<p>Before going for the initiation, I had taken the decision to go to my new apartment instead of returning to meet Jshap. He’d demand an explanation for the contusion on my face and the cuts on my body.</p>"
+              ],
+              "order": 7,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-4f915520-2bed-42dd-855a-c574282b2a28",
+              "title": "Chapter THIRTY-SEVEN",
+              "subtitle": "",
+              "chapterNumber": 37,
+              "content": [
                 "<p>We are asked to lie down near a small old and dilapidated house, which they refer to as the shrine, while the men in mask dressed in dark shirts, black trousers and black berets march slowly into the God-forsaken house one after another in a single file bearing a burning candle each and croaking repeatedly, “My mother don’t you worry, my father don’t you worry, if I happen to die an inverted man, never mind we shall meet again…my darling don’t you worry, my teacher don’t you worry, if I happen to die an inverted man never mind we shall meet again.”</p>",
                 "<p>Twenty-eight of us made it through to the second stage of the hazing, which is generally referred to as blending. We are reminded that only nuggets, that’s us, that pass the intelligence test, codenamed etit, will move on to the final test after which successful nuggets will be accepted into the brotherhood and thereafter have the honour of becoming one of the campus hard men.</p>",
                 "<p>Gideon Dim is lying next to me as we eagerly wait to be called up for the intelligence test. Gideon and I have already started courting a mutual feeling of brotherhood. Apart from the fact he’s my faculty mate, when we met the day after the drill and identified each other as nuggets, after lectures he offered to buy me lunch. After being through the drill, the feeling of toughness and self-confidence was evident in our carriage and smug gait as we walked into the cafeteria wearing dark sunshades.</p>",
@@ -4467,8 +4786,18 @@
                 "<p>“Yeah.”</p>",
                 "<p>“Good.” he taps me on my shoulder and steps away.</p>",
                 "<p>“Don’t forget they may ask you to taste the food before accepting it from you,” his colleague adds, taps my shoulder and quickly joins him.</p>",
-                "<p>I caress my chin and ponder over the task before me. The mystery book better be with these guys, or else…and when I get it. I may just decide to keep it for myself. Then I’ll rule the cult and make all other groups submit to me. And according to Jshap, make things happen, a lot of things. I brood over it as I watch them walk away.</p>",
-                "<p>THIRTY-EIGHT</p>",
+                "<p>I caress my chin and ponder over the task before me. The mystery book better be with these guys, or else…and when I get it. I may just decide to keep it for myself. Then I’ll rule the cult and make all other groups submit to me. And according to Jshap, make things happen, a lot of things. I brood over it as I watch them walk away.</p>"
+              ],
+              "order": 8,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-7c32abb0-62c9-4e2d-9f53-37618f450e7d",
+              "title": "Chapter THIRTY-EIGHT",
+              "subtitle": "",
+              "chapterNumber": 38,
+              "content": [
                 "<p>Today is the final stage of the initiation process. The men in masks march into the shrine silently, holding a burning candle each. But unlike the previous meeting, they aren’t singing. We are summoned in after they had all entered.</p>",
                 "<p>From his voice I notice that the one referred to as the High Priest is the same person who played the role of an emcee during the intelligence test. Apart from the full black regalia he’s wearing, he has a red band around his right upper arm. Two others are wearing similar armbands. I guess they are the principal officers of the group, but in addition the High Priest is wearing a red sash around his waist.</p>",
                 "<p>We are made to stand in a circle bowing our faces to the altar – a portion on the floor marked off in the middle of the room by a six-sided star drawn with a red paint. A skull and two bones are placed inside the star surrounded by candles of different colours. There is also a pot of fire with strange inscriptions written in different colours raised on a metal tripod stand.</p>",
@@ -4518,8 +4847,18 @@
                 "<p>After the unveiling process, the first thing we learn about the family is the fraternal handshake. All members of the family greet us excitedly with the fraternal handshake.</p>",
                 "<p>A locally brewed wine is passed from one disciple to another amidst the chanting of choruses, drumming and dancing as the house celebrates with us. They call it sensibrew. Some say it is the drink of the gods, while others refer to it as the drink of wise men. It is passed from one disciple to another. In the spirit of brotherhood, no cup was provided so we are all made to drink merrily from the can.</p>",
                 "<p>Punch, which is called sensibrew here, is a flavoursome and strong beverage made from a concoction of raw ethanol, stout, black currant, and Indian hemp essence, and sweetened with sugar. The Indian hemp is boiled in water long enough to give off much of its essence. Then it is later sieved and raw ethanol is added to the solution. Black currant drink is added to give it a wine-red colour and stout to enrich its flavour. The concentrated solution is eventually diluted with water and sweetened with sugar.</p>",
-                "<p>Everyone is allowed to take a mouthful of this highly intoxicating concoction at one time as it keeps coming around until we are all high. It’s a moment of joy for everyone, especially we, the pupa, who have looked forward to this after the gruesome hazing. We give one another the fraternal handshake grinning from ear to ear. Gideon is over the moon and I think he’s smashed too. He whispers to me that he will report the guy that defrauded him to the family as soon as the party is over.</p>",
-                "<p>THIRTY-NINE</p>",
+                "<p>Everyone is allowed to take a mouthful of this highly intoxicating concoction at one time as it keeps coming around until we are all high. It’s a moment of joy for everyone, especially we, the pupa, who have looked forward to this after the gruesome hazing. We give one another the fraternal handshake grinning from ear to ear. Gideon is over the moon and I think he’s smashed too. He whispers to me that he will report the guy that defrauded him to the family as soon as the party is over.</p>"
+              ],
+              "order": 9,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-410f3b24-4280-4610-8f57-778b0afc20db",
+              "title": "Chapter THIRTY-NINE",
+              "subtitle": "",
+              "chapterNumber": 39,
+              "content": [
                 "<p>My inverted name is Albatross. My first outing to prove the clout of the new fraternity comes on the heels of our initiation. Thanks to Gideon. He took his case to the family and demanded for justice. The principal officers agreed that a fast track solution be adopted to recover the money since the guy in question, who is in his final year, will be leaving school after the exams.</p>",
                 "<p>Gideon suggested that he and I be given the permission to visit the guy and demand for the money. But for the fear that we may either handle the matter prematurely or not have the courage to challenge him because he’s a notorious cultist, Sammy, who was also appointed as my guardian angel, was asked to accompany us.</p>",
                 "<p>The victim, Obi Shina stays off campus, in the boys’ quarters of a lecturer’s house. Our visit is essentially to put out feelers so as to ascertain the logistics of the next course of action, and to know if an attack will be necessary. For that matter, we aren’t prepared for an assault. None of us has a facemask, and although we were told that the use of firearms would not be necessary, my flute, the fraternity parlance for pistol, is secretly tucked into my bum bag because I’ve gotten used to carrying it wherever I go. And I’m sure there’s a more dangerous arsenal in the rucksack Sammy’s carrying on his back.</p>",
@@ -4652,8 +4991,18 @@
                 "<p>When we arrive the hostel, Gideon opens the door but restrains himself, “You know I’ve been troubled in my heart over the death of Obi. I don’t know what came over me that instant. I was so angry I – I lost my senses…do you think I did the right thing?”</p>",
                 "<p>“Don’t forget Legion, don’t feel sorry, okay. Those who waste time thinking about the behind don’t do much about the future.”</p>",
                 "<p>“I’ll remember that. And if the deal is certain don’t forget me. Who doesn’t want to be rich anyway?” he asks jokingly. “I owe you man…shezou brother.”</p>",
-                "<p>“What are brothers for? Shezou.” He gives me the brotherhood handshake and steps out of the car.</p>",
-                "<p>FORTY</p>",
+                "<p>“What are brothers for? Shezou.” He gives me the brotherhood handshake and steps out of the car.</p>"
+              ],
+              "order": 10,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-173292cf-207e-45d1-8d5e-def49517b30b",
+              "title": "Chapter FORTY",
+              "subtitle": "",
+              "chapterNumber": 40,
+              "content": [
                 "<p>The slightest offence is brought to the disciplinary panel. And blowing the cover of a pupa is a grave offence. Sammy has broken the rules of engagement as my guardian angel – he’s let everyone know I’m a disciple of the Inverted Cross Fraternity. He borrows my car and dons my baffs whenever he’s going for a meeting with his clients.</p>",
                 "<p>But for obvious reasons the panel winks at it. Sammy tells me my personality as a disciple of the Inverted Cross is having a great impact on other frats. Besides, it’s the first time a pupa is so conspicuously identified with the family by nearly everybody few weeks after initiation.</p>",
                 "<p>I’ve personally noticed that most of my acquaintances are either keeping me at arms length or being unnecessarily chary in relating with me. I can imagine them whisper silently among themselves about me, “that guy belongs to the most powerful cult group on campus...” and somehow that makes me feel good. But none of them has mustered the courage to ask me about it directly. And I know they won’t.</p>",
@@ -4733,8 +5082,18 @@
                 "<p>“Obi? I heard about it.”</p>",
                 "<p>Sammy is also well known to Paul and he’s conversant with the fraternity’s philosophy of guardian angel, since according to him they (or we) come from the same stock. So I go straight to narrating what happened in Obi’s room that night and how the family has reached the decision to excommunicate me, and that someone reported seeing Sammy at that time. Now he’s hunted by the police for interrogation.</p>",
                 "<p>Paul agrees to speak to Barrister Ilaje on my behalf, and gives me strong assurance that he could pull some strings to get the police to close the case. He says he dines with the Inspector General of Police, and reminds me to let Sammy know in unmistaken words that I pulled the strings. Paul also gives me a list of some identified members of the Inverted Cross Fraternity working for the Provost.</p>",
-                "<p>If everything works out exactly as we planned it, I’m sure it’d douse the suspicion Sammy’s nursing about me and I know he’ll persuade the panel to reverse their verdict to excommunicate me. And if that happens, Steel will have a taste of the stock I’m made of.</p>",
-                "<p>FORTY-ONE</p>",
+                "<p>If everything works out exactly as we planned it, I’m sure it’d douse the suspicion Sammy’s nursing about me and I know he’ll persuade the panel to reverse their verdict to excommunicate me. And if that happens, Steel will have a taste of the stock I’m made of.</p>"
+              ],
+              "order": 11,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-c70c75ad-dbd5-4328-9021-18b992c579b9",
+              "title": "Chapter FORTY-ONE",
+              "subtitle": "",
+              "chapterNumber": 41,
+              "content": [
                 "<p>Contrary to Sammy’s advice for me to take to my heels I take to Legion’s room off campus without anybody’s knowledge. He’s taking a high risk hiding me, but he couldn’t turn me back when I came knocking at his door.</p>",
                 "<p>Although Steel has no proof of his allegation that I’m an infiltrator, he succeeded in instigating family members against me. According to Legion, I am liable to death. And anyone of the family members who finds me was instructed to strike me down, or else report to the precinct caucus. But after the fellowship of the spirit tonight, he informs me that the security department has officially declared that Sammy Briggs has been cleared of the allegation of the murder of Obi Shina. He says it was announced in Harlem. There was a general belief in the house that somebody must have pulled the strings.</p>",
                 "<p>The report sent to the school’s security department is that one Linus Kono, a student, was arrested and detained, and that he has admitted being responsible for the death of Obi Shina. And that further investigations are underway to track his accomplices in the crime, that’s Legion and me. There’s no Linus Kono, and nothing will be heard of him or his accomplices again, I know. We laugh it over.</p>",
@@ -4797,8 +5156,18 @@
                 "<p>“You’re a pupa, Hugo Boss. What can you do about this?” he says derisively.</p>",
                 "<p>“Don’t underestimate me Lethal Weapon,” I reply firmly.</p>",
                 "<p>New precinct caucus are usually chosen secretly by the incumbent caucus and later presented to the house at the next fellowship of the spirit after that caucus meeting. They in turn choose the Satraps from among hard working disciples.</p>",
-                "<p>Although Sammy appears on the outside to be Steel’s loyalist, judging by his complaints about his letting out the family’s secrets to Lizzy, I know he has reservations about him. Steel has bruised his ego, and I know Sammy won’t take this lightly with him.</p>",
-                "<p>FORTY-TWO</p>",
+                "<p>Although Sammy appears on the outside to be Steel’s loyalist, judging by his complaints about his letting out the family’s secrets to Lizzy, I know he has reservations about him. Steel has bruised his ego, and I know Sammy won’t take this lightly with him.</p>"
+              ],
+              "order": 12,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-6ee45508-ad64-40af-a7b9-0e64f0a50855",
+              "title": "Chapter FORTY-TWO",
+              "subtitle": "",
+              "chapterNumber": 42,
+              "content": [
                 "<p>Because in strict terms, going by the code of conducts, disciples of the inverted cross, particularly members of the precinct caucus are forbidden by the code from having intimate affairs with girls, it is taboo for two disciples to be in conflict over a ringo. But because nearly everyone is guilty of the offence of having a girlfriend, that transgression is treated with levity. And the case of disciples contesting for a ringo is unheard of.</p>",
                 "<p>Because the members of the caucus know about my fight with Steel over Lizzy at the party, Vince suggests I present that as the motive behind his allegation of my being a spy. However, he warns that if it boomerangs, the consequences could be severe.</p>",
                 "<p>The panel decries levelling such grave allegation against me on account of jealousy and the caucus, following the code, unanimously reach the decision to suspend him. But Sammy intercedes on his behalf. Being my guardian angel, he feigns to have misinformed Steel on the matter. After considering his explanation, it is struck off.</p>",
@@ -4853,8 +5222,18 @@
                 "<p>Rather than outright disconnection of the phone lines from the mains, I switched off the ring volume of the central connecting telephone at the reception and my father’s direct line. Neither of them will be aware that calls are coming in, not until a caller comes over to the office probably, and complains why his or her call is not being answered. And that could take the whole day.</p>",
                 "<p>After about three minutes the cashier comes with a tall fair man wearing thick gold-framed lenses, who is now holding the cheque leaf and the letter. He points out something to Legion in the letter and after a brief dialogue he signs on the cheque leaf and hands it over to the cashier. Legion is asked to append his signature at the back of the cheque leaf.</p>",
                 "<p>He winks at me as he walks to a corner at the counter for the routine security photograph. Then the cashier packs bundles of Naira notes into a black cellophane bag and hands it over to Legion. I saunter to the door as he bends down to sign the cheque a second time.</p>",
-                "<p>Legion joins me in the taxi. He hands over the bag to me and we shake hands. I instruct the taxi driver to take us to the motor park.</p>",
-                "<p>FORTY-THREE</p>",
+                "<p>Legion joins me in the taxi. He hands over the bag to me and we shake hands. I instruct the taxi driver to take us to the motor park.</p>"
+              ],
+              "order": 13,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-02d07b11-14cb-4090-85d5-ae3ef6c11451",
+              "title": "Chapter FORTY-THREE",
+              "subtitle": "",
+              "chapterNumber": 43,
+              "content": [
                 "<p>The rendezvous is the Palm Beach hotel. When I break the news that the money is ready, Sammy greets me with renewed respect but Steel’s dread for me is escalated. He gives me a cold handshake. Then we all sit down to discuss how to dispose the stuff and how to share the proceeds.</p>",
                 "<p>I remind them of my extra cut in the deal, and because I don’t trust Steel, I also add that the stuff will be in my custody pending when we make enough sales to pay off the money I invested. They have no qualms with my keeping the stuff until I get my money back. But Steel insists on arranging for another buyer and also suggests that I take twenty percent of the profit and leave Sammy and him to share the remaining eighty.</p>",
                 "<p>I disagree.</p>",
@@ -4994,8 +5373,18 @@
                 "<p>I raise my head to the dais again. Chief Ilaje is wearing a wicked smile on his face nodding his head lightly.</p>",
                 "<p>“It’s too late you can’t back out now,” Nosa tells me.</p>",
                 "<p>My heart misses a beat as I turn back to the page and stare at the name Ikenna Obiajulu again. Casting back my mind to the things Jehoshaphat has in common with him. First, he’s also a mystic, then I recall my conversation with Jshap, when he mentioned the blind target. Finally, he was also at Metropolitan University. Couldn’t this be the same person I know as Jehoshaphat Obiajulu?</p>",
-                "<p>I lean forward to the table and write my name and append my signature a space beneath his. Nosa then pierces my thumb with a pin. He asks me to smear the blood to cover my thumb and print it in a box below Jehoshaphat’s thumbprint.</p>",
-                "<p>FORTY-FOUR</p>",
+                "<p>I lean forward to the table and write my name and append my signature a space beneath his. Nosa then pierces my thumb with a pin. He asks me to smear the blood to cover my thumb and print it in a box below Jehoshaphat’s thumbprint.</p>"
+              ],
+              "order": 14,
+              "isPreview": false,
+              "status": "Published"
+            },
+            {
+              "id": "chapter-e3c3322b-2fbf-405e-82fd-2f51db3e07da",
+              "title": "Chapter FORTY-FOUR",
+              "subtitle": "",
+              "chapterNumber": 44,
+              "content": [
                 "<p>The pomp and circumstance of the feast of the Passover is over, so is the euphoria of attaining the supreme and enviable position that has eluded many disciples, that has fizzled out to the thought of the enormous responsibility I’m saddled with – to find the Hangman in diaspora and make him fully shed his fingers or else I cannot receive the full honour of a Hangman, and as stated on my ordination, I will never be star bearer until my predecessor fully sheds his fingers.</p>",
                 "<p>To fully shed his fingers, I will have to cut off the thumb of the Hangman, if I find him and thumbprint it in his own blood next to the print in the annals of the star bearer. The thumbprint must match that of Ikenna Obiajulu, the Seagull, which appears in the book. Alternatively, where I cannot find him, I must adduce to the Order a proof that the Hangman is dead before I will be accorded the rights of the star bearer. In other words, the responsibility has fallen on me to solve a decade of mystery surrounding the disappearance of the Hangman. For that matter, I no longer find pleasure in being Hangman or star bearer, or associating with this group anymore.</p>",
                 "<p>“The oracle didn’t lie after all,” Barrister Ilaje says excitedly. “After our first meeting, I went back to inquire about you, Albatross. Guess what the Oracle told me?” he asks rhetorically.</p>",
@@ -5089,7 +5478,7 @@
                 "<p>“What the hell do you mean you’re blind?”</p>",
                 "<p>Sammy stares distantly ahead of him, without saying a word without blinking. I wave my hand across his face, but he doesn’t blink.</p>"
               ],
-              "order": 1,
+              "order": 15,
               "isPreview": false,
               "status": "Published"
             }
@@ -5146,5 +5535,5 @@
     "giftLimit": 5,
     "autoApprovePosts": true
   },
-  "serverSavedAt": "2026-06-15T16:20:00.000Z"
+  "serverSavedAt": "2026-06-15T17:04:27.932Z"
 }
