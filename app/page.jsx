@@ -755,7 +755,10 @@ export default function Home() {
       window.speechSynthesis.cancel();
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(activeChapter.chapter.content.join(" "));
+    const rawText = Array.isArray(activeChapter.chapter.content)
+      ? activeChapter.chapter.content.join(" ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+      : String(activeChapter.chapter.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const utterance = new SpeechSynthesisUtterance(rawText);
     utterance.rate = 1;
     window.speechSynthesis.speak(utterance);
   }
@@ -1826,7 +1829,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
           className="chapter-content-html"
           dangerouslySetInnerHTML={{ 
             __html: Array.isArray(activeChapter.chapter.content) 
-              ? activeChapter.chapter.content.map(p => `<p>${p}</p>`).join('')
+              ? activeChapter.chapter.content.join('')
               : activeChapter.chapter.content 
           }} 
         />
@@ -2546,7 +2549,8 @@ function RichTextEditor({ name, defaultValue, placeholder }) {
   const [html, setHtml] = useState(() => {
     if (!defaultValue) return "";
     if (Array.isArray(defaultValue)) {
-      return defaultValue.map(p => `<p>${p}</p>`).join("");
+      // Content items are already stored as HTML <p> strings - join them directly
+      return defaultValue.join("");
     }
     // If it's already an HTML string, just return it. 
     // If it's plain text with newlines, convert to paragraphs.

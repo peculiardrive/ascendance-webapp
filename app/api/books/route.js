@@ -37,5 +37,5 @@ export async function GET(request) {
       });
   }
 
-  return json({ ok: true, books: activeBooks.map((book) => publicBook(book, state, userId)) });
+  return json({ ok: true, books: activeBooks.map((book) => publicBook(book, state, userId, isAdmin)) });
 }
