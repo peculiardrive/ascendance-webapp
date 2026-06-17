@@ -1047,9 +1047,9 @@ function TrailerIntro({ onEnter }) {
         </button>
 
         <div className="trailer-copy">
-          <div className="trailer-text-container" style={{ pointerEvents: "none" }}>
-            <h1>{isPlaying ? "Ascendance" : "Play Trailer Video"}</h1>
-            <p>{isPlaying ? "The Trilogy" : "Ascendance"}</p>
+          <div className={`trailer-text-container ${isPlaying ? "is-playing" : ""}`} style={{ pointerEvents: "none" }}>
+            <h1>Play Trailer Video</h1>
+            <p>Ascendance</p>
           </div>
           <button className="trailer-login-btn-new" onClick={(e) => { e.stopPropagation(); onEnter(true); }}>Login</button>
         </div>

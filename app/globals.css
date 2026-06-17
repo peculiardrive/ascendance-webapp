@@ -263,6 +263,12 @@ p {
   align-items: center;
   justify-content: center;
   flex: 1;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.trailer-text-container.is-playing {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .trailer-text-container h1,
