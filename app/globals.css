@@ -1432,11 +1432,15 @@ textarea {
 
 .leader-strip {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: safe center;
   gap: 16px 12px;
-  padding: 0 12px;
-  overflow: visible;
+  padding: 0 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .leader-strip::-webkit-scrollbar {

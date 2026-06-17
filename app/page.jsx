@@ -1474,9 +1474,9 @@ function getCommunityLeaders(posts) {
 
 function LeaderList({ leaders, onSelect }) {
   return (
-    <div className="leader-strip" role="list" aria-label="Top community contributors" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px 12px', padding: '0 12px', overflow: 'visible' }}>
+    <div className="leader-strip" role="list" aria-label="Top community contributors" style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'safe center', gap: '16px 12px', padding: '0 24px', overflowX: 'auto', overflowY: 'hidden', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       {leaders.map((leader, index) => (
-        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <button className={`leader-chip rank-${index + 1}`} key={`${leader.name}-${leader.points}`} role="listitem" onClick={() => onSelect?.(leader)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           <div className="leader-avatar" aria-hidden="true" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--app-purple)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(74, 14, 78, 0.2)' }}>
             {leader.avatar || leader.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
           </div>
