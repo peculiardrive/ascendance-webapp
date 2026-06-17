@@ -1062,6 +1062,12 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
   const step = user?.onboardingStep || "signin";
   const [mode, setMode] = useState("login");
   const [resetEmail, setResetEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const changeMode = (newMode) => {
+    setMode(newMode);
+    setShowPassword(false);
+  };
 
   return (
     <main className="auth-page">
@@ -1076,8 +1082,42 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
               <form onSubmit={(event) => { event.preventDefault(); onSignup(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
                 <input name="email" type="email" placeholder="Email" autoComplete="email" required />
                 <input name="fullName" placeholder="Full name" autoComplete="name" required />
-                <input name="password" type="password" placeholder="Password (Min 8 characters)" autoComplete="new-password" minLength={8} required />
-                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Already have an account? Login</button>
+                <div className="password-input-wrapper" style={{ position: 'relative', width: '100%' }}>
+                  <input name="password" type={showPassword ? "text" : "password"} placeholder="Password (Min 8 characters)" autoComplete="new-password" minLength={8} required style={{ width: '100%', paddingRight: '52px' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--brand)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px',
+                      zIndex: 2,
+                    }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <button className="auth-alt-link" type="button" onClick={() => changeMode("login")}>Already have an account? Login</button>
                 <div className="auth-submit-container">
                   <button className="primary-btn auth-submit-new">Submit</button>
                 </div>
@@ -1085,10 +1125,44 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
             ) : mode === "login" ? (
               <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid new-auth-form">
                 <input name="email" type="email" placeholder="Email" autoComplete="email" required />
-                <input name="password" type="password" placeholder="Password" autoComplete="current-password" required />
+                <div className="password-input-wrapper" style={{ position: 'relative', width: '100%' }}>
+                  <input name="password" type={showPassword ? "text" : "password"} placeholder="Password" autoComplete="current-password" required style={{ width: '100%', paddingRight: '52px' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--brand)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px',
+                      zIndex: 2,
+                    }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 8px', marginTop: '-8px' }}>
-                  <button className="auth-alt-link" style={{ textAlign: 'left' }} type="button" onClick={() => setMode("forgot")}>Forgot Password?</button>
-                  <button className="auth-alt-link" type="button" onClick={() => setMode("signup")}>Create Profile</button>
+                  <button className="auth-alt-link" style={{ textAlign: 'left' }} type="button" onClick={() => changeMode("forgot")}>Forgot Password?</button>
+                  <button className="auth-alt-link" type="button" onClick={() => changeMode("signup")}>Create Profile</button>
                 </div>
                 <div className="auth-submit-container">
                   <button className="primary-btn auth-submit-new">Submit</button>
@@ -1102,12 +1176,12 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
                 const success = await onRequestPasswordReset(formData); 
                 if (success) {
                   setResetEmail(email);
-                  setMode("reset");
+                  changeMode("reset");
                 }
               }} className="form-grid new-auth-form">
                 <p style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', marginBottom: '8px' }}>Enter your email to receive a recovery code.</p>
                 <input name="email" type="email" placeholder="Email" autoComplete="email" required />
-                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Back to Login</button>
+                <button className="auth-alt-link" type="button" onClick={() => changeMode("login")}>Back to Login</button>
                 <div className="auth-submit-container">
                   <button className="primary-btn auth-submit-new">Send Code</button>
                 </div>
@@ -1117,8 +1191,42 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
                 <p style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', marginBottom: '8px' }}>Enter the 6-digit code sent to your email.</p>
                 <input type="hidden" name="email" value={resetEmail} />
                 <input name="code" inputMode="numeric" placeholder="6-digit code" maxLength={6} required />
-                <input name="newPassword" type="password" placeholder="New Password (Min 8 chars)" minLength={8} required />
-                <button className="auth-alt-link" type="button" onClick={() => setMode("login")}>Back to Login</button>
+                <div className="password-input-wrapper" style={{ position: 'relative', width: '100%' }}>
+                  <input name="newPassword" type={showPassword ? "text" : "password"} placeholder="New Password (Min 8 chars)" minLength={8} required style={{ width: '100%', paddingRight: '52px' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--brand)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px',
+                      zIndex: 2,
+                    }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <button className="auth-alt-link" type="button" onClick={() => changeMode("login")}>Back to Login</button>
                 <div className="auth-submit-container">
                   <button className="primary-btn auth-submit-new">Reset Password</button>
                 </div>
