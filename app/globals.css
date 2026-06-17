@@ -205,6 +205,43 @@ p {
   margin-left: 0;
 }
 
+/* Trailer Volume/Mute Button Styles */
+.trailer-mute-btn {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  .trailer-mute-btn:hover {
+    transform: scale(1.08);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.trailer-mute-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
 .trailer-copy {
   position: relative;
   z-index: 1;

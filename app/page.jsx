@@ -976,6 +976,7 @@ function Splash({ hidden = false }) {
 function TrailerIntro({ onEnter }) {
   const [videoReady, setVideoReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
 
   const togglePlay = () => {
@@ -985,9 +986,18 @@ function TrailerIntro({ onEnter }) {
       setIsPlaying(false);
     } else {
       videoRef.current.muted = false;
+      setIsMuted(false);
       videoRef.current.play().catch(err => console.log(err));
       setIsPlaying(true);
     }
+  };
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    const newMute = !isMuted;
+    videoRef.current.muted = newMute;
+    setIsMuted(newMute);
   };
 
   return (
@@ -1022,6 +1032,19 @@ function TrailerIntro({ onEnter }) {
             )}
           </div>
         </div>
+
+        {/* Mute/Unmute Float Button */}
+        <button className="trailer-mute-btn" onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"}>
+          {isMuted ? (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zm-8 8H6l5 5v-4.18l-5-5H4v4.18zM19 12c0 2.76-1.54 5.14-3.8 6.3l1.42 1.42C19.78 17.84 21 15.07 21 12c0-3.07-1.22-5.84-3.38-7.72l-1.42 1.42C17.46 6.86 19 9.24 19 12zM3.41 1.86L2 3.27 4.73 6H4v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81l2.04 2.04 1.41-1.41L3.41 1.86z"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+          )}
+        </button>
 
         <div className="trailer-copy" onClick={(e) => e.stopPropagation()}>
           <div className="trailer-text-container" style={{ pointerEvents: "none" }}>
