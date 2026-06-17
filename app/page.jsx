@@ -1007,7 +1007,7 @@ function TrailerIntro({ onEnter }) {
           ref={videoRef}
           className={`trailer-video ${videoReady ? "is-ready" : ""}`}
           autoPlay
-          muted
+          muted={isMuted}
           loop
           playsInline
           poster="/assets/cover-book-1.svg"
@@ -1046,12 +1046,12 @@ function TrailerIntro({ onEnter }) {
           )}
         </button>
 
-        <div className="trailer-copy" onClick={(e) => e.stopPropagation()}>
+        <div className="trailer-copy">
           <div className="trailer-text-container" style={{ pointerEvents: "none" }}>
             <h1>{isPlaying ? "Ascendance" : "Play Trailer Video"}</h1>
             <p>{isPlaying ? "The Trilogy" : "Ascendance"}</p>
           </div>
-          <button className="trailer-login-btn-new" onClick={() => onEnter(true)}>Login</button>
+          <button className="trailer-login-btn-new" onClick={(e) => { e.stopPropagation(); onEnter(true); }}>Login</button>
         </div>
       </section>
     </main>

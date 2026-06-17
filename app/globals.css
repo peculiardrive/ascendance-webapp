@@ -2928,7 +2928,7 @@ body {
 }
 
 .trailer-video.is-ready {
-  opacity: 0.08;
+  opacity: 1;
 }
 
 .trailer-copy {
