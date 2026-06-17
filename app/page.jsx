@@ -975,11 +975,26 @@ function Splash({ hidden = false }) {
 
 function TrailerIntro({ onEnter }) {
   const [videoReady, setVideoReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.muted = false;
+      videoRef.current.play().catch(err => console.log(err));
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <main className="trailer-page">
-      <section className="trailer-stage" aria-label="Autoplaying Ascendance trailer">
+      <section className="trailer-stage" aria-label="Ascendance trailer stage" onClick={togglePlay} style={{ cursor: "pointer" }}>
         <video
+          ref={videoRef}
           className={`trailer-video ${videoReady ? "is-ready" : ""}`}
           autoPlay
           muted
@@ -992,10 +1007,26 @@ function TrailerIntro({ onEnter }) {
           <source src="/assets/ascendance-trailer.mp4" type="video/mp4" />
           <source src="/assets/ascendance-trailer.webm" type="video/webm" />
         </video>
-        <div className="trailer-copy">
-          <div className="trailer-text-container">
-            <h1>Play Trailer Video</h1>
-            <p>Ascendance</p>
+
+        {/* Play Button Overlay */}
+        <div className={`trailer-play-overlay ${isPlaying ? "is-playing" : ""}`}>
+          <div className="play-btn-circle">
+            {isPlaying ? (
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            )}
+          </div>
+        </div>
+
+        <div className="trailer-copy" onClick={(e) => e.stopPropagation()}>
+          <div className="trailer-text-container" style={{ pointerEvents: "none" }}>
+            <h1>{isPlaying ? "Ascendance" : "Play Trailer Video"}</h1>
+            <p>{isPlaying ? "The Trilogy" : "Ascendance"}</p>
           </div>
           <button className="trailer-login-btn-new" onClick={() => onEnter(true)}>Login</button>
         </div>
