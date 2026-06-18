@@ -1047,10 +1047,7 @@ function TrailerIntro({ onEnter }) {
         </button>
 
         <div className="trailer-copy">
-          <div className={`trailer-text-container ${isPlaying ? "is-playing" : ""}`} style={{ pointerEvents: "none" }}>
-            <h1>Play Trailer Video</h1>
-            <p>Ascendance</p>
-          </div>
+          <div style={{ flex: 1 }} />
           <button className="trailer-login-btn-new" onClick={(e) => { e.stopPropagation(); onEnter(true); }}>Login</button>
         </div>
       </section>
