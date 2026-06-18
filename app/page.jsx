@@ -1597,6 +1597,7 @@ function HomeView({
 }) {
   const [showSummary, setShowSummary] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useRef(null);
   const ownedBooks = books.filter((book) => ownsBook(user?.id, purchases, book.id));
   const currentBook = ownedBooks.at(-1) || books[0];
   const firstChapter = flattenChapters([currentBook])[0];
@@ -1608,63 +1609,47 @@ function HomeView({
 
   useEffect(() => {
     return () => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
+      // Pause the MP3 when navigating away from the home screen
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
     };
   }, []);
 
   function togglePlaySummary() {
-    if (!("speechSynthesis" in window)) return;
+    const audio = audioRef.current;
+    if (!audio) return;
     if (isAudioPlaying) {
-      window.speechSynthesis.cancel();
+      audio.pause();
       setIsAudioPlaying(false);
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(currentBook.blurb);
-    speech.rate  = 0.9;
-    speech.pitch = 1;
-    speech.onend  = () => setIsAudioPlaying(false);
-    speech.onerror = () => setIsAudioPlaying(false);
-
-    const applyVoiceAndSpeak = () => {
-      // Book summaries use a female voice by default (narrator feel)
-      const voices = window.speechSynthesis.getVoices();
-      const english = voices.filter(v => v.lang.startsWith("en"));
-      const femaleHints = ["female", "aria", "jenny", "nova", "zira", "hazel", "susan", "samantha", "emily", "kate", "natasha", "moira", "tessa", "fiona"];
-      function scoreVoice(v) {
-        let s = 0;
-        const n = v.name.toLowerCase();
-        if (n.includes("online") || n.includes("neural") || n.includes("natural")) s += 120;
-        if (n.includes("enhanced") || n.includes("premium"))                       s += 60;
-        if (n.includes("google"))                                                   s += 35;
-        if (n.includes("microsoft"))                                                s += 25;
-        if (femaleHints.some(h => n.includes(h)))                                  s += 50;
-        if (v.lang === "en-GB") s += 12;
-        if (v.lang === "en-US") s += 6;
-        return s;
-      }
-      const best = english.sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
-      if (best) speech.voice = best;
-      window.speechSynthesis.speak(speech);
-      setIsAudioPlaying(true);
-    };
-
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length) {
-      applyVoiceAndSpeak();
     } else {
-      window.speechSynthesis.addEventListener("voiceschanged", applyVoiceAndSpeak, { once: true });
+      audio.play();
+      setIsAudioPlaying(true);
     }
+  }
+
+  function stopAudio() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setIsAudioPlaying(false);
   }
 
   return (
     <div className="home-screen">
+      {/* Hidden MP3 audio element — controlled by togglePlaySummary / stopAudio */}
+      <audio
+        ref={audioRef}
+        src="/assets/ascendance-prologue.mp3"
+        onEnded={() => setIsAudioPlaying(false)}
+        preload="metadata"
+      />
       <section className="featured-book" aria-labelledby="featured-book-title">
         <div className="cover-stage">
           <TiltCover src={currentBook.cover} alt={`${currentBook.title} cover`} className="featured-cover" />
-          <button className="audio-drama-fab" onClick={togglePlaySummary} aria-label={isAudioPlaying ? "Stop listening to the summary" : `Listen to the summary of ${currentBook.title}`}>
+          <button className="audio-drama-fab" onClick={togglePlaySummary} aria-label={isAudioPlaying ? "Stop audio" : "Play the Ascendance Trilogy Prologue"}>
             {isAudioPlaying ? (
               <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
@@ -1710,20 +1695,20 @@ function HomeView({
       </section>
 
       {showSummary && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); stopAudio(); }}>
           <div className="modal-card" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()} style={{ padding: "24px", display: "grid", gap: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h2 style={{ margin: 0, fontSize: "1.4rem", color: "var(--brand)" }}>Book Summary</h2>
-              <button className="modal-close" onClick={() => { setShowSummary(false); window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
+              <button className="modal-close" onClick={() => { setShowSummary(false); stopAudio(); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{currentBook.title}</h3>
             <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6 }}>{currentBook.blurb}</p>
             <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
               <button className="primary-btn" onClick={togglePlaySummary} style={{ flex: 1 }}>
-                {isAudioPlaying ? "Stop (TTS)" : "Listen (TTS)"}
+                {isAudioPlaying ? "⏸ Pause" : "▶ Listen"}
               </button>
-              <button className="ghost-btn" onClick={() => { window.speechSynthesis?.cancel(); setIsAudioPlaying(false); }} style={{ flex: 1 }}>
-                Stop
+              <button className="ghost-btn" onClick={stopAudio} style={{ flex: 1 }}>
+                ⏹ Stop
               </button>
             </div>
           </div>
