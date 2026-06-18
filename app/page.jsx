@@ -1624,8 +1624,13 @@ function HomeView({
       audio.pause();
       setIsAudioPlaying(false);
     } else {
-      audio.play();
-      setIsAudioPlaying(true);
+      // If the track already ended, restart from the beginning
+      if (audio.ended || audio.currentTime >= audio.duration) {
+        audio.currentTime = 0;
+      }
+      audio.play()
+        .then(() => setIsAudioPlaying(true))
+        .catch(() => setIsAudioPlaying(false)); // browser blocked playback
     }
   }
 
