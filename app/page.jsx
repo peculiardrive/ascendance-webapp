@@ -1596,7 +1596,8 @@ function HomeView({
   onViewLeaderboard
 }) {
   const [showSummary, setShowSummary] = useState(false);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false); // MP3 FAB on cover
+  const [isTtsPlaying, setIsTtsPlaying] = useState(false);     // TTS in Book Summary modal
   const audioRef = useRef(null);
   const ownedBooks = books.filter((book) => ownsBook(user?.id, purchases, book.id));
   const currentBook = ownedBooks.at(-1) || books[0];
@@ -1609,14 +1610,17 @@ function HomeView({
 
   useEffect(() => {
     return () => {
-      // Pause the MP3 when navigating away from the home screen
+      // Stop MP3 when navigating away
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
+      // Stop any TTS when navigating away
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     };
   }, []);
 
+  // --- Cover FAB: plays the MP3 prologue ---
   function togglePlaySummary() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -1624,13 +1628,10 @@ function HomeView({
       audio.pause();
       setIsAudioPlaying(false);
     } else {
-      // If the track already ended, restart from the beginning
-      if (audio.ended || audio.currentTime >= audio.duration) {
-        audio.currentTime = 0;
-      }
+      if (audio.ended || audio.currentTime >= audio.duration) audio.currentTime = 0;
       audio.play()
         .then(() => setIsAudioPlaying(true))
-        .catch(() => setIsAudioPlaying(false)); // browser blocked playback
+        .catch(() => setIsAudioPlaying(false));
     }
   }
 
@@ -1640,6 +1641,53 @@ function HomeView({
     audio.pause();
     audio.currentTime = 0;
     setIsAudioPlaying(false);
+  }
+
+  // --- Book Summary modal: reads the blurb text with smart TTS voice ---
+  function toggleBlurbTts() {
+    if (!("speechSynthesis" in window)) return;
+    if (isTtsPlaying) {
+      window.speechSynthesis.cancel();
+      setIsTtsPlaying(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(currentBook.blurb);
+    utterance.rate  = 0.9;
+    utterance.pitch = 1;
+    utterance.onend   = () => setIsTtsPlaying(false);
+    utterance.onerror = () => setIsTtsPlaying(false);
+
+    const femaleHints = ["female", "aria", "jenny", "nova", "zira", "hazel", "susan", "samantha", "emily", "kate", "natasha", "moira", "tessa", "fiona"];
+    function scoreVoice(v) {
+      let s = 0;
+      const n = v.name.toLowerCase();
+      if (n.includes("online") || n.includes("neural") || n.includes("natural")) s += 120;
+      if (n.includes("enhanced") || n.includes("premium"))                       s += 60;
+      if (n.includes("google"))                                                   s += 35;
+      if (n.includes("microsoft"))                                                s += 25;
+      if (femaleHints.some(h => n.includes(h)))                                  s += 50;
+      if (v.lang === "en-GB") s += 12;
+      if (v.lang === "en-US") s += 6;
+      return s;
+    }
+
+    const speak = () => {
+      const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith("en"));
+      const best = voices.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+      if (best) utterance.voice = best;
+      window.speechSynthesis.speak(utterance);
+      setIsTtsPlaying(true);
+    };
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) speak();
+    else window.speechSynthesis.addEventListener("voiceschanged", speak, { once: true });
+  }
+
+  function stopBlurbTts() {
+    window.speechSynthesis?.cancel();
+    setIsTtsPlaying(false);
   }
 
   return (
@@ -1700,19 +1748,19 @@ function HomeView({
       </section>
 
       {showSummary && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); stopAudio(); }}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => { setShowSummary(false); stopBlurbTts(); }}>
           <div className="modal-card" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()} style={{ padding: "24px", display: "grid", gap: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h2 style={{ margin: 0, fontSize: "1.4rem", color: "var(--brand)" }}>Book Summary</h2>
-              <button className="modal-close" onClick={() => { setShowSummary(false); stopAudio(); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
+              <button className="modal-close" onClick={() => { setShowSummary(false); stopBlurbTts(); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{currentBook.title}</h3>
             <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6 }}>{currentBook.blurb}</p>
             <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
-              <button className="primary-btn" onClick={togglePlaySummary} style={{ flex: 1 }}>
-                {isAudioPlaying ? "⏸ Pause" : "▶ Listen"}
+              <button className="primary-btn" onClick={toggleBlurbTts} style={{ flex: 1 }}>
+                {isTtsPlaying ? "⏸ Pause" : "▶ Listen"}
               </button>
-              <button className="ghost-btn" onClick={stopAudio} style={{ flex: 1 }}>
+              <button className="ghost-btn" onClick={stopBlurbTts} style={{ flex: 1 }}>
                 ⏹ Stop
               </button>
             </div>
