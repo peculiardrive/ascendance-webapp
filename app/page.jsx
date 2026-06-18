@@ -749,6 +749,43 @@ export default function Home() {
     });
   }
 
+  /**
+   * Picks the best available browser voice.
+   * Priority: Neural/Online/Natural > Enhanced/Premium > Google > Microsoft > any English.
+   * Respects preferredGender ("Male" | "Female") stored on each section.
+   */
+  function getBestVoice(preferredGender) {
+    const voices = window.speechSynthesis.getVoices();
+    const english = voices.filter(v => v.lang.startsWith("en"));
+    if (!english.length) return null;
+
+    const gender = (preferredGender || "female").toLowerCase();
+
+    // Female-leaning name hints
+    const femaleHints = ["female", "aria", "jenny", "nova", "zira", "hazel", "susan", "samantha", "emily", "kate", "natasha", "moira", "tessa", "fiona"];
+    // Male-leaning name hints
+    const maleHints   = ["male", "guy", "david", "mark", "daniel", "james", "alex", "fred", "rishi", "oliver", "arthur"];
+
+    function score(v) {
+      let s = 0;
+      const n = v.name.toLowerCase();
+      // Quality tier — neural/online voices sound most natural
+      if (n.includes("online") || n.includes("neural") || n.includes("natural")) s += 120;
+      if (n.includes("enhanced") || n.includes("premium"))                       s += 60;
+      if (n.includes("google"))                                                   s += 35;
+      if (n.includes("microsoft"))                                                s += 25;
+      // Gender match
+      const hints = gender === "female" ? femaleHints : maleHints;
+      if (hints.some(h => n.includes(h)))                                         s += 50;
+      // Prefer British English for storytelling warmth
+      if (v.lang === "en-GB")                                                     s += 12;
+      if (v.lang === "en-US")                                                     s += 6;
+      return s;
+    }
+
+    return english.slice().sort((a, b) => score(b) - score(a))[0];
+  }
+
   function speakActiveChapter() {
     if (!("speechSynthesis" in window)) return notify("Text-to-speech is not supported here.");
     if (window.speechSynthesis.speaking) {
@@ -758,9 +795,27 @@ export default function Home() {
     const rawText = Array.isArray(activeChapter.chapter.content)
       ? activeChapter.chapter.content.join(" ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
       : String(activeChapter.chapter.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+
     const utterance = new SpeechSynthesisUtterance(rawText);
-    utterance.rate = 1;
-    window.speechSynthesis.speak(utterance);
+    utterance.rate  = 0.9;   // slightly slower = more natural storytelling pace
+    utterance.pitch = 1;
+
+    // Use voice preference stored on the section ("Male" / "Female"), default Female
+    const preferredGender = activeChapter?.section?.voice || "Female";
+
+    // Voices may not be loaded yet on first call — retry once after the event fires
+    const trySpeak = () => {
+      const best = getBestVoice(preferredGender);
+      if (best) utterance.voice = best;
+      window.speechSynthesis.speak(utterance);
+    };
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      trySpeak();
+    } else {
+      window.speechSynthesis.addEventListener("voiceschanged", trySpeak, { once: true });
+    }
   }
 
   if (!ready) {
@@ -1564,18 +1619,43 @@ function HomeView({
     if (isAudioPlaying) {
       window.speechSynthesis.cancel();
       setIsAudioPlaying(false);
-    } else {
-      window.speechSynthesis.cancel();
-      const speech = new SpeechSynthesisUtterance(currentBook.blurb);
-      speech.rate = 0.95;
-      speech.onend = () => {
-        setIsAudioPlaying(false);
-      };
-      speech.onerror = () => {
-        setIsAudioPlaying(false);
-      };
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const speech = new SpeechSynthesisUtterance(currentBook.blurb);
+    speech.rate  = 0.9;
+    speech.pitch = 1;
+    speech.onend  = () => setIsAudioPlaying(false);
+    speech.onerror = () => setIsAudioPlaying(false);
+
+    const applyVoiceAndSpeak = () => {
+      // Book summaries use a female voice by default (narrator feel)
+      const voices = window.speechSynthesis.getVoices();
+      const english = voices.filter(v => v.lang.startsWith("en"));
+      const femaleHints = ["female", "aria", "jenny", "nova", "zira", "hazel", "susan", "samantha", "emily", "kate", "natasha", "moira", "tessa", "fiona"];
+      function scoreVoice(v) {
+        let s = 0;
+        const n = v.name.toLowerCase();
+        if (n.includes("online") || n.includes("neural") || n.includes("natural")) s += 120;
+        if (n.includes("enhanced") || n.includes("premium"))                       s += 60;
+        if (n.includes("google"))                                                   s += 35;
+        if (n.includes("microsoft"))                                                s += 25;
+        if (femaleHints.some(h => n.includes(h)))                                  s += 50;
+        if (v.lang === "en-GB") s += 12;
+        if (v.lang === "en-US") s += 6;
+        return s;
+      }
+      const best = english.sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+      if (best) speech.voice = best;
       window.speechSynthesis.speak(speech);
       setIsAudioPlaying(true);
+    };
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      applyVoiceAndSpeak();
+    } else {
+      window.speechSynthesis.addEventListener("voiceschanged", applyVoiceAndSpeak, { once: true });
     }
   }
 
