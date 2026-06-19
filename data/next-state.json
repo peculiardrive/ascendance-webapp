@@ -22,7 +22,7 @@
           "price": 0,
           "order": 1,
           "tts": true,
-          "voice": "Female",
+          "voice": "Male",
           "chapters": [
             {
               "id": "b1-c0",
@@ -1694,7 +1694,7 @@
           "price": 1500,
           "order": 2,
           "tts": true,
-          "voice": "Female",
+          "voice": "Male",
           "chapters": [
             {
               "id": "b1-c15",
@@ -3839,7 +3839,7 @@
           "price": 1500,
           "order": 3,
           "tts": true,
-          "voice": "Female",
+          "voice": "Male",
           "chapters": [
             {
               "id": "b1-c30",
@@ -5510,7 +5510,7 @@
           "price": 2000,
           "order": 1,
           "tts": true,
-          "voice": "Female",
+          "voice": "Male",
           "chapters": [
             {
               "id": "b2-c1",
@@ -6962,7 +6962,7 @@
           "price": 2000,
           "order": 2,
           "tts": true,
-          "voice": "Female",
+          "voice": "Male",
           "chapters": [
             {
               "id": "b2-c15",
@@ -10847,7 +10847,7 @@
           "order": 1,
           "price": 2500,
           "tts": true,
-          "voice": "Male",
+          "voice": "Female",
           "chapters": [
             {
               "id": "b3-c1",
