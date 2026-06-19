@@ -2,62 +2,17 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("Connecting to Supabase Database...");
-  const purchaseCount = await prisma.purchase.count();
-  console.log("Total purchases in database:", purchaseCount);
-
-  const successfulPurchases = await prisma.purchase.findMany({
-    where: { paymentStatus: "Successful" },
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: {
-          fullName: true,
-          email: true
-        }
-      }
-    }
-  });
-
-  console.log("\nLatest 5 Successful Purchases:");
-  successfulPurchases.forEach((p) => {
-    console.log(`- User: ${p.user.fullName} (${p.user.email})`);
-    console.log(`  Reference: ${p.paymentReference}`);
-    console.log(`  Product Type: ${p.productType}`);
-    console.log(`  Amount: ${p.amount}`);
-    console.log(`  Date: ${p.createdAt}`);
-  });
-
-  const pendingPurchases = await prisma.purchase.findMany({
-    where: { paymentStatus: { not: "Successful" } },
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: {
-          fullName: true,
-          email: true
-        }
-      }
-    }
-  });
-
-  console.log("\nLatest 5 Non-Successful Purchases:");
-  pendingPurchases.forEach((p) => {
-    console.log(`- User: ${p.user.fullName} (${p.user.email})`);
-    console.log(`  Reference: ${p.paymentReference}`);
-    console.log(`  Status: ${p.paymentStatus}`);
-    console.log(`  Amount: ${p.amount}`);
-    console.log(`  Date: ${p.createdAt}`);
-  });
+async function run() {
+  const purchases = await prisma.purchase.findMany();
+  console.log("Prisma Purchases:");
+  for (const p of purchases) {
+    console.log(`- ID: ${p.id}, UserID: ${p.userId}, ProductType: ${p.productType}, BookID: ${p.bookId}, Status: ${p.paymentStatus}`);
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error("Error connecting to database:", e);
-  })
-  .finally(async () => {
+run()
+  .then(() => prisma.$disconnect())
+  .catch(async (e) => {
+    console.error(e);
     await prisma.$disconnect();
   });

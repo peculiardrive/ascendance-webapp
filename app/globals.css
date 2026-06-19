@@ -1684,13 +1684,14 @@ textarea {
 }
 
 .shell.is-reading .topbar {
-  display: none;
+  display: none !important;
 }
 
 .shell.is-reading .main {
-  width: 100%;
-  max-width: none;
-  padding: 0 0 calc(var(--nav-height) + 8px);
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .reader-shell {
@@ -3707,9 +3708,10 @@ textarea,
 }
 
 .shell.is-reading .main {
-  width: 100%;
-  max-width: none;
-  padding: 0 0 calc(var(--nav-height) + 8px);
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .reader-shell {
@@ -3782,10 +3784,17 @@ textarea,
 }
 
 .reader-topbar-row-1 {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: 40px 1fr 40px !important;
   align-items: center !important;
-  gap: 12px !important;
   width: 100% !important;
+  gap: 8px !important;
+}
+
+.reader-topbar-spacer {
+  width: 40px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
 }
 
 .reader-topbar-row-2 {
@@ -3808,6 +3817,7 @@ textarea,
   padding: 0 !important;
   border-radius: 50% !important;
   transition: background-color 0.2s !important;
+  flex-shrink: 0 !important;
 }
 
 .reader-back-btn:hover {
@@ -4236,7 +4246,7 @@ textarea,
 
 /* Splash Screen Perfect Centering Override */
 .splash-inner {
-  position: relative !important;
+  position: static !important;
 }
 
 .splash-logo {
@@ -4412,6 +4422,36 @@ textarea,
 
 .shell.is-reading .nav-tabs {
   display: none !important;
+}
+
+/* Desktop: ensure reader is truly full-screen with no global chrome */
+@media (min-width: 760px) {
+  .shell.is-reading {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .shell.is-reading .topbar {
+    display: none !important;
+  }
+
+  .shell.is-reading .main {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .shell.is-reading .reader-shell {
+    min-height: 100vh !important;
+    width: 100vw !important;
+    max-width: none !important;
+  }
+
+  .shell.is-reading .reader-topbar {
+    width: 100% !important;
+    max-width: none !important;
+  }
 }
 
 /* Midnight Gold Theme Specifics */

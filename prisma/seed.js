@@ -35,6 +35,7 @@ async function main() {
         author: book.author,
         coverImage: book.cover,
         blurb: book.blurb,
+        summary: book.summary || "",
         bookOrder: book.order,
         price: book.price,
         status: book.status,

@@ -194,6 +194,8 @@ export default function Home() {
   const [autoplayAudio, setAutoplayAudio] = useState(false);
   const [communityQuery, setCommunityQuery] = useState("");
   const [communitySurface, setCommunitySurface] = useState("feed");
+  const [isReadingTtsPlaying, setIsReadingTtsPlaying] = useState(false); // Reading page TTS
+  const [currentTtsParaIndex, setCurrentTtsParaIndex] = useState(-1);
   const [readerSettings, setReaderSettings] = useState({
     font: "Georgia",
     size: 19,
@@ -342,6 +344,14 @@ export default function Home() {
   useEffect(() => {
     if (activeChapterId) localStorage.setItem(LAST_CHAPTER_KEY, activeChapterId);
   }, [activeChapterId]);
+
+  useEffect(() => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsReadingTtsPlaying(false);
+    setCurrentTtsParaIndex(-1);
+  }, [activeChapterId, view]);
 
   useEffect(() => {
     if (!ready || !user?.id || !isOnboarded) return;
@@ -786,36 +796,111 @@ export default function Home() {
     return english.slice().sort((a, b) => score(b) - score(a))[0];
   }
 
-  function speakActiveChapter() {
-    if (!("speechSynthesis" in window)) return notify("Text-to-speech is not supported here.");
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
+  // Pre-warm SpeechSynthesis voices early to avoid cold-start delays
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+      const handleVoices = () => window.speechSynthesis.getVoices();
+      window.speechSynthesis.addEventListener("voiceschanged", handleVoices);
+      return () => {
+        window.speechSynthesis.removeEventListener("voiceschanged", handleVoices);
+      };
+    }
+  }, []);
+
+  // Extract clean paragraphs for chunk-by-chunk speech synthesis
+  const activeChapterParagraphs = useMemo(() => {
+    if (!activeChapter?.chapter?.content) return [];
+    const content = activeChapter.chapter.content;
+    const arr = Array.isArray(content) ? content : [content];
+    return arr.map(p => {
+      return String(p || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    }).filter(Boolean);
+  }, [activeChapter]);
+
+  // Use a mutable state ref to ensure the async speech callbacks (onend, onerror)
+  // always reference the correct dynamic state variables without React closure staleness.
+  const ttsStateRef = useRef({ paragraphs: [], index: -1, playing: false });
+  useEffect(() => {
+    ttsStateRef.current.paragraphs = activeChapterParagraphs;
+  }, [activeChapterParagraphs]);
+
+  useEffect(() => {
+    ttsStateRef.current.playing = isReadingTtsPlaying;
+    ttsStateRef.current.index = currentTtsParaIndex;
+  }, [isReadingTtsPlaying, currentTtsParaIndex]);
+
+  function speakParagraph(index) {
+    if (!("speechSynthesis" in window)) return;
+    const paras = ttsStateRef.current.paragraphs;
+    
+    if (index < 0 || index >= paras.length) {
+      console.log("Chunk TTS finished speaking all paragraphs in chapter.");
+      setIsReadingTtsPlaying(false);
+      setCurrentTtsParaIndex(-1);
       return;
     }
-    const rawText = Array.isArray(activeChapter.chapter.content)
-      ? activeChapter.chapter.content.join(" ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-      : String(activeChapter.chapter.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
-    const utterance = new SpeechSynthesisUtterance(rawText);
-    utterance.rate  = 0.9;   // slightly slower = more natural storytelling pace
+    console.log(`TTS Chunk Player: speaking paragraph index ${index} / ${paras.length}`);
+    window.speechSynthesis.cancel(); // Abort previous speech segment cleanly
+
+    const text = paras[index];
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
     utterance.pitch = 1;
 
-    // Use voice preference stored on the section ("Male" / "Female"), default Female
     const preferredGender = activeChapter?.section?.voice || "Female";
-
-    // Voices may not be loaded yet on first call — retry once after the event fires
-    const trySpeak = () => {
-      const best = getBestVoice(preferredGender);
-      if (best) utterance.voice = best;
-      window.speechSynthesis.speak(utterance);
-    };
-
     const voices = window.speechSynthesis.getVoices();
     if (voices.length) {
-      trySpeak();
-    } else {
-      window.speechSynthesis.addEventListener("voiceschanged", trySpeak, { once: true });
+      const best = getBestVoice(preferredGender);
+      if (best) utterance.voice = best;
     }
+
+    utterance.onstart = () => {
+      console.log(`Speech chunk ${index} started`);
+      setCurrentTtsParaIndex(index);
+    };
+
+    utterance.onend = () => {
+      console.log(`Speech chunk ${index} ended`);
+      if (ttsStateRef.current.playing && ttsStateRef.current.index === index) {
+        speakParagraph(index + 1);
+      }
+    };
+
+    utterance.onerror = (err) => {
+      console.error(`Speech chunk ${index} error:`, err);
+      if (err.error !== "interrupted") {
+        setIsReadingTtsPlaying(false);
+        setCurrentTtsParaIndex(-1);
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function speakActiveChapter() {
+    console.log("speakActiveChapter called. Playing:", isReadingTtsPlaying, "Current Index:", currentTtsParaIndex);
+    if (!("speechSynthesis" in window)) {
+      return notify("Text-to-speech is not supported here.");
+    }
+    
+    if (isReadingTtsPlaying) {
+      console.log("Cancelling text-to-speech chunks");
+      window.speechSynthesis.cancel();
+      setIsReadingTtsPlaying(false);
+      return;
+    }
+
+    if (activeChapterParagraphs.length === 0) {
+      console.warn("No paragraphs extracted for speech");
+      return notify("No content to read.");
+    }
+
+    const startIdx = currentTtsParaIndex >= 0 ? currentTtsParaIndex : 0;
+    console.log(`Starting chunked playback from index: ${startIdx}`);
+    setIsReadingTtsPlaying(true);
+    speakParagraph(startIdx);
   }
 
   if (!ready) {
@@ -894,6 +979,8 @@ export default function Home() {
               onBack={() => setView("books")}
               onAutoScroll={toggleAutoScroll}
               onSpeak={speakActiveChapter}
+              isTtsPlaying={isReadingTtsPlaying}
+              currentTtsParaIndex={currentTtsParaIndex}
               onSave={() => saveProgress(activeChapter, 45)}
               onRead={openChapter}
               onPurchase={purchase}
@@ -1652,7 +1739,7 @@ function HomeView({
       return;
     }
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(currentBook.blurb);
+    const utterance = new SpeechSynthesisUtterance(currentBook.summary || currentBook.blurb);
     utterance.rate  = 0.9;
     utterance.pitch = 1;
     utterance.onend   = () => setIsTtsPlaying(false);
@@ -1672,17 +1759,19 @@ function HomeView({
       return s;
     }
 
-    const speak = () => {
-      const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith("en"));
+    const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith("en"));
+    if (voices.length) {
       const best = voices.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
       if (best) utterance.voice = best;
-      window.speechSynthesis.speak(utterance);
-      setIsTtsPlaying(true);
-    };
+    } else {
+      window.speechSynthesis.addEventListener("voiceschanged", () => {
+        const updatedVoices = window.speechSynthesis.getVoices();
+        console.log(`Speech voices loaded asynchronously: ${updatedVoices.length} available.`);
+      }, { once: true });
+    }
 
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length) speak();
-    else window.speechSynthesis.addEventListener("voiceschanged", speak, { once: true });
+    window.speechSynthesis.speak(utterance);
+    setIsTtsPlaying(true);
   }
 
   function stopBlurbTts() {
@@ -1755,7 +1844,7 @@ function HomeView({
               <button className="modal-close" onClick={() => { setShowSummary(false); stopBlurbTts(); }} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
             </div>
             <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{currentBook.title}</h3>
-            <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6 }}>{currentBook.blurb}</p>
+            <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{currentBook.summary || currentBook.blurb}</p>
             <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
               <button className="primary-btn" onClick={toggleBlurbTts} style={{ flex: 1 }}>
                 {isTtsPlaying ? "⏸ Pause" : "▶ Listen"}
@@ -1921,39 +2010,240 @@ function UnlockDialog({ book, onClose, onPurchase, onViewNotices }) {
 }
 
 const GLOSSARY_CHARACTERS = [
+  // ── CHARACTERS ──────────────────────────────────────────────────────────
   {
-    name: "Elias",
+    name: "Ikenna Obiajulu",
     role: "Protagonist",
-    bio: "A young, observant reader who discovers a forbidden warning and holds his mother's secret journal, setting off his journey into the mysteries of the inverted cross.",
-    avatar: "E"
-  },
-  {
-    name: "Ikenna",
-    role: "The Seeker",
-    bio: "A crucial figure in Book One whose mysterious fate the reader must uncover as he searches for truth beneath ordinary faith.",
+    bio: "The central figure of Disciples of the Inverted Cross. A brilliant young man who defies his father's vow for him to become a priest, joins the fraternity, becomes Hangman, later receives Christ, and swears to destroy the fraternity he helped create.",
     avatar: "I"
   },
   {
-    name: "The Seagull",
-    role: "Hermit / Chronicler",
-    bio: "A mysterious author and chronicler of 'The Fall' (Book One, Series Two) who records hidden staircases and the secrets of the afraid.",
+    name: "Jehoshaphat / Jshap",
+    role: "Protagonist",
+    bio: "The new name Ikenna adopts after turning away from the fraternity. It represents his attempt to escape the penalty of his transgression and begin a new life under a changed identity.",
+    avatar: "J"
+  },
+  {
+    name: "Sammy Briggs",
+    role: "Successor Protagonist",
+    bio: "A former disciple of the Inverted Cross and later a fugitive soul searching for redemption. Once known as Lethal Weapon, Sammy becomes a teacher, mentor, and witness to the possibility that corrupted gifts can be redeemed for purpose.",
     avatar: "S"
   },
   {
-    name: "Albatross",
-    role: "Guardian of the Fraternity",
-    bio: "The key author behind 'The Fraternity' (Book One, Series Three) who oversees the forbidden order's secret ceremonies and the witnesses who survive them.",
+    name: "Elizabeth / Lizzy",
+    role: "Witness Protagonist",
+    bio: "Ikenna's love interest and later one of the most important witnesses of the Ascendance story. She carries Ikenna's memory, follows Sammy's trail, investigates Rakiya's paintings, and helps uncover the final revelation.",
+    avatar: "L"
+  },
+  {
+    name: "Rakiya / Rachel",
+    role: "Remnant Witness",
+    bio: "A gifted, formally untrained left-handed artist whose paintings carry prophetic meaning. Her rescue and artwork become central to the mystery of Rhapsodies of the Coming Regent.",
+    avatar: "R"
+  },
+  {
+    name: "Bitty / Bitrus Shak",
+    role: "Mentor-Bridge",
+    bio: "A former fraternity figure and friend connected to Ikenna, Sammy, and Lizzy. His story carries guilt, escape, royal responsibility, and eventual release from the burden of the past.",
+    avatar: "B"
+  },
+  {
+    name: "Rev. Joseph Obiajulu",
+    role: "Mentor",
+    bio: "Ikenna's father, a clergyman whose vow to dedicate Ikenna to God becomes one of the earliest spiritual tensions in the story.",
+    avatar: "R"
+  },
+  {
+    name: "Ifeanyi Obiajulu",
+    role: "Catalyst",
+    bio: "Ikenna's elder brother. He once helped Ikenna leave home, later carries guilt for leading him into Dike's orbit, and must eventually confront both his uncle and his own need for reconciliation.",
+    avatar: "I"
+  },
+  {
+    name: "Dike Obiajulu",
+    role: "Antagonist",
+    bio: "Ifeanyi and Ikenna's uncle. A wealthy, crafty, and dangerous figure whose hidden dealings connect family betrayal, child trafficking, art exploitation, and the deeper darkness behind the trilogy.",
+    avatar: "D"
+  },
+  {
+    name: "Ugo Amanze",
+    role: "Rival Disciple",
+    bio: "A ruthless fraternity figure whose ambition and rivalry help trigger Ikenna's final exposure. His confrontation with Jshap reveals the deadly cost of the Hangman's law and pushes Ikenna toward the sacrifice that defines the Ascendance story.",
+    avatar: "U"
+  },
+  {
+    name: "Steel",
+    role: "Antagonist",
+    bio: "A feared fraternity member whose possessiveness, violence, and bitterness make him a recurring antagonist, especially in relation to Sammy and Lizzy.",
+    avatar: "S"
+  },
+  {
+    name: "Legion",
+    role: "Antagonist",
+    bio: "A young disciple of the fraternity who admires Sammy and is drawn deeper into the cult's violent promise of identity, power, and belonging.",
+    avatar: "L"
+  },
+  {
+    name: "Otunba",
+    role: "Antagonist",
+    bio: "A charismatic politician connected to the fraternity's political machinery. He represents the dangerous alliance between cultism, ambition, election violence, and public power.",
+    avatar: "O"
+  },
+  // ── TRILOGY & WORLD ──────────────────────────────────────────────────────
+  {
+    name: "Ascendance",
+    role: "The Trilogy",
+    bio: "The overarching title of the trilogy. It points to rising above darkness, corruption, fear, and broken identity into divine purpose, truth, and restoration.",
     avatar: "A"
   },
-{
-    name: "Bloody Sniper",
-    role: "Merchant of the Ivory Towers",
-    bio: "A ruthless accounting master in the polished halls of influence, dealing in signatures, favors, and traded truths in 'The Fulcrum'.",
-    avatar: "B"
-  }
+  {
+    name: "Disciples of the Inverted Cross",
+    role: "First Series of the Trilogy",
+    bio: "The first part of the Ascendance trilogy. It follows Ikenna Obiajulu's journey from ambition and rebellion into the dark world of a university fraternity, and his eventual vow to destroy what he helped create.",
+    avatar: "D"
+  },
+  {
+    name: "Merchants of the Ivory Towers",
+    role: "Second Series of the Trilogy",
+    bio: "The second part of the trilogy. It follows Sammy Briggs as he flees the fraternity's wrath and begins to discover a deeper system that trades in politics, ambition, influence, and the destinies of gifted young people.",
+    avatar: "M"
+  },
+  {
+    name: "Rhapsodies of the Coming Regent",
+    role: "Third Series of the Trilogy",
+    bio: "The final part of the trilogy. It follows Lizzy's search for truth through Rakiya's prophetic art, Ifeanyi's confrontation with family darkness, and the revelation of the Regent whose coming gives meaning to the entire story.",
+    avatar: "R"
+  },
+  // ── SYSTEMS & MOTIFS ─────────────────────────────────────────────────────
+  {
+    name: "The Inverted Cross Fraternity",
+    role: "World-Building Story Motif",
+    bio: "A feared secret university fraternity built around rebellion, power, oath, hierarchy, violence, and distorted spirituality. It becomes the central dark system Ikenna, Sammy, Bitty, and Lizzy must confront.",
+    avatar: "F"
+  },
+  {
+    name: "The Cross",
+    role: "Story Motif",
+    bio: "A central symbol in the trilogy. To the fraternity, the inverted cross represents rebellion and dark allegiance. To the redeemed characters, the upright Cross becomes a symbol of Christ's sacrifice, mercy, deliverance, and return.",
+    avatar: "✝"
+  },
+  {
+    name: "The GODs",
+    role: "Antagonist System",
+    bio: "The hidden ruling powers behind the fraternity. They represent the unseen authorities that preserve the fraternity's covenant, enforce its laws, and manipulate its disciples for darker purposes.",
+    avatar: "G"
+  },
+  {
+    name: "The Order",
+    role: "Antagonist System",
+    bio: "Another name for the organized structure of the Inverted Cross Fraternity, including its hierarchy, rituals, rules, offices, and secret operations.",
+    avatar: "O"
+  },
+  {
+    name: "The Testament",
+    role: "Symbolic Object",
+    bio: "The secret code or spiritual constitution of the Inverted Cross Fraternity. It contains hidden laws, obligations, offices, punishments, and future programs designed to preserve the fraternity's influence.",
+    avatar: "T"
+  },
+  {
+    name: "The Program",
+    role: "Symbolic Story Element",
+    bio: "A hidden operation tied to the fraternity's deeper purpose. It is designed to harvest the gifts, ambitions, talents, and vulnerabilities of young people through politics, influence, fame, education, money, and opportunity.",
+    avatar: "P"
+  },
+  {
+    name: "Merchants",
+    role: "Story Title",
+    bio: "The unseen handlers, patrons, politicians, sponsors, and power brokers who exploit young people's hunger for success, belonging, influence, and fulfilment.",
+    avatar: "M"
+  },
+  {
+    name: "Hangman",
+    role: "Antagonist System Motif",
+    bio: "A high-ranking office in the Inverted Cross Fraternity. The Hangman is connected to ritual authority, violence, and the dark symbolism of the fraternity's law.",
+    avatar: "H"
+  },
+  {
+    name: "The Law of the Hangman",
+    role: "Antagonist System Motif",
+    bio: "A dark rule connected to the Hangman's office. It involves the symbolic 'shedding of fingers' before the mantle can pass to another.",
+    avatar: "⚖"
+  },
+  {
+    name: "Fingers of the Hangman",
+    role: "Antagonist System Motif",
+    bio: "The bronze nails given to a Hangman during ordination. They are called 'fingers' and are tied to the violent obligations of the office.",
+    avatar: "F"
+  },
+  {
+    name: "Crucifixion Parade",
+    role: "Antagonist System Motif",
+    bio: "A violent fraternity operation led by the Hangman. It is one of the darkest distortions of the Cross in the story.",
+    avatar: "C"
+  },
+  {
+    name: "Cardinal",
+    role: "Antagonist System Motif",
+    bio: "A leadership title within the fraternity. It marks rank, command, and influence among the disciples of the Inverted Cross.",
+    avatar: "C"
+  },
+  {
+    name: "Guardian Angel",
+    role: "Antagonist System Motif",
+    bio: "A fraternity role associated with guiding, protecting, and shaping new members. Sammy later recognizes that the leadership skill behind this role can be redeemed for mentoring young people toward purpose.",
+    avatar: "G"
+  },
+  {
+    name: "The Key",
+    role: "Antagonist System Motif",
+    bio: "A mysterious identity connected to Sammy and the fraternity's hidden spiritual system. It points to his role in the larger Program and the danger surrounding his life.",
+    avatar: "🔑"
+  },
+  {
+    name: "Matchstick Image",
+    role: "Symbolic Object",
+    bio: "A symbolic image in Ikenna's memoir linking Ikenna, Bitty, and Sammy. It hints at the hidden connection among the three disciples and their roles in the larger story.",
+    avatar: "🔥"
+  },
+  {
+    name: "Morashe Hills",
+    role: "Mystic Location",
+    bio: "A spiritually significant location tied to fraternity mystery, consecration, and the dark origins of some characters' commitments.",
+    avatar: "⛰"
+  },
+  {
+    name: "Katampe Prison",
+    role: "Redemption Location",
+    bio: "The prison where Ikenna's transformation begins after he encounters the message of Christ and begins to understand grace, guilt, and redemption.",
+    avatar: "K"
+  },
+  {
+    name: "The Crucified One",
+    role: "Symbolic Title",
+    bio: "A title referring to Jesus Christ. Sammy uses it when declaring his new allegiance after turning away from the fraternity.",
+    avatar: "✝"
+  },
+  {
+    name: "Prophetic Art",
+    role: "Story Motif",
+    bio: "Artwork that carries spiritual meaning beyond ordinary visual beauty. Rakiya's paintings become prophetic signs pointing to rescue, judgment, redemption, and the coming Regent.",
+    avatar: "🎨"
+  },
+  {
+    name: "The Inversion",
+    role: "Story Motif",
+    bio: "The distortion of truth, purpose, identity, and the Cross by darkness. To experience the inversion is to have one's gifts, desires, and identity bent toward false power.",
+    avatar: "↕"
+  },
+  {
+    name: "The Remnant Generation",
+    role: "Story Motif",
+    bio: "A phrase pointing to young people whose gifts will not be owned by darkness. It reflects Sammy's growing understanding of his calling to help the wounded, gifted, and vulnerable discover purpose.",
+    avatar: "🌱"
+  },
 ];
 
-function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, onAutoScroll, onSpeak, onSave, onRead, onPurchase, purchases, user, onViewNotices }) {
+function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, onAutoScroll, onSpeak, onSave, onRead, onPurchase, purchases, user, onViewNotices, isTtsPlaying, currentTtsParaIndex }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
@@ -2013,6 +2303,7 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
   return (
     <div className={`reader-shell ${settings.theme}`}>
       <header className="reader-topbar">
+        {/* Single row: [Back] | [TTS · Glossary · Save] | [spacer] */}
         <div className="reader-topbar-row-1">
           <button className="reader-back-btn" onClick={onBack} aria-label="Go back">
             <svg className="back-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -2020,9 +2311,9 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
           </button>
-          <div className="reader-central-controls" style={{ flex: 1, justifyContent: "center" }}>
-            <button className="reader-btn tts-btn" onClick={onSpeak}>
-              <span>TTS</span>
+          <div className="reader-central-controls">
+            <button className={`reader-btn tts-btn ${isTtsPlaying ? "is-active" : ""}`} onClick={onSpeak}>
+              <span>{isTtsPlaying ? "⏸ Pause" : "TTS"}</span>
             </button>
             <button className="reader-btn glossary-btn" onClick={() => setGlossaryOpen(true)}>
               <span>Glossary</span>
@@ -2031,12 +2322,13 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
               <span>Save</span>
             </button>
           </div>
-          <div style={{ width: '40px' }} /> {/* Spacer to balance back button and keep controls centered */}
+          <div className="reader-topbar-spacer" aria-hidden="true" />
         </div>
+        {/* Row 2: Book title + chapter info */}
         <div className="reader-topbar-row-2">
           <div className="reader-meta-info">
             <h1>{activeChapter.book.title}</h1>
-            <span>Reading: {activeChapter.section.title} - {activeChapter.chapter.title}</span>
+            <span>Reading: {activeChapter.section.title} – {activeChapter.chapter.title}</span>
           </div>
         </div>
       </header>
@@ -2102,14 +2394,27 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
       <article className="reader-body" style={{ fontFamily: settings.font, fontSize: settings.size, lineHeight: settings.line, textAlign: settings.align, paddingBottom: '100px' }}>
         <p className="eyebrow">{activeChapter.section.title}</p>
         <h2>{activeChapter.chapter.title} {activeChapter.chapter.subtitle ? `— ${activeChapter.chapter.subtitle}` : ""}</h2>
-        <div 
-          className="chapter-content-html"
-          dangerouslySetInnerHTML={{ 
-            __html: Array.isArray(activeChapter.chapter.content) 
-              ? activeChapter.chapter.content.join('')
-              : activeChapter.chapter.content 
-          }} 
-        />
+        <div className="chapter-content-html">
+          {(Array.isArray(activeChapter.chapter.content) ? activeChapter.chapter.content : [activeChapter.chapter.content]).map((p, idx) => {
+            const cleanText = String(p || "").replace(/^<p>/i, "").replace(/<\/p>$/i, "");
+            const isActive = isTtsPlaying && idx === currentTtsParaIndex;
+            return (
+              <p 
+                key={idx}
+                className={isActive ? "tts-active-paragraph" : ""}
+                style={{
+                  backgroundColor: isActive ? "rgba(111, 66, 193, 0.15)" : "transparent",
+                  transition: "background-color 0.3s ease, padding 0.3s ease",
+                  borderRadius: "4px",
+                  padding: isActive ? "8px 12px" : "0",
+                  margin: "16px 0",
+                  boxShadow: isActive ? "0 2px 8px rgba(111, 66, 193, 0.1)" : "none"
+                }}
+                dangerouslySetInnerHTML={{ __html: cleanText }}
+              />
+            );
+          })}
+        </div>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', paddingTop: '20px', borderTop: '1px solid rgba(128,105,90,0.2)' }}>
           <button className="ghost-btn" disabled={!prev} onClick={() => prev && onRead(prev)}>Previous</button>

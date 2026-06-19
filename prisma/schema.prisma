@@ -58,6 +58,7 @@ model Book {
   author             String
   coverImage         String?           @map("cover_image")
   blurb              String?
+  summary            String?
   bookOrder          Int               @map("book_order")
   price              Decimal           @default(0) @db.Decimal(12, 2)
   status             String            @default("Draft")

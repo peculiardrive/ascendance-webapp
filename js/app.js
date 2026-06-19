@@ -14,6 +14,8 @@ const seedBooks = [
     preview: true,
     blurb:
       "A forbidden order rises beneath the surface of ordinary faith, and a young reader is drawn into the cost of discernment. Ascendance begins where hidden loyalties, ambition, and sacrifice collide.",
+    summary:
+      "Unconsciously, he established the evidence of system he’s a truce breaker.\n\nAlthough his father, Rev. Joseph Obiajulu had avowed him to God to be a priest, a vow that saved him from death, he absconded from home in pursuit of his dream to become a medical doctor. Then he breached his promise to Ifeanyi, his elder brother, not to join the university’s secret fraternity, a promise that was sealed with the gift of a golden chain and a crucifix pendant.\n\nBut when he violated his consecration vow as Hangman of the dreaded Inverted Cross Fraternity, he was forced to give up the hammer, the medallion and the armband.\nTo escape the penalty of his transgression, he adopted a new name…Jehoshaphat.\n\nHe became an apostate and swore to destroy the fraternity he founded… one promise he didn’t fail.",
     sections: [
       {
         id: "b1-s1",
@@ -87,7 +89,9 @@ const seedBooks = [
     status: "Published",
     preview: false,
     blurb:
-      "The struggle moves from hidden rooms into polished halls, where influence is traded like currency and truth becomes the most expensive commodity.",
+      "Sammy’s exile exposes a hidden network where politicians, patrons, and power brokers harvest young dreams.",
+    summary:
+      "He laid the Cross upright on the grave of the man who founded the fraternity, and by that single act, Sammy Briggs became both a truce breaker and a marked man.\n\nOnce ordained as Lethal Weapon, the feared Cardinal of the Inverted Cross Fraternity, he had lived by violence, loyalty, and the illusion of power. But when he rejected the political machine of the GODs and the fraternity’s blood economy, and chose the Crucified One over the gods of the Order, the family that once protected him became the darkness hunting him.\n\nTo escape the penalty of his defection, he fled into exile. Stripped of rank, money, protection, and identity, Sammy discovered that the gifts he had once used to mentor boys into darkness could be redeemed to guide wounded young people toward purpose.\n\nAnd though the GODs came for him again, Sammy Briggs had found the one thing stronger than fear — purpose.",
     sections: [
       {
         id: "b2-s1",
@@ -125,7 +129,9 @@ const seedBooks = [
     status: "Published",
     preview: false,
     blurb:
-      "The final movement gathers every oath, betrayal, and revelation into the arrival of a regent whose coming will test the meaning of ascendance itself.",
+      "Through Rakiya’s prophetic art, Lizzy uncovers the final mystery that turns grief into revelation and darkness into hope.",
+    summary:
+      "She thought she was only keeping faith with the memory of the man she loved.\n\nBut when Sammy Briggs is arrested, Rakiya disappears, and the paintings of an untrained girl begin to speak with the language of prophecy, Elizabeth finds herself drawn into the unfinished purpose of Ikenna Obiajulu’s death. Once known on campus for charm, beauty, and controversy, Lizzy has become a witness of the Cross she once scarcely understood.\n\nCarrying the burden of three disciples of the Inverted Cross, she traces the hidden merchants who traffic not only in bodies, art, influence, and money — but in destinies. To rescue the girl, save Sammy, and expose the system, Ifeanyi must betray the man who once sheltered him, confront the guilt of leading Ikenna into Dike’s house, and return to the father he abandoned.\n\nAnd through Rakiya’s prophetic paintings, the story finally rises into its true crescendo: The Regent is coming. And the Cross that darkness tried to invert has become the way home.",
     sections: [
       {
         id: "b3-s1",
@@ -211,6 +217,7 @@ let currentUtterance = null;
 let backendAvailable = false;
 let backendSaveTimer = null;
 let isHydratingBackend = false;
+let isTtsSpeaking = false;
 
 const app = document.querySelector("#app");
 const splash = document.querySelector("#splash");
@@ -578,7 +585,7 @@ function renderHome() {
     <section class="featured-book" aria-labelledby="featured-book-title" style="display: grid; justify-items: center; gap: 34px; margin-top: 20px;">
       <div class="cover-stage" style="position: relative;">
         <img class="featured-cover" src="${currentBook.cover}" alt="${escapeHtml(currentBook.title)} cover" style="width: min(520px, 66vw); aspect-ratio: 3/4.1; object-fit: cover; box-shadow: 0 14px 32px rgba(0,0,0,0.12);">
-        <button class="audio-drama-fab" data-action="speak" data-text="${escapeHtml(currentBook.blurb)}" aria-label="Listen to summary">
+        <button class="audio-drama-fab" data-action="speak" data-text="${escapeHtml(currentBook.summary || currentBook.blurb)}" aria-label="Listen to summary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -2247,9 +2254,9 @@ function showSummaryModal(bookId) {
         <button class="modal-close" data-modal-action="close" style="min-height: auto; padding: 4px 8px; cursor: pointer; border: none; background: transparent; font-size: 0.9rem; font-weight: bold;">Close</button>
       </div>
       <h3 style="margin: 0; font-size: 1.1rem; font-weight: bold;">${escapeHtml(book.title)}</h3>
-      <p style="margin: 0; color: var(--ink); line-height: 1.6; text-align: left;">${escapeHtml(book.blurb)}</p>
+      <p style="margin: 0; color: var(--ink); line-height: 1.6; text-align: left; white-space: pre-wrap;">${escapeHtml(book.summary || book.blurb)}</p>
       <div style="display: flex; gap: 12px; margin-top: 12px;">
-        <button class="primary-btn" data-modal-action="speak-summary" data-text="${escapeHtml(book.blurb)}" style="flex: 1; min-height: 44px; border-radius: 8px;">
+        <button class="primary-btn" data-modal-action="speak-summary" data-text="${escapeHtml(book.summary || book.blurb)}" style="flex: 1; min-height: 44px; border-radius: 8px;">
           Listen (TTS)
         </button>
         <button class="ghost-btn" data-modal-action="stop-speak" style="flex: 1; min-height: 44px; border-radius: 8px;">
@@ -2340,12 +2347,37 @@ function speakText(text) {
     toast("Text-to-speech is not supported in this browser.");
     return;
   }
-  if (window.speechSynthesis.speaking) {
+  const ttsBtns = document.querySelectorAll(".tts-btn");
+  
+  const resetTtsBtns = () => {
+    isTtsSpeaking = false;
+    ttsBtns.forEach(btn => {
+      btn.classList.remove("is-active");
+      btn.style.background = "transparent";
+      btn.style.color = "#3d1054";
+      btn.textContent = "TTS";
+    });
+  };
+
+  if (isTtsSpeaking) {
     window.speechSynthesis.cancel();
+    resetTtsBtns();
     return;
   }
+  
+  window.speechSynthesis.cancel(); // Clear queue
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.rate = Math.min(1.8, 0.75 + state.readerSettings.scrollSpeed / 6);
+  currentUtterance.onend = resetTtsBtns;
+  currentUtterance.onerror = resetTtsBtns;
+  
+  isTtsSpeaking = true;
+  ttsBtns.forEach(btn => {
+    btn.classList.add("is-active");
+    btn.style.background = "#3d1054";
+    btn.style.color = "#fff";
+    btn.textContent = "⏸ Pause";
+  });
   window.speechSynthesis.speak(currentUtterance);
 }
 
