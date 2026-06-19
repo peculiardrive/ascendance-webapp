@@ -674,6 +674,28 @@ export default function Home() {
     window.location.href = data.authorizationUrl;
   }
 
+  async function redeemGift(formData) {
+    const code = String(formData.get("accessCode") || "").toUpperCase().trim();
+    if (!code) return notify("Access code is required.");
+    
+    notify("Validating gift code...");
+    try {
+      const response = await fetch("/api/gifts/redeem", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ accessCode: code })
+      });
+      const data = await response.json();
+      if (!data.ok) return notify(data.error);
+      
+      notify("Trilogy successfully unlocked! Happy reading.");
+      await refreshState();
+    } catch (e) {
+      console.error(e);
+      notify("Failed to redeem gift code.");
+    }
+  }
+
   async function adminLogin(formData) {
     const response = await fetch("/api/admin/login", {
       method: "POST",
@@ -1004,7 +1026,7 @@ export default function Home() {
               onSurfaceChange={setCommunitySurface}
             />
           )}
-          {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} />}
+          {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} onRedeem={redeemGift} />}
           {view === "profile" && (
             <ProfileView
               user={user}
@@ -2954,29 +2976,51 @@ function CommunityComment({ comment, replies, onReply }) {
   );
 }
 
-function NoticesView({ gifts, onGift }) {
+function NoticesView({ gifts, onGift, onRedeem }) {
   return (
     <div className="gift-screen">
       <div className="screen-heading">
         <p className="eyebrow">Share the journey</p>
-        <h1>Gift Ascendance</h1>
-        <p>Send the complete trilogy to a friend and follow their redemption progress here.</p>
+        <h1>Gift & Redeem</h1>
+        <p>Send the complete trilogy to a friend, or redeem an access code to unlock your books.</p>
       </div>
-      <section className="gift-panel">
-        <div className="gift-cover-stack" aria-hidden="true">
-          <img src="/assets/books/disciples-inverted-cross.jpeg" alt="" />
-          <img src="/assets/books/merchants-ivory-towers.jpeg" alt="" />
-          <img src="/assets/books/rhapsodies-coming-regent.jpeg" alt="" />
-        </div>
-        <div className="gift-price">
-          <div><span>Ascendance Trilogy gift</span><small>All three books for one reader</small></div>
-          <ReaderPrice usdAmount={USD_PRICES.giftTrilogy} />
-        </div>
-        <form onSubmit={(event) => { event.preventDefault(); onGift(new FormData(event.currentTarget)); event.currentTarget.reset(); }} className="gift-form">
-          <label>Recipient email<input name="recipientEmail" type="email" placeholder="friend@example.com" required /></label>
-          <button className="primary-btn">Pay and Send Gift</button>
-        </form>
-      </section>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+        {/* Panel 1: Gift Panel */}
+        <section className="gift-panel" style={{ gridTemplateColumns: '1fr', gap: '16px', display: 'flex', flexDirection: 'column' }}>
+          <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--brand)', fontFamily: 'Georgia, serif' }}>Send a Gift</h2>
+          <div className="gift-cover-stack" aria-hidden="true" style={{ margin: '12px 0' }}>
+            <img src="/assets/books/disciples-inverted-cross.jpeg" alt="" />
+            <img src="/assets/books/merchants-ivory-towers.jpeg" alt="" />
+            <img src="/assets/books/rhapsodies-coming-regent.jpeg" alt="" />
+          </div>
+          <div className="gift-price" style={{ marginBottom: '12px' }}>
+            <div><span style={{ fontWeight: 'bold' }}>Ascendance Trilogy gift</span><small>All three books for one reader</small></div>
+            <ReaderPrice usdAmount={USD_PRICES.giftTrilogy} />
+          </div>
+          <form onSubmit={(event) => { event.preventDefault(); onGift(new FormData(event.currentTarget)); event.currentTarget.reset(); }} style={{ display: 'grid', gap: '12px', marginTop: 'auto' }}>
+            <label style={{ display: 'grid', gap: '6px', color: 'var(--brand)' }}>Recipient email
+              <input name="recipientEmail" type="email" placeholder="friend@example.com" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid var(--app-line)', background: 'transparent' }} />
+            </label>
+            <button className="primary-btn" style={{ minHeight: '44px', borderRadius: '6px', cursor: 'pointer' }}>Pay and Send Gift</button>
+          </form>
+        </section>
+
+        {/* Panel 2: Redeem Panel */}
+        <section className="gift-panel" style={{ gridTemplateColumns: '1fr', gap: '16px', display: 'flex', flexDirection: 'column' }}>
+          <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--brand)', fontFamily: 'Georgia, serif' }}>Redeem Gift Code</h2>
+          <p style={{ margin: 0, color: 'var(--ink)', fontSize: '0.9rem', lineHeight: 1.5 }}>
+            Have a gift access code? Enter the 8-character code below to unlock the complete Ascendance Trilogy on your account.
+          </p>
+          <form onSubmit={(event) => { event.preventDefault(); onRedeem(new FormData(event.currentTarget)); event.currentTarget.reset(); }} style={{ display: 'grid', gap: '12px', marginTop: 'auto' }}>
+            <label style={{ display: 'grid', gap: '6px', color: 'var(--brand)' }}>Access code
+              <input name="accessCode" placeholder="E.g., ABCDEFGH" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid var(--app-line)', background: 'transparent', textTransform: 'uppercase' }} />
+            </label>
+            <button className="primary-btn" style={{ minHeight: '44px', borderRadius: '6px', background: 'var(--ink)', cursor: 'pointer' }}>Unlock Trilogy</button>
+          </form>
+        </section>
+      </div>
+
       <section className="gift-history">
         <h2>Gift activity</h2>
         {gifts.length ? gifts.map((gift) => <article className="notice-card" key={gift.id}><div><h3>{gift.recipientEmail}</h3><p>{gift.status}</p></div><strong>{gift.accessCode}</strong></article>) : <div className="empty-state">No gift activity yet.</div>}
