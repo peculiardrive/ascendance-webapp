@@ -204,7 +204,8 @@ export default function Home() {
     theme: "light",
     align: "left",
     scrollSpeed: 2,
-    autoScrollEnabled: false
+    autoScrollEnabled: false,
+    ttsVoiceGender: "auto"
   });
   const autoScrollRef = useRef(null);
 
@@ -907,7 +908,9 @@ export default function Home() {
     utterance.rate = 0.9;
     utterance.pitch = 1;
 
-    const preferredGender = activeChapter?.section?.voice || "Female";
+    const preferredGender = readerSettings.ttsVoiceGender === "auto" || !readerSettings.ttsVoiceGender
+      ? (activeChapter?.section?.voice || "Female")
+      : readerSettings.ttsVoiceGender;
     const voices = window.speechSynthesis.getVoices();
     if (voices.length) {
       const best = getBestVoice(preferredGender);
@@ -2426,6 +2429,15 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
                   <button onClick={() => setSettings({ ...settings, theme: 'dark' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1c1c1e', border: settings.theme === 'dark' ? '2px solid var(--app-purple)' : '1px solid #555', cursor: 'pointer' }} aria-label="Dark" title="Dark"></button>
                   <button onClick={() => setSettings({ ...settings, theme: 'midnight-gold' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#19191c', border: settings.theme === 'midnight-gold' ? '2px solid #c99d42' : '1px solid #555', cursor: 'pointer' }} aria-label="Midnight Gold" title="Midnight Gold"></button>
                   <button onClick={() => setSettings({ ...settings, theme: 'royal-forest' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#14281a', border: settings.theme === 'royal-forest' ? '2px solid #3c5e47' : '1px solid #555', cursor: 'pointer' }} aria-label="Royal Forest" title="Royal Forest"></button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'bold' }}>TTS Voice</span>
+                <div className="typography-toggle-container">
+                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'auto' })} className={`font-select-btn ${settings.ttsVoiceGender === 'auto' || !settings.ttsVoiceGender ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Auto</button>
+                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'Male' })} className={`font-select-btn ${settings.ttsVoiceGender === 'Male' ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Male</button>
+                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'Female' })} className={`font-select-btn ${settings.ttsVoiceGender === 'Female' ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Female</button>
                 </div>
               </div>
 
