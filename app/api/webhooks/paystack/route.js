@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { generateGiftCode } from "@/lib/gifts";
+import { sendGiftNotificationEmail } from "@/lib/email";
 import { paystackAmount, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { json, readState, uid, writeState } from "@/lib/store";
@@ -45,7 +46,7 @@ export async function POST(request) {
   if (product.productType === "gift-trilogy") {
     const existingGift = await prisma.gift.findFirst({ where: { paymentReference: reference } });
     if (!existingGift) {
-      await prisma.gift.create({
+      const savedGift = await prisma.gift.create({
         data: {
           senderUserId: metadata.userId,
           recipientEmail: String(metadata.recipientEmail || "").toLowerCase().trim(),
@@ -55,6 +56,26 @@ export async function POST(request) {
           status: "Sent"
         }
       });
+
+      // Retrieve the sender user details to get their full name
+      const senderUser = await prisma.user.findUnique({ where: { id: metadata.userId } });
+      const senderName = senderUser ? senderUser.fullName : "A reader";
+
+      // Construct baseUrl from request headers
+      const protocol = request.headers.get("x-forwarded-proto") || "https";
+      const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "www.ascendance-trilogy.com";
+      const baseUrl = `${protocol}://${host}`;
+
+      try {
+        await sendGiftNotificationEmail({
+          to: savedGift.recipientEmail,
+          accessCode: savedGift.accessCode,
+          senderName,
+          baseUrl
+        });
+      } catch (err) {
+        console.error("Failed to send gift notification email in webhook:", err);
+      }
     }
     return json({ ok: true });
   }

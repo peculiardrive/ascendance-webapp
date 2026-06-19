@@ -184,6 +184,7 @@ export default function Home() {
   const [posts, setPosts] = useState(defaultState.posts);
   const [purchases, setPurchases] = useState([]);
   const [gifts, setGifts] = useState([]);
+  const [giftCodeParam, setGiftCodeParam] = useState("");
   const [progress, setProgress] = useState({});
   const [settings, setSettings] = useState(defaultState.settings);
   const [activeChapterId, setActiveChapterId] = useState("b1-c1");
@@ -365,6 +366,41 @@ export default function Home() {
     const query = params.toString();
     window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }, [ready, user?.id, isOnboarded]);
+
+  // Capture giftCode from URL search parameters as early as possible
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const giftCode = params.get("giftCode");
+      if (giftCode) {
+        try {
+          sessionStorage.setItem("pending_gift_code", giftCode.toUpperCase().trim());
+        } catch (e) {
+          console.warn("sessionStorage access failed", e);
+        }
+        params.delete("giftCode");
+        const query = params.toString();
+        window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+      }
+    }
+  }, []);
+
+  // Redirect and pre-fill the pending gift code if present
+  useEffect(() => {
+    if (ready && user && isOnboarded && splashDone) {
+      try {
+        const pendingCode = sessionStorage.getItem("pending_gift_code");
+        if (pendingCode) {
+          setGiftCodeParam(pendingCode);
+          setView("notices");
+          sessionStorage.removeItem("pending_gift_code");
+          notify("Access code loaded from link. Click Unlock to redeem!");
+        }
+      } catch (e) {
+        console.warn("Failed to check pending gift code from sessionStorage", e);
+      }
+    }
+  }, [ready, user, isOnboarded, splashDone]);
 
   async function refreshState(includeDeleted = false) {
     const booksUrl = includeDeleted ? "/api/books?includeDeleted=true" : "/api/books";
@@ -1026,7 +1062,7 @@ export default function Home() {
               onSurfaceChange={setCommunitySurface}
             />
           )}
-          {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} onRedeem={redeemGift} />}
+          {view === "notices" && <NoticesView gifts={gifts} onGift={sendGift} onRedeem={redeemGift} initialCode={giftCodeParam} />}
           {view === "profile" && (
             <ProfileView
               user={user}
@@ -2976,7 +3012,7 @@ function CommunityComment({ comment, replies, onReply }) {
   );
 }
 
-function NoticesView({ gifts, onGift, onRedeem }) {
+function NoticesView({ gifts, onGift, onRedeem, initialCode = "" }) {
   return (
     <div className="gift-screen">
       <div className="screen-heading">
@@ -3014,7 +3050,7 @@ function NoticesView({ gifts, onGift, onRedeem }) {
           </p>
           <form onSubmit={(event) => { event.preventDefault(); onRedeem(new FormData(event.currentTarget)); event.currentTarget.reset(); }} style={{ display: 'grid', gap: '12px', marginTop: 'auto' }}>
             <label style={{ display: 'grid', gap: '6px', color: 'var(--brand)' }}>Access code
-              <input name="accessCode" placeholder="E.g., ABCDEFGH" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid var(--app-line)', background: 'transparent', textTransform: 'uppercase' }} />
+              <input key={initialCode} name="accessCode" defaultValue={initialCode} placeholder="E.g., ABCDEFGH" required style={{ padding: '12px', borderRadius: '6px', border: '1px solid var(--app-line)', background: 'transparent', textTransform: 'uppercase' }} />
             </label>
             <button className="primary-btn" style={{ minHeight: '44px', borderRadius: '6px', background: 'var(--ink)', cursor: 'pointer' }}>Unlock Trilogy</button>
           </form>

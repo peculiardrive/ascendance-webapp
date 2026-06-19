@@ -121,36 +121,36 @@ async function run() {
     });
   });
 
-  // Set notices tab view
+  // Set last view to home to verify query parameter redirect works
   await context.addInitScript(() => {
-    localStorage.setItem("ascendance_last_view", "notices");
+    localStorage.setItem("ascendance_last_view", "home");
   });
 
-  console.log("Navigating to home notices view...");
-  await page.goto("http://127.0.0.1:3000/?confirmBypass=true", { waitUntil: "load" });
+  console.log("Navigating to app with giftCode query parameter...");
+  await page.goto("http://127.0.0.1:3000/?confirmBypass=true&giftCode=" + accessCode, { waitUntil: "load" });
 
-  console.log("Waiting for page load...");
+  console.log("Waiting for page load and redirection to Gift tab...");
   await page.waitForSelector("input[name='accessCode']", { timeout: 15000 });
   await page.screenshot({ path: join(process.cwd(), "scratch", "redemption-ui-step1-loaded.png") });
 
-  console.log("Typing access code...");
+  console.log("Verifying access code was auto-populated from URL...");
   const codeInput = await page.$("input[name='accessCode']");
   if (!codeInput) {
     throw new Error("Redemption input 'accessCode' not found!");
   }
-  await codeInput.fill(accessCode);
+  const prefilledValue = await codeInput.inputValue();
+  console.log(`Prefilled input value: "${prefilledValue}"`);
+  if (prefilledValue !== accessCode) {
+    throw new Error(`Expected accessCode to be prefilled as "${accessCode}", but got "${prefilledValue}"`);
+  }
 
   console.log("Submitting redemption form...");
   await page.screenshot({ path: join(process.cwd(), "scratch", "redemption-ui-step2-typed.png") });
   
-  const submitButton = await page.$("button:has-text('Unlock Trilogy')");
-  if (!submitButton) {
-    throw new Error("Unlock Trilogy submit button not found!");
-  }
-  await submitButton.click();
+  await page.click("button:has-text('Unlock Trilogy')");
 
   console.log("Waiting for verification response...");
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(1500);
   await page.screenshot({ path: join(process.cwd(), "scratch", "redemption-ui-step3-result.png") });
 
   await browser.close();

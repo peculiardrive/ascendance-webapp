@@ -1,4 +1,5 @@
 import { generateGiftCode } from "@/lib/gifts";
+import { sendGiftNotificationEmail } from "@/lib/email";
 import { paystackAmount, paystackRequest, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { assertSameOrigin, readerSessionFrom } from "@/lib/session";
@@ -77,6 +78,23 @@ export async function POST(request) {
           status: "Sent"
         }
       });
+
+      // Construct baseUrl from request headers
+      const protocol = request.headers.get("x-forwarded-proto") || "https";
+      const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "www.ascendance-trilogy.com";
+      const baseUrl = `${protocol}://${host}`;
+
+      try {
+        await sendGiftNotificationEmail({
+          to: savedGift.recipientEmail,
+          accessCode: savedGift.accessCode,
+          senderName: user.fullName,
+          baseUrl
+        });
+      } catch (err) {
+        console.error("Failed to send gift notification email:", err);
+      }
+
       const gift = { ...savedGift, senderName: user.fullName };
       state.gifts.unshift(gift);
       transaction.status = "Successful";
