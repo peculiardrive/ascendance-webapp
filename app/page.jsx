@@ -1031,6 +1031,7 @@ export default function Home() {
           onAdminReply={adminReply}
           onRefresh={() => refreshState(true)}
           setAdmin={setAdmin}
+          notify={notify}
         />
         <Toast message={toast} />
       </>
@@ -1151,6 +1152,7 @@ export default function Home() {
               onAdminReply={adminReply}
               onRefresh={refreshState}
               setAdmin={setAdmin}
+              notify={notify}
             />
           )}
         </AppShell>
@@ -3316,7 +3318,8 @@ function AdminGate({
   onModeratePost,
   onAdminReply,
   onRefresh,
-  setAdmin
+  setAdmin,
+  notify
 }) {
   const [forgotMode, setForgotMode] = useState("login");
   const [resetEmail, setResetEmail] = useState("");
