@@ -39,3 +39,38 @@ export async function GET(request) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const adminSession = adminSessionFrom(request);
+    if (!adminSession) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const admin = await prisma.adminUser.findUnique({ where: { id: adminSession.sub } });
+    if (!admin) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const url = new URL(request.url);
+    const userId = url.searchParams.get("id");
+    if (!userId) {
+      return NextResponse.json({ ok: false, error: "Missing user ID" }, { status: 400 });
+    }
+
+    await prisma.$transaction([
+      prisma.gift.updateMany({
+        where: { redeemedByUserId: userId },
+        data: { redeemedByUserId: null }
+      }),
+      prisma.user.delete({
+        where: { id: userId }
+      })
+    ]);
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Failed to delete user:", error);
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  }
+}

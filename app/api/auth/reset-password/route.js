@@ -27,7 +27,7 @@ export async function POST(request) {
       return json({ ok: false, error: "Reset code has expired." }, { status: 400 });
     }
 
-    const isCodeValid = await verifyPassword(user.passwordResetCodeHash, code);
+    const isCodeValid = verifyPassword(code, user.passwordResetCodeHash);
     if (!isCodeValid) {
       return json({ ok: false, error: "Invalid reset code." }, { status: 400 });
     }

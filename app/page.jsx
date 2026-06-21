@@ -178,6 +178,8 @@ export default function Home() {
   const [showTrailer, setShowTrailer] = useState(false);
   const [view, setView] = useState("auth");
   const [user, setUser] = useState(null);
+  const [pendingPurchase, setPendingPurchase] = useState(null);
+  const [showEmailPrompt, setShowEmailPrompt] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [adminTwoFactorPending, setAdminTwoFactorPending] = useState(false);
   const [books, setBooks] = useState(defaultState.books);
@@ -205,7 +207,7 @@ export default function Home() {
     align: "left",
     scrollSpeed: 2,
     autoScrollEnabled: false,
-    ttsVoiceGender: "auto"
+    ttsVoiceGender: "Male"
   });
   const autoScrollRef = useRef(null);
 
@@ -550,19 +552,44 @@ export default function Home() {
     notify("Password updated successfully.");
   }
 
-  async function purchase(book, productType = "book") {
+  async function purchase(book, productType = "book", guestEmail = null) {
+    if (!user && !guestEmail) {
+      setPendingPurchase({ book, productType });
+      setShowEmailPrompt(true);
+      return;
+    }
     const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         productType,
-        bookId: productType === "book" ? book?.id : null
+        bookId: productType === "book" ? book?.id : null,
+        email: guestEmail
       })
     });
     const data = await response.json();
     if (!data.ok) return notify(data.error);
     notify("Opening Paystack checkout.");
     window.location.href = data.authorizationUrl;
+  }
+
+  async function completeSignup(formData) {
+    const response = await fetch("/api/auth/complete-signup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        fullName: formData.get("fullName"),
+        password: formData.get("password"),
+        phone: formData.get("phone"),
+        username: formData.get("username"),
+        country: formData.get("country")
+      })
+    });
+    const data = await response.json();
+    if (!data.ok) return notify(data.error);
+    setUser(data.user);
+    notify("Signup complete! Welcome to Ascendance.");
+    await refreshState();
   }
 
   async function verifyPaystackPayment(reference) {
@@ -608,6 +635,11 @@ export default function Home() {
   }
 
   async function createPost(formData) {
+    if (!user) {
+      setView("auth");
+      notify("Please create a profile or log in to post a review.");
+      return;
+    }
     const response = await fetch("/api/community/posts", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -620,6 +652,11 @@ export default function Home() {
   }
 
   async function communityAction(payload) {
+    if (!user) {
+      setView("auth");
+      notify("Please create a profile or log in to participate.");
+      return;
+    }
     const response = await fetch("/api/community/posts", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -694,7 +731,12 @@ export default function Home() {
   }
 
   async function sendGift(formData) {
-    if (!ownsBook(user?.id, purchases, "book-1")) {
+    if (!user) {
+      setView("auth");
+      notify("Please create a profile or log in to send a gift.");
+      return;
+    }
+    if (!ownsBook(user.id, purchases, "book-1")) {
       return notify("You must purchase Book One or the Trilogy before you can send a gift.");
     }
     const response = await fetch("/api/payments/paystack/initialize", {
@@ -712,6 +754,11 @@ export default function Home() {
   }
 
   async function redeemGift(formData) {
+    if (!user) {
+      setView("auth");
+      notify("Please create a profile or log in to redeem your gift.");
+      return;
+    }
     const code = String(formData.get("accessCode") || "").toUpperCase().trim();
     if (!code) return notify("Access code is required.");
     
@@ -823,36 +870,36 @@ export default function Home() {
    * Priority: Neural/Online/Natural > Enhanced/Premium > Google > Microsoft > any English.
    * Respects preferredGender ("Male" | "Female") stored on each section.
    */
-  function getBestVoice(preferredGender) {
+  function getBestVoice() {
     const voices = window.speechSynthesis.getVoices();
     const english = voices.filter(v => v.lang.startsWith("en"));
     if (!english.length) return null;
 
-    const gender = (preferredGender || "female").toLowerCase();
+    // Strict male voice name hints
+    const maleHints = ["male", "guy", "david", "mark", "daniel", "james", "alex", "fred", "rishi", "oliver", "arthur", "brian", "george", "stefan", "ravi", "harry", "ryan", "tyler", "liam", "noah"];
 
-    // Female-leaning name hints
-    const femaleHints = ["female", "aria", "jenny", "nova", "zira", "hazel", "susan", "samantha", "emily", "kate", "natasha", "moira", "tessa", "fiona"];
-    // Male-leaning name hints
-    const maleHints   = ["male", "guy", "david", "mark", "daniel", "james", "alex", "fred", "rishi", "oliver", "arthur"];
+    // Filter strictly to male voices first
+    const maleVoices = english.filter(v => {
+      const n = v.name.toLowerCase();
+      return maleHints.some(h => n.includes(h));
+    });
+
+    // Only fallback to any English voice if absolutely no male voice exists
+    const candidates = maleVoices.length > 0 ? maleVoices : english;
 
     function score(v) {
       let s = 0;
       const n = v.name.toLowerCase();
-      // Quality tier — neural/online voices sound most natural
       if (n.includes("online") || n.includes("neural") || n.includes("natural")) s += 120;
       if (n.includes("enhanced") || n.includes("premium"))                       s += 60;
       if (n.includes("google"))                                                   s += 35;
       if (n.includes("microsoft"))                                                s += 25;
-      // Gender match
-      const hints = gender === "female" ? femaleHints : maleHints;
-      if (hints.some(h => n.includes(h)))                                         s += 50;
-      // Prefer British English for storytelling warmth
       if (v.lang === "en-GB")                                                     s += 12;
       if (v.lang === "en-US")                                                     s += 6;
       return s;
     }
 
-    return english.slice().sort((a, b) => score(b) - score(a))[0];
+    return candidates.slice().sort((a, b) => score(b) - score(a))[0];
   }
 
   // Pre-warm SpeechSynthesis voices early to avoid cold-start delays
@@ -877,6 +924,8 @@ export default function Home() {
     }).filter(Boolean);
   }, [activeChapter]);
 
+  // Use a mutable state ref to ensure the async speech callbacks (onend, onerror)
+  // always reference the correct dynamic state variables without React closure staleness.
   // Use a mutable state ref to ensure the async speech callbacks (onend, onerror)
   // always reference the correct dynamic state variables without React closure staleness.
   const ttsStateRef = useRef({ paragraphs: [], index: -1, playing: false });
@@ -908,12 +957,9 @@ export default function Home() {
     utterance.rate = 0.9;
     utterance.pitch = 1;
 
-    const preferredGender = readerSettings.ttsVoiceGender === "auto" || !readerSettings.ttsVoiceGender
-      ? (activeChapter?.section?.voice || "Female")
-      : readerSettings.ttsVoiceGender;
     const voices = window.speechSynthesis.getVoices();
     if (voices.length) {
-      const best = getBestVoice(preferredGender);
+      const best = getBestVoice();
       if (best) utterance.voice = best;
     }
 
@@ -984,6 +1030,7 @@ export default function Home() {
           onModeratePost={moderatePost}
           onAdminReply={adminReply}
           onRefresh={() => refreshState(true)}
+          setAdmin={setAdmin}
         />
         <Toast message={toast} />
       </>
@@ -994,9 +1041,18 @@ export default function Home() {
     <>
       {!splashDone ? <Splash hidden={splashFade} /> : null}
       {showTrailer && (!user || !isOnboarded) ? (
-        <TrailerIntro onEnter={(shouldPlay) => { setAutoplayAudio(shouldPlay); setShowTrailer(false); setView("auth"); }} />
-      ) : !user || !isOnboarded ? (
-        <AuthView autoplay={autoplayAudio} user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onResendCode={resendVerificationCode} onProfile={updateProfile} onRequestPasswordReset={requestPasswordReset} onResetPassword={resetPassword} />
+        <TrailerIntro onEnter={(shouldPlay) => {
+          setAutoplayAudio(shouldPlay);
+          setShowTrailer(false);
+          const hasGift = typeof window !== "undefined" && sessionStorage.getItem("pending_gift_code");
+          if (user && !isOnboarded) {
+            setView("auth");
+          } else {
+            setView(hasGift ? "auth" : "home");
+          }
+        }} />
+      ) : (view === "auth" || (user && !isOnboarded)) ? (
+        <AuthView autoplay={autoplayAudio} user={user} onSignup={signup} onLogin={login} onVerify={verifyEmail} onResendCode={resendVerificationCode} onProfile={updateProfile} onRequestPasswordReset={requestPasswordReset} onResetPassword={resetPassword} onCompleteSignup={completeSignup} />
       ) : (
         <AppShell view={view} setView={(v) => {
           if (v === "community") {
@@ -1094,9 +1150,33 @@ export default function Home() {
               onModeratePost={moderatePost}
               onAdminReply={adminReply}
               onRefresh={refreshState}
+              setAdmin={setAdmin}
             />
           )}
         </AppShell>
+      )}
+      {showEmailPrompt && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowEmailPrompt(false)}>
+          <div className="modal-card" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()} style={{ padding: "24px", display: "grid", gap: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={{ margin: 0, fontSize: "1.4rem", color: "var(--brand)" }}>Checkout Email</h2>
+              <button className="modal-close" onClick={() => setShowEmailPrompt(false)} style={{ minHeight: "auto", padding: "4px 8px" }}>Close</button>
+            </div>
+            <p style={{ margin: 0, color: "var(--ink)", lineHeight: 1.6 }}>Please enter your email to proceed to checkout. You will complete your profile registration after the payment is verified.</p>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const email = new FormData(e.currentTarget).get("email");
+              if (!email) return;
+              setShowEmailPrompt(false);
+              if (pendingPurchase) {
+                purchase(pendingPurchase.book, pendingPurchase.productType, email);
+              }
+            }} style={{ display: "grid", gap: "12px" }}>
+              <input name="email" type="email" placeholder="reader@example.com" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--app-line)", background: "transparent", color: "var(--ink)", width: "100%" }} />
+              <button className="primary-btn" style={{ minHeight: "44px", borderRadius: "8px" }}>Continue to Payment</button>
+            </form>
+          </div>
+        </div>
       )}
       {shareModalOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setShareModalOpen(false)}>
@@ -1251,14 +1331,14 @@ function TrailerIntro({ onEnter }) {
 
         <div className="trailer-copy">
           <div style={{ flex: 1 }} />
-          <button className="trailer-login-btn-new" onClick={(e) => { e.stopPropagation(); onEnter(true); }}>Login</button>
+          <button className="trailer-login-btn-new" onClick={(e) => { e.stopPropagation(); onEnter(true); }}>Start Reading</button>
         </div>
       </section>
     </main>
   );
 }
 
-function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, onProfile, onRequestPasswordReset, onResetPassword }) {
+function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, onProfile, onRequestPasswordReset, onResetPassword, onCompleteSignup }) {
   const step = user?.onboardingStep || "signin";
   const [mode, setMode] = useState("login");
   const [resetEmail, setResetEmail] = useState("");
@@ -1274,7 +1354,7 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
       <section className="auth-panel">
         <img className="auth-logo" src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
         <div className="auth-heading">
-          <h1>{step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : mode === "forgot" ? "Reset Password" : mode === "reset" ? "New Password" : "Create Profile"}</h1>
+          <h1>{step === "signup-payment-pending" ? "Complete Profile" : step === "verify" ? "Confirm Email" : step === "phone" ? "Add Telephone" : step === "profile" ? "Reader Profile" : mode === "login" ? "Login" : mode === "forgot" ? "Reset Password" : mode === "reset" ? "New Password" : "Create Profile"}</h1>
         </div>
         {step === "signin" && (
           <>
@@ -1451,6 +1531,63 @@ function AuthView({ autoplay, user, onSignup, onLogin, onVerify, onResendCode, o
               </>
             )}
             <button className="primary-btn auth-submit">Submit</button>
+          </form>
+        )}
+        {step === "signup-payment-pending" && (
+          <form onSubmit={(event) => { event.preventDefault(); onCompleteSignup(new FormData(event.currentTarget)); }} className="form-grid">
+            <p style={{ color: 'var(--muted)', fontSize: '0.95rem', textAlign: 'center', marginBottom: '16px', lineHeight: 1.5 }}>
+              Payment successful! Complete your reader profile to start reading.
+            </p>
+            <label style={{ color: 'var(--brand)' }}>Full Name
+              <input name="fullName" placeholder="Ada Lovelace" required style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--app-line)', background: 'transparent', color: 'var(--ink)' }} />
+            </label>
+            <label style={{ color: 'var(--brand)' }}>Choose Password
+              <div className="password-input-wrapper" style={{ position: 'relative', width: '100%' }}>
+                <input name="password" type={showPassword ? "text" : "password"} placeholder="Min 8 characters" minLength={8} required style={{ width: '100%', paddingRight: '52px' }} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--brand)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px',
+                    zIndex: 2,
+                  }}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </label>
+            <label style={{ color: 'var(--brand)' }}>Telephone
+              <input name="phone" type="tel" placeholder="+234 800 000 0000" required style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--app-line)', background: 'transparent', color: 'var(--ink)' }} />
+            </label>
+            <label style={{ color: 'var(--brand)' }}>Community username
+              <input name="username" placeholder="AdaReads" required style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--app-line)', background: 'transparent', color: 'var(--ink)' }} />
+            </label>
+            <label style={{ color: 'var(--brand)' }}>Country code
+              <input name="country" placeholder="NG" defaultValue="NG" required style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--app-line)', background: 'transparent', color: 'var(--ink)' }} />
+            </label>
+            <button className="primary-btn auth-submit" style={{ marginTop: '12px' }}>Complete Signup</button>
           </form>
         )}
       </section>
@@ -2016,11 +2153,23 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
 }
 
 function UnlockDialog({ book, onClose, onPurchase, onViewNotices }) {
-  const [selection, setSelection] = useState(book.id === "book-1" ? "trilogy" : "book");
+  const [selection, setSelection] = useState("trilogy");
 
-  const isBook1 = book.id === "book-1";
   const bookPrice = book.id === "book-1" ? 2.59 : 3.59;
   const bookTitle = book.title;
+  const isBook1 = book.id === "book-1";
+
+  const getBookLabel = (id) => {
+    if (id === "book-1") return "Book One";
+    if (id === "book-2") return "Book Two";
+    if (id === "book-3") return "Book Three";
+    return "Book";
+  };
+
+  const dialogTitle = isBook1 ? "The free chapters end here." : `Unlock ${bookTitle}`;
+  const dialogDescription = isBook1
+    ? "The story is only getting started. Unlock Book One, or choose the complete trilogy for the full journey."
+    : "To continue reading, unlock this sequel volume or purchase the complete trilogy.";
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -2028,42 +2177,34 @@ function UnlockDialog({ book, onClose, onPurchase, onViewNotices }) {
         <button className="modal-close" onClick={onClose} aria-label="Close unlock options">Close</button>
         <img className="unlock-wordmark" src={BRAND_ASSETS.wordmark} alt="Ascendance The Trilogy" />
         
-        {isBook1 ? (
-          <>
-            <h2 id="unlock-title">The free chapters end here.</h2>
-            <p>The story is only getting started. Unlock Book One, or choose the complete trilogy for the full journey.</p>
-            <div className="unlock-covers" aria-hidden="true">
-              <img src="/assets/books/disciples-inverted-cross.jpeg" alt="" />
-              <img src="/assets/books/merchants-ivory-towers.jpeg" alt="" />
-              <img src="/assets/books/rhapsodies-coming-regent.jpeg" alt="" />
-            </div>
-            <label className={`unlock-option ${selection === "trilogy" ? "is-selected" : ""}`}>
-              <input type="radio" name="unlock" value="trilogy" checked={selection === "trilogy"} onChange={() => setSelection("trilogy")} />
-              <span><strong>Unlock all three books (Trilogy)</strong><small>{usdCurrency(6.59)} · Best value</small></span>
-            </label>
-            <label className={`unlock-option ${selection === "book" ? "is-selected" : ""}`}>
-              <input type="radio" name="unlock" value="book" checked={selection === "book"} onChange={() => setSelection("book")} />
-              <span><strong>Unlock Book One: Disciples of the Inverted Cross</strong><small>{usdCurrency(2.59)}</small></span>
-            </label>
-            <button className="primary-btn unlock-continue" onClick={() => onPurchase(selection === "book" ? book : null, selection)}>Continue to checkout</button>
-          </>
-        ) : (
-          <>
-            <h2 id="unlock-title">Unlock {bookTitle}</h2>
-            <p>To continue reading, unlock this sequel volume or purchase the complete trilogy.</p>
-            <div className="unlock-covers" aria-hidden="true">
-              <img src={book.cover} alt="" style={{ width: "120px", borderRadius: "8px" }} />
-            </div>
-            <div style={{ display: "grid", gap: "12px", width: "100%", marginTop: "16px" }}>
-              <button className="primary-btn" onClick={() => onPurchase(book, "book")} style={{ minHeight: "58px", borderRadius: "12px" }}>
-                Unlock {bookTitle} ({usdCurrency(bookPrice)})
-              </button>
-              <button className="ghost-btn" onClick={() => { onClose(); onViewNotices(); }} style={{ minHeight: "58px", borderRadius: "12px" }}>
-                Gift this Book
-              </button>
-            </div>
-          </>
-        )}
+        <h2 id="unlock-title">{dialogTitle}</h2>
+        <p>{dialogDescription}</p>
+        <div className="unlock-covers" aria-hidden="true">
+          <img src="/assets/books/disciples-inverted-cross.jpeg" alt="" />
+          <img src="/assets/books/merchants-ivory-towers.jpeg" alt="" />
+          <img src="/assets/books/rhapsodies-coming-regent.jpeg" alt="" />
+        </div>
+        
+        <label className={`unlock-option ${selection === "trilogy" ? "is-selected" : ""}`}>
+          <input type="radio" name="unlock" value="trilogy" checked={selection === "trilogy"} onChange={() => setSelection("trilogy")} />
+          <span><strong>Unlock all three books (Trilogy)</strong><small>{usdCurrency(6.59)} · Best value</small></span>
+        </label>
+        
+        <label className={`unlock-option ${selection === "book" ? "is-selected" : ""}`}>
+          <input type="radio" name="unlock" value="book" checked={selection === "book"} onChange={() => setSelection("book")} />
+          <span><strong>Unlock {getBookLabel(book.id)}: {bookTitle}</strong><small>{usdCurrency(bookPrice)}</small></span>
+        </label>
+        
+        <div style={{ display: "grid", gap: "12px", width: "100%", marginTop: "16px" }}>
+          <button className="primary-btn unlock-continue" onClick={() => onPurchase(selection === "book" ? book : null, selection)}>
+            Continue to checkout
+          </button>
+          {!isBook1 && (
+            <button className="ghost-btn" onClick={() => { onClose(); onViewNotices(); }} style={{ minHeight: "58px", borderRadius: "12px" }}>
+              Gift this Book
+            </button>
+          )}
+        </div>
         <small className="checkout-note" style={{ marginTop: "12px", display: "block" }}>Paystack displays the supported settlement currency at checkout.</small>
       </section>
     </div>
@@ -2429,15 +2570,6 @@ function ReaderView({ activeChapter, chapters, settings, setSettings, onBack, on
                   <button onClick={() => setSettings({ ...settings, theme: 'dark' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1c1c1e', border: settings.theme === 'dark' ? '2px solid var(--app-purple)' : '1px solid #555', cursor: 'pointer' }} aria-label="Dark" title="Dark"></button>
                   <button onClick={() => setSettings({ ...settings, theme: 'midnight-gold' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#19191c', border: settings.theme === 'midnight-gold' ? '2px solid #c99d42' : '1px solid #555', cursor: 'pointer' }} aria-label="Midnight Gold" title="Midnight Gold"></button>
                   <button onClick={() => setSettings({ ...settings, theme: 'royal-forest' })} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#14281a', border: settings.theme === 'royal-forest' ? '2px solid #3c5e47' : '1px solid #555', cursor: 'pointer' }} aria-label="Royal Forest" title="Royal Forest"></button>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'bold' }}>TTS Voice</span>
-                <div className="typography-toggle-container">
-                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'auto' })} className={`font-select-btn ${settings.ttsVoiceGender === 'auto' || !settings.ttsVoiceGender ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Auto</button>
-                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'Male' })} className={`font-select-btn ${settings.ttsVoiceGender === 'Male' ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Male</button>
-                  <button onClick={() => setSettings({ ...settings, ttsVoiceGender: 'Female' })} className={`font-select-btn ${settings.ttsVoiceGender === 'Female' ? 'is-active' : ''}`} style={{ fontSize: '0.85rem' }}>Female</button>
                 </div>
               </div>
 
@@ -3078,6 +3210,15 @@ function NoticesView({ gifts, onGift, onRedeem, initialCode = "" }) {
 }
 
 function ProfileView({ user, progress, purchases, gifts, onProfile, onChangePassword, onLogout, onShareApp, onInstall, canInstall }) {
+  if (!user) {
+    return (
+      <div className="profile-screen" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px', background: 'var(--reader-bg, #fff)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', gap: '16px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', fontSize: '2rem', margin: 0 }}>Reader Profile</h1>
+        <p style={{ color: 'var(--ink)', maxWidth: '400px', lineHeight: 1.6, margin: 0 }}>Create a profile to sync reading progress across devices, unlock sequels, and participate in the community.</p>
+        <button className="primary-btn" onClick={onLogout} style={{ minHeight: '56px', paddingInline: '32px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '8px' }}>Create Profile / Log In</button>
+      </div>
+    );
+  }
   const completed = Object.values(progress).filter((item) => Number(item?.percentage || 0) >= 100).length;
   return (
     <div className="profile-screen" style={{ maxWidth: '800px', margin: '0 auto', padding: '16px', background: 'var(--reader-bg, #fff)', minHeight: '100vh' }}>
@@ -3162,7 +3303,6 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onChangePass
     </div>
   );
 }
-
 function AdminGate({
   admin,
   twoFactorPending,
@@ -3175,27 +3315,219 @@ function AdminGate({
   onLogout,
   onModeratePost,
   onAdminReply,
-  onRefresh
+  onRefresh,
+  setAdmin
 }) {
+  const [forgotMode, setForgotMode] = useState("login");
+  const [resetEmail, setResetEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleForgotPassword = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email");
+
+    try {
+      const response = await fetch("/api/admin/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      if (!data.ok) {
+        setError(data.error || "Failed to send verification code.");
+      } else {
+        setResetEmail(email);
+        setForgotMode("reset");
+        setSuccess("Password reset code sent to the admin email.");
+      }
+    } catch (e) {
+      console.error(e);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const code = formData.get("code");
+    const newPassword = formData.get("newPassword");
+
+    try {
+      const response = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail, code, newPassword })
+      });
+      const data = await response.json();
+      if (!data.ok) {
+        setError(data.error || "Failed to reset password.");
+      } else {
+        setSuccess("Password successfully reset.");
+        if (setAdmin) {
+          setAdmin(data.admin);
+        }
+        await onRefresh(true);
+        setForgotMode("login");
+      }
+    } catch (e) {
+      console.error(e);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!admin) {
     return (
       <div className="content-stack">
         <section className="admin-login-panel">
           <p className="eyebrow">Admin backend</p>
-          <h1>{twoFactorPending ? "Authentication Code" : "Admin Login"}</h1>
           {twoFactorPending ? (
-            <form onSubmit={(event) => { event.preventDefault(); onVerifyTwoFactor(new FormData(event.currentTarget)); }} className="form-grid">
-              <p>Enter the six-digit code sent to the admin email. It expires in ten minutes.</p>
-              <label>Authentication code<input name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" required /></label>
-              <button className="primary-btn">Verify and Open Dashboard</button>
-              <button className="ghost-btn" type="button" onClick={onLogout}>Cancel</button>
-            </form>
+            <>
+              <h1>Authentication Code</h1>
+              <form onSubmit={(event) => { event.preventDefault(); onVerifyTwoFactor(new FormData(event.currentTarget)); }} className="form-grid">
+                <p>Enter the six-digit code sent to the admin email. It expires in ten minutes.</p>
+                <label>Authentication code<input name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" required /></label>
+                <button className="primary-btn">Verify and Open Dashboard</button>
+                <button className="ghost-btn" type="button" onClick={onLogout}>Cancel</button>
+              </form>
+            </>
+          ) : forgotMode === "forgot" ? (
+            <>
+              <h1>Admin Password Reset</h1>
+              {error && <div className="error-message" style={{ color: "var(--danger)", marginBottom: "12px", fontSize: "0.9rem" }}>{error}</div>}
+              <form onSubmit={handleForgotPassword} className="form-grid">
+                <p style={{ color: "var(--ink)", fontSize: "0.95rem", lineHeight: "1.5" }}>Enter the admin email address associated with your account to receive a secure 6-digit reset code.</p>
+                <label>
+                  Email
+                  <input name="email" type="email" placeholder="admin@example.com" autoComplete="email" required />
+                </label>
+                <button className="primary-btn" disabled={loading}>
+                  {loading ? "Sending..." : "Send Reset Code"}
+                </button>
+                <button className="ghost-btn" type="button" onClick={() => { setForgotMode("login"); setError(""); }} disabled={loading}>
+                  Back to Login
+                </button>
+              </form>
+            </>
+          ) : forgotMode === "reset" ? (
+            <>
+              <h1>New Admin Password</h1>
+              {error && <div className="error-message" style={{ color: "var(--danger)", marginBottom: "12px", fontSize: "0.9rem" }}>{error}</div>}
+              {success && <div className="success-message" style={{ color: "var(--brand)", marginBottom: "12px", fontSize: "0.9rem" }}>{success}</div>}
+              <form onSubmit={handleResetPassword} className="form-grid">
+                <p style={{ color: "var(--ink)", fontSize: "0.95rem", lineHeight: "1.5" }}>We sent a verification code to <strong>{resetEmail}</strong>. Please enter the code and choose your new password below.</p>
+                <label>
+                  Verification code
+                  <input name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="123456" required />
+                </label>
+                <label>
+                  New Password
+                  <div className="password-input-wrapper" style={{ position: "relative", width: "100%" }}>
+                    <input name="newPassword" type={showPassword ? "text" : "password"} placeholder="New password (Min 8 characters)" minLength={8} required style={{ width: "100%", paddingRight: "52px" }} />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--brand)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "4px",
+                        zIndex: 2,
+                      }}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      ) : (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </label>
+                <button className="primary-btn" disabled={loading}>
+                  {loading ? "Resetting..." : "Reset Password & Login"}
+                </button>
+                <button className="ghost-btn" type="button" onClick={() => { setForgotMode("login"); setError(""); }} disabled={loading}>
+                  Back to Login
+                </button>
+              </form>
+            </>
           ) : (
-            <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
-              <label>Email<input name="email" type="email" placeholder="admin@example.com" autoComplete="email" required /></label>
-              <label>Password<input name="password" type="password" placeholder="Admin password" autoComplete="current-password" required /></label>
-              <button className="primary-btn">Continue</button>
-            </form>
+            <>
+              <h1>Admin Login</h1>
+              <form onSubmit={(event) => { event.preventDefault(); onLogin(new FormData(event.currentTarget)); }} className="form-grid">
+                <label>Email<input name="email" type="email" placeholder="admin@example.com" autoComplete="email" required /></label>
+                <label>
+                  Password
+                  <div className="password-input-wrapper" style={{ position: "relative", width: "100%" }}>
+                    <input name="password" type={showPassword ? "text" : "password"} placeholder="Admin password" autoComplete="current-password" required style={{ width: "100%", paddingRight: "52px" }} />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--brand)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "4px",
+                        zIndex: 2,
+                      }}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      ) : (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </label>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '0 8px', marginTop: '-8px' }}>
+                  <button className="auth-alt-link" style={{ textAlign: 'left' }} type="button" onClick={() => { setForgotMode("forgot"); setError(""); }}>Forgot Password?</button>
+                </div>
+                <button className="primary-btn">Continue</button>
+              </form>
+            </>
           )}
         </section>
       </div>
@@ -3213,6 +3545,7 @@ function AdminGate({
       onModeratePost={onModeratePost}
       onAdminReply={onAdminReply}
       onRefresh={onRefresh}
+      notify={notify}
     />
   );
 }
@@ -3275,9 +3608,9 @@ function RichTextEditor({ name, defaultValue, placeholder }) {
 }
 
 
-function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModeratePost, onAdminReply, onRefresh }) {
+function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModeratePost, onAdminReply, onRefresh, notify }) {
   const [activeTab, setActiveTab] = useState("overview");
-  const revenue = purchases.reduce((sum, purchase) => sum + Number(purchase.amount || 0), 0);
+  const revenue = purchases.reduce((sum, purchase) => sum + ((purchase.status || purchase.paymentStatus) === "Successful" ? Number(purchase.amount || 0) : 0), 0);
   const [editingItem, setEditingItem] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [users, setUsers] = useState([]);
@@ -3370,6 +3703,24 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleDeleteUser = async (id, email) => {
+    if (typeof window !== "undefined" && !window.confirm(`Are you sure you want to permanently delete user ${email}? This will delete all their purchases, progress, posts, comments, and likes.`)) return;
+    try {
+      const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setUsers(users.filter(u => u.id !== id));
+        if (notify) notify("User deleted successfully.");
+        else alert("User deleted successfully.");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete user");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("An error occurred while deleting user.");
     }
   };
 
@@ -3475,7 +3826,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                     return d.toISOString().split("T")[0];
                   });
                   const revByDate = purchases.reduce((acc, p) => {
-                    if (p.paymentStatus !== "Successful") return acc;
+                    if ((p.status || p.paymentStatus) !== "Successful") return acc;
                     const date = new Date(p.createdAt || p.paidAt).toISOString().split("T")[0];
                     if (!acc[date]) acc[date] = 0;
                     acc[date] += Number(p.amount || 0);
@@ -3939,6 +4290,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                         <th style={{ padding: "12px", color: "var(--brand)" }}>Purchases</th>
                         <th style={{ padding: "12px", color: "var(--brand)" }}>Chapters Read</th>
                         <th style={{ padding: "12px", color: "var(--brand)" }}>Points</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -3958,6 +4310,15 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                             </span>
                           </td>
                           <td style={{ padding: "12px", fontWeight: "600", color: "var(--brand)" }}>{u.points || 0}</td>
+                          <td style={{ padding: "12px" }}>
+                            <button 
+                              className="danger-btn" 
+                              onClick={() => handleDeleteUser(u.id, u.email)}
+                              style={{ padding: "4px 8px", fontSize: "0.8rem", minHeight: "auto", borderRadius: "4px" }}
+                            >
+                              Delete
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

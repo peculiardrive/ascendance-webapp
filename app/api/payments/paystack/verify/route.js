@@ -2,35 +2,43 @@ import { generateGiftCode } from "@/lib/gifts";
 import { sendGiftNotificationEmail } from "@/lib/email";
 import { paystackAmount, paystackRequest, resolvePaymentProduct } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
-import { assertSameOrigin, readerSessionFrom } from "@/lib/session";
+import { assertSameOrigin, readerSessionFrom, readerSessionCookie } from "@/lib/session";
 import { json, readJson, readState, requireFields, uid, writeState } from "@/lib/store";
 
 export async function POST(request) {
   try {
     assertSameOrigin(request);
-    const userId = readerSessionFrom(request)?.sub;
+    let userId = readerSessionFrom(request)?.sub;
     const payload = await readJson(request);
     requireFields(payload, ["reference"]);
-    if (!userId) return json({ ok: false, error: "Missing user session." }, { status: 401 });
 
     const reference = String(payload.reference).trim();
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
-
     const existing = await prisma.purchase.findUnique({ where: { paymentReference: reference } });
     if (existing) {
       return json({
         ok: true,
         purchase: { ...existing, amount: Number(existing.amount), status: existing.paymentStatus },
         alreadyVerified: true
+      }, {
+        headers: { "set-cookie": readerSessionCookie(existing.userId) }
       });
     }
 
     const verification = await paystackRequest(`/transaction/verify/${encodeURIComponent(reference)}`);
     const metadata = verification.data.metadata || {};
-    if (metadata.userId !== userId) {
+    const transactionUserId = metadata.userId;
+
+    if (!transactionUserId) {
+      return json({ ok: false, error: "Invalid payment transaction metadata." }, { status: 400 });
+    }
+
+    if (userId && userId !== transactionUserId) {
       return json({ ok: false, error: "Payment does not belong to this reader." }, { status: 403 });
     }
+
+    userId = transactionUserId;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
 
     const product = await resolvePaymentProduct({
       productType: metadata.productType,
@@ -102,7 +110,7 @@ export async function POST(request) {
       transaction.gatewayResponse = verification.data.gateway_response;
       if (!state.transactions.some((item) => item.reference === reference)) state.transactions.push(transaction);
       await writeState(state);
-      return json({ ok: true, gift, transaction });
+      return json({ ok: true, gift, transaction }, { headers: { "set-cookie": readerSessionCookie(userId) } });
     }
 
     const savedPurchase = await prisma.purchase.create({
@@ -130,7 +138,7 @@ export async function POST(request) {
     if (!state.transactions.some((item) => item.reference === reference)) state.transactions.push(transaction);
     await writeState(state);
 
-    return json({ ok: true, purchase, transaction });
+    return json({ ok: true, purchase, transaction }, { headers: { "set-cookie": readerSessionCookie(userId) } });
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: error.status || 400 });
   }

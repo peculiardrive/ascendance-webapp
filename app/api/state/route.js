@@ -44,9 +44,17 @@ export async function GET(request) {
     ok: true,
     state: {
       purchases: purchases.map((purchase) => ({
-        ...purchase,
+        id: purchase.id,
+        userId: purchase.userId,
+        productType: purchase.productType,
+        bookId: purchase.bookId,
+        sectionId: purchase.sectionId,
         amount: Number(purchase.amount),
-        status: purchase.paymentStatus
+        paymentReference: purchase.paymentReference,
+        paymentGateway: purchase.paymentGateway,
+        paymentStatus: purchase.paymentStatus,
+        status: purchase.paymentStatus,
+        createdAt: purchase.createdAt
       })),
       gifts,
       progress,

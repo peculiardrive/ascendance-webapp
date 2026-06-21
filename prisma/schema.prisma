@@ -41,12 +41,14 @@ model User {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid()) @map("admin_id")
-  name         String
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  role         String   @default("admin")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                     String    @id @default(cuid()) @map("admin_id")
+  name                   String
+  email                  String    @unique
+  passwordHash           String    @map("password_hash")
+  role                   String    @default("admin")
+  passwordResetCodeHash  String?   @map("password_reset_code_hash")
+  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
 
   @@map("admin_users")
 }

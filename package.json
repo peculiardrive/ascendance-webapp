@@ -21,6 +21,7 @@
     "@prisma/client": "^6.9.0",
     "mammoth": "^1.12.0",
     "next": "^15.3.0",
+    "pg": "^8.22.0",
     "playwright-core": "^1.60.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

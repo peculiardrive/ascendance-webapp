@@ -6,14 +6,47 @@ import { json, readJson, readState, requireFields, uid, writeState } from "@/lib
 export async function POST(request) {
   try {
     assertSameOrigin(request);
-    const userId = readerSessionFrom(request)?.sub;
+    let userId = readerSessionFrom(request)?.sub;
     const payload = await readJson(request);
     requireFields(payload, ["productType"]);
-    if (!userId) return json({ ok: false, error: "Missing user session." }, { status: 401 });
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
-    if (!user.emailVerified) return json({ ok: false, error: "Verify your email before making a payment." }, { status: 403 });
+    let user;
+    if (!userId) {
+      const email = payload.email?.toLowerCase().trim();
+      if (!email) {
+        return json({ ok: false, error: "Email is required for checkout." }, { status: 400 });
+      }
+      user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        if (user.onboardingStep === "done") {
+          return json({ ok: false, error: "This email is already registered. Please log in to complete your purchase." }, { status: 400 });
+        }
+        if (user.onboardingStep !== "signup-payment-pending") {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { onboardingStep: "signup-payment-pending" }
+          });
+        }
+        userId = user.id;
+      } else {
+        user = await prisma.user.create({
+          data: {
+            email,
+            fullName: "Guest Reader",
+            emailVerified: false,
+            onboardingStep: "signup-payment-pending"
+          }
+        });
+        userId = user.id;
+      }
+    } else {
+      user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
+    }
+
+    if (user.onboardingStep !== "signup-payment-pending" && !user.emailVerified) {
+      return json({ ok: false, error: "Verify your email before making a payment." }, { status: 403 });
+    }
 
     const product = await resolvePaymentProduct(payload);
     if (product.amount <= 0) return json({ ok: false, error: "This item does not require payment." }, { status: 400 });
