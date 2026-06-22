@@ -36,6 +36,7 @@ model User {
   likes                 PostLike[]
   purchases             Purchase[]
   readingProgress       ReadingProgress[]
+  activities            UserActivity[]
 
   @@map("users")
 }
@@ -240,4 +241,20 @@ model rate_limit_buckets {
   count      Int      @default(0)
   reset_at   DateTime
   updated_at DateTime @default(now())
+}
+
+model UserActivity {
+  id        String   @id @default(cuid()) @map("activity_id")
+  userId    String?  @map("user_id")
+  email     String?
+  action    String
+  details   Json?
+  device    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("user_activities")
 }

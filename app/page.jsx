@@ -429,6 +429,18 @@ export default function Home() {
     window.__ascendanceToast = window.setTimeout(() => setToast(""), 2600);
   }
 
+  async function logActivity(action, details = {}) {
+    try {
+      await fetch("/api/analytics/log", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, details })
+      });
+    } catch (e) {
+      console.error("Failed to log activity", e);
+    }
+  }
+
   async function signup(formData) {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
@@ -615,6 +627,7 @@ export default function Home() {
     localStorage.setItem(LAST_VIEW_KEY, "reader");
     localStorage.setItem(LAST_CHAPTER_KEY, item.chapter.id);
     setView("reader");
+    logActivity("VIEW_CHAPTER", { chapterId: item.chapter.id, chapterTitle: item.chapter.chapterTitle, bookTitle: item.book?.title });
   }
 
   async function saveProgress(chapterItem, percentage = 25) {
@@ -996,6 +1009,7 @@ export default function Home() {
       console.log("Cancelling text-to-speech chunks");
       window.speechSynthesis.cancel();
       setIsReadingTtsPlaying(false);
+      logActivity("PAUSE_AUDIO", { chapterId: activeChapterId });
       return;
     }
 
@@ -1008,6 +1022,7 @@ export default function Home() {
     console.log(`Starting chunked playback from index: ${startIdx}`);
     setIsReadingTtsPlaying(true);
     speakParagraph(startIdx);
+    logActivity("PLAY_AUDIO", { chapterId: activeChapterId });
   }
 
   if (!ready) {
@@ -3618,6 +3633,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [isImporting, setIsImporting] = useState(false);
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   const activeBooks = useMemo(() => books.filter(b => !b.deleted), [books]);
   const deletedBooks = useMemo(() => books.filter(b => b.deleted), [books]);
@@ -3657,6 +3674,22 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
         .catch(e => {
           console.error("Failed to fetch users", e);
           setLoadingUsers(false);
+        });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "analytics") {
+      setLoadingAnalytics(true);
+      fetch("/api/admin/analytics")
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) setAnalyticsData(data);
+          setLoadingAnalytics(false);
+        })
+        .catch(e => {
+          console.error("Failed to fetch analytics", e);
+          setLoadingAnalytics(false);
         });
     }
   }, [activeTab]);
@@ -3784,6 +3817,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
             <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
             <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")} style={{ padding: "8px 16px" }}>Users</button>
+            <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px" }}>Analytics</button>
             <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")} style={{ padding: "8px 16px" }}>Recycle Bin</button>
           </div>
         </div>
@@ -3805,6 +3839,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               ? "Recycle Bin"
               : activeTab === "users"
               ? "Users Management"
+              : activeTab === "analytics"
+              ? "Activity & Analytics"
               : "Community Moderation"}
           </h1>
           <button className="ghost-btn" onClick={onRefresh} style={{ background: "white" }}>Refresh Data</button>
@@ -4329,6 +4365,137 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === "analytics" && (
+          <div className="admin-tab-pane">
+            {loadingAnalytics ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "var(--brand)" }}>Loading analytics...</div>
+            ) : !analyticsData ? (
+              <p className="muted">Failed to load analytics data.</p>
+            ) : (
+              <div style={{ display: "grid", gap: "24px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                  <div className="stat-card" style={{ background: "linear-gradient(135deg, #1e1e2f, #2d2d44)", color: "white" }}>
+                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.totalUsers}</strong>
+                    <span>Total Registered</span>
+                  </div>
+                  <div className="stat-card" style={{ background: "linear-gradient(135deg, #2d1b33, #4a2852)", color: "white" }}>
+                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.signupsToday}</strong>
+                    <span>Signups Today</span>
+                  </div>
+                  <div className="stat-card" style={{ background: "linear-gradient(135deg, #1b332d, #285246)", color: "white" }}>
+                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.signupsWeek}</strong>
+                    <span>Signups This Week</span>
+                  </div>
+                  <div className="stat-card" style={{ background: "linear-gradient(135deg, #332d1b, #524628)", color: "white" }}>
+                    <strong style={{ fontSize: "2rem" }}>
+                      {analyticsData.stats.actions["PLAY_AUDIO"] || 0}
+                    </strong>
+                    <span>Audio TTS Plays</span>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                  <div className="admin-library-card">
+                    <h2>Device Distribution</h2>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "20px" }}>
+                      {(() => {
+                        const dCount = analyticsData.stats.devices.desktop || 0;
+                        const mCount = analyticsData.stats.devices.mobile || 0;
+                        const total = dCount + mCount || 1;
+                        const dPct = Math.round((dCount / total) * 100);
+                        const mPct = Math.round((mCount / total) * 100);
+                        return (
+                          <>
+                            <div>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                                <span>Desktop ({dCount})</span>
+                                <strong>{dPct}%</strong>
+                              </div>
+                              <div style={{ width: "100%", height: "8px", background: "var(--line)", borderRadius: "4px" }}>
+                                <div style={{ width: `${dPct}%`, height: "100%", background: "var(--app-purple)", borderRadius: "4px" }} />
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                                <span>Mobile ({mCount})</span>
+                                <strong>{mPct}%</strong>
+                              </div>
+                              <div style={{ width: "100%", height: "8px", background: "var(--line)", borderRadius: "4px" }}>
+                                <div style={{ width: `${mPct}%`, height: "100%", background: "var(--brand)", borderRadius: "4px" }} />
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="admin-library-card">
+                    <h2>Top Read Chapters</h2>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "20px" }}>
+                      {analyticsData.stats.popularChapters.length === 0 ? (
+                        <p className="muted">No chapter views logged yet.</p>
+                      ) : (
+                        analyticsData.stats.popularChapters.map((chap, idx) => (
+                          <div key={idx} style={{ display: "flex", justifyContent: "space-between", paddingBottom: "8px", borderBottom: "1px solid var(--line)" }}>
+                            <div>
+                              <strong style={{ color: "var(--ink)" }}>{chap.chapterTitle}</strong>
+                              <p className="muted" style={{ margin: "2px 0 0 0", fontSize: "0.8rem" }}>{chap.bookTitle}</p>
+                            </div>
+                            <span className="admin-role-badge" style={{ background: "var(--app-purple)", color: "white" }}>{chap.count} views</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-library-card">
+                  <h2>Real-Time Activity Feed (Last 100 Actions)</h2>
+                  <div style={{ overflowX: "auto", marginTop: "20px" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                      <thead>
+                        <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                          <th style={{ padding: "12px", color: "var(--brand)" }}>Reader</th>
+                          <th style={{ padding: "12px", color: "var(--brand)" }}>Action</th>
+                          <th style={{ padding: "12px", color: "var(--brand)" }}>Device</th>
+                          <th style={{ padding: "12px", color: "var(--brand)" }}>Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analyticsData.activities.length === 0 ? (
+                          <tr>
+                            <td colSpan="4" style={{ padding: "20px", textAlign: "center" }} className="muted">No activities logged yet.</td>
+                          </tr>
+                        ) : (
+                          analyticsData.activities.map(act => (
+                            <tr key={act.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                              <td style={{ padding: "12px" }}>
+                                <strong style={{ color: "var(--ink)", display: "block" }}>{act.fullName}</strong>
+                                <span className="muted" style={{ fontSize: "0.8rem" }}>{act.email}</span>
+                              </td>
+                              <td style={{ padding: "12px" }}>
+                                <span className="admin-role-badge" style={{
+                                  background: act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
+                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" ? "white" : "var(--ink)"
+                                }}>
+                                  {act.action}
+                                </span>
+                              </td>
+                              <td style={{ padding: "12px", color: "var(--ink)" }}>{act.device || "—"}</td>
+                              <td style={{ padding: "12px", color: "var(--ink)" }}>{new Date(act.createdAt).toLocaleString()}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
