@@ -316,6 +316,41 @@ export default function Home() {
     };
   }, []);
 
+  // Handle referral tracking
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const refCode = params.get("ref") || params.get("partner");
+      if (refCode) {
+        const cleanedCode = refCode.trim().toLowerCase();
+        localStorage.setItem("ascendance_referred_by", cleanedCode);
+        
+        fetch("/api/referrals/visit", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: cleanedCode })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) {
+            console.log(`Referral visit recorded for: ${data.partner.name}`);
+          }
+        })
+        .catch(err => console.error("Error logging referral visit:", err));
+
+        // Clean up parameters from the URL
+        params.delete("ref");
+        params.delete("partner");
+        const query = params.toString();
+        window.history.replaceState(
+          {}, 
+          "", 
+          `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`
+        );
+      }
+    }
+  }, []);
+
   useEffect(() => {
     function captureInstallPrompt(event) {
       event.preventDefault();
@@ -442,13 +477,15 @@ export default function Home() {
   }
 
   async function signup(formData) {
+    const referralCode = typeof window !== "undefined" ? localStorage.getItem("ascendance_referred_by") : null;
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         email: formData.get("email"),
         fullName: formData.get("fullName"),
-        password: formData.get("password")
+        password: formData.get("password"),
+        referralCode
       })
     });
     const data = await response.json();
@@ -570,13 +607,15 @@ export default function Home() {
       setShowEmailPrompt(true);
       return;
     }
+    const referralCode = typeof window !== "undefined" ? localStorage.getItem("ascendance_referred_by") : null;
     const response = await fetch("/api/payments/paystack/initialize", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         productType,
         bookId: productType === "book" ? book?.id : null,
-        email: guestEmail
+        email: guestEmail,
+        referralCode
       })
     });
     const data = await response.json();
@@ -3635,6 +3674,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [partners, setPartners] = useState([]);
+  const [loadingPartners, setLoadingPartners] = useState(false);
 
   const activeBooks = useMemo(() => books.filter(b => !b.deleted), [books]);
   const deletedBooks = useMemo(() => books.filter(b => b.deleted), [books]);
@@ -3693,6 +3734,88 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
         });
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "referrals") {
+      setLoadingPartners(true);
+      fetch("/api/admin/referrals")
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) setPartners(data.partners || []);
+          setLoadingPartners(false);
+        })
+        .catch(e => {
+          console.error("Failed to fetch referral partners", e);
+          setLoadingPartners(false);
+        });
+    }
+  }, [activeTab]);
+
+  const handleCreatePartner = async (event) => {
+    event.preventDefault();
+    const fd = new FormData(event.currentTarget);
+    const name = fd.get("name");
+    const code = fd.get("code");
+    const type = fd.get("type");
+
+    try {
+      const res = await fetch("/api/admin/referrals", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, code, type })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setPartners(prev => [data.partner, ...prev]);
+        event.target.reset();
+        if (notify) notify("Referral partner created successfully.");
+        
+        // Refetch to get computed stats
+        fetch("/api/admin/referrals")
+          .then(res => res.json())
+          .then(d => { if (d.ok) setPartners(d.partners || []); });
+      } else {
+        alert(data.error || "Failed to create partner");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error creating partner");
+    }
+  };
+
+  const handleTogglePartner = async (partner) => {
+    try {
+      const res = await fetch(`/api/admin/referrals/${partner.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ isActive: !partner.isActive })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, isActive: data.partner.isActive } : p));
+        if (notify) notify(`Partner marked ${data.partner.isActive ? 'Active' : 'Inactive'}.`);
+      } else {
+        alert(data.error || "Failed to toggle status");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeletePartner = async (id) => {
+    if (typeof window !== "undefined" && !window.confirm("Are you sure you want to delete this referral partner? All visit/signup relations will remain but the tracking link will no longer work.")) return;
+    try {
+      const res = await fetch(`/api/admin/referrals/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPartners(prev => prev.filter(p => p.id !== id));
+        if (notify) notify("Referral partner deleted successfully.");
+      } else {
+        alert("Failed to delete partner");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleDelete = async (type, id) => {
     const label = type === 'section' ? 'series' : type;
@@ -3817,6 +3940,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
             <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
             <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")} style={{ padding: "8px 16px" }}>Users</button>
+            <button className={`admin-nav-btn ${activeTab === "referrals" ? "is-active" : ""}`} onClick={() => setActiveTab("referrals")} style={{ padding: "8px 16px" }}>Referrals</button>
             <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px" }}>Analytics</button>
             <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")} style={{ padding: "8px 16px" }}>Recycle Bin</button>
           </div>
@@ -3839,6 +3963,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               ? "Recycle Bin"
               : activeTab === "users"
               ? "Users Management"
+              : activeTab === "referrals"
+              ? "Referral Partners"
               : activeTab === "analytics"
               ? "Activity & Analytics"
               : "Community Moderation"}
@@ -4162,6 +4288,109 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 </form>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "referrals" && (
+          <div className="admin-tab-pane">
+            <div className="admin-library-grid">
+              <div className="admin-library-card">
+                <h2>Create Referral Partner</h2>
+                <form onSubmit={handleCreatePartner} className="form-grid" style={{ marginTop: "16px" }}>
+                  <label>Partner Name
+                    <input name="name" placeholder="e.g., The Bookworm Café" required />
+                  </label>
+                  <label>Unique Code / Slug
+                    <input name="code" placeholder="e.g., bookworm" required pattern="[a-z0-9-_]+" title="Only lowercase letters, numbers, hyphens, and underscores allowed" />
+                  </label>
+                  <label>Partner Type
+                    <select name="type" required>
+                      <option value="shop">Book Shop</option>
+                      <option value="club">Reading Club / Bookclub</option>
+                    </select>
+                  </label>
+                  <button className="primary-btn" style={{ marginTop: "12px" }}>Create Partner</button>
+                </form>
+              </div>
+
+              <div className="admin-library-card">
+                <h2>Referral Partner Metrics</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "16px" }}>
+                  {loadingPartners ? (
+                    <div style={{ textAlign: "center", padding: "20px", color: "var(--brand)" }}>Loading partners...</div>
+                  ) : partners.length === 0 ? (
+                    <p className="muted">No partners registered yet.</p>
+                  ) : (
+                    <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                        <thead>
+                          <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Partner</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Code/Type</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Visits</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Signups</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Purchases</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Revenue</th>
+                            <th style={{ padding: "12px", color: "var(--brand)" }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {partners.map(p => (
+                            <tr key={p.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                              <td style={{ padding: "12px" }}>
+                                <strong style={{ color: "var(--ink)", display: "block" }}>{p.name}</strong>
+                                <small style={{ color: "var(--muted)" }}>Registered: {new Date(p.createdAt || Date.now()).toLocaleDateString()}</small>
+                              </td>
+                              <td style={{ padding: "12px" }}>
+                                <span className="admin-role-badge" style={{ background: "rgba(0,0,0,0.06)", color: "var(--ink)" }}>{p.code}</span>
+                                <span className="admin-role-badge" style={{ background: p.type === 'shop' ? 'rgba(74, 14, 78, 0.1)' : 'rgba(0, 150, 136, 0.1)', color: p.type === 'shop' ? 'var(--app-purple)' : '#009688', marginLeft: '6px' }}>{p.type}</span>
+                              </td>
+                              <td style={{ padding: "12px", color: "var(--ink)" }}>{p.visitsCount || 0}</td>
+                              <td style={{ padding: "12px", color: "var(--ink)" }}>{p.signupsCount || 0}</td>
+                              <td style={{ padding: "12px", color: "var(--ink)" }}>{p.purchasesCount || 0}</td>
+                              <td style={{ padding: "12px", fontWeight: "bold", color: "var(--app-green)" }}>
+                                {ngnCurrency(p.totalRevenue || 0)}
+                              </td>
+                              <td style={{ padding: "12px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                <button
+                                  className="ghost-btn"
+                                  onClick={() => handleTogglePartner(p)}
+                                  style={{ padding: "4px 8px", fontSize: "0.8rem", minHeight: "auto", background: p.isActive ? "rgba(76, 175, 80, 0.1)" : "rgba(244, 67, 54, 0.1)", color: p.isActive ? "#4CAF50" : "#F44336", border: "none" }}
+                                  type="button"
+                                >
+                                  {p.isActive ? "Active" : "Inactive"}
+                                </button>
+                                <button
+                                  className="ghost-btn"
+                                  onClick={() => {
+                                    const link = `${window.location.origin}/?ref=${p.code}`;
+                                    navigator.clipboard.writeText(link);
+                                    if (notify) notify("Referral link copied!");
+                                    else alert("Referral link copied to clipboard!");
+                                  }}
+                                  style={{ padding: "4px 8px", fontSize: "0.8rem", minHeight: "auto" }}
+                                  type="button"
+                                >
+                                  Copy Link
+                                </button>
+                                <button
+                                  className="danger-btn"
+                                  onClick={() => handleDeletePartner(p.id)}
+                                  style={{ padding: "4px 8px", fontSize: "0.8rem", minHeight: "auto", borderRadius: "4px" }}
+                                  type="button"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

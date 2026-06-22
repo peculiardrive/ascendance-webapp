@@ -37,6 +37,8 @@ model User {
   purchases             Purchase[]
   readingProgress       ReadingProgress[]
   activities            UserActivity[]
+  referralPartnerId     String?           @map("referral_partner_id")
+  referralPartner       ReferralPartner?  @relation("UserReferral", fields: [referralPartnerId], references: [id])
 
   @@map("users")
 }
@@ -135,6 +137,8 @@ model Purchase {
   book             Book?    @relation(fields: [bookId], references: [id])
   section          Section? @relation(fields: [sectionId], references: [id])
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referralPartnerId String? @map("referral_partner_id")
+  referralPartner   ReferralPartner? @relation("PurchaseReferral", fields: [referralPartnerId], references: [id])
 
   @@index([userId])
   @@map("purchases")
@@ -258,3 +262,30 @@ model UserActivity {
   @@index([createdAt])
   @@map("user_activities")
 }
+
+model ReferralPartner {
+  id                 String            @id @default(cuid()) @map("partner_id")
+  name               String
+  type               String            // "shop" or "club"
+  code               String            @unique
+  isActive           Boolean           @default(true) @map("is_active")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+  visits             ReferralVisit[]
+  users              User[]            @relation("UserReferral")
+  purchases          Purchase[]        @relation("PurchaseReferral")
+
+  @@map("referral_partners")
+}
+
+model ReferralVisit {
+  id         String          @id @default(cuid()) @map("visit_id")
+  partnerId  String          @map("partner_id")
+  ip         String?
+  userAgent  String?         @map("user_agent")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  partner    ReferralPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@map("referral_visits")
+}
+

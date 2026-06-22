@@ -29,6 +29,16 @@ export async function POST(request) {
       return json({ ok: true, user: { id: "mock-user-1", fullName: payload.fullName || "Demo Reader", email }, delivery: { id: "mock-delivery-1" } }, { status: 201 });
     }
 
+    let referralPartnerId = null;
+    if (payload.referralCode) {
+      const partner = await prisma.referralPartner.findUnique({
+        where: { code: String(payload.referralCode).toLowerCase().trim() }
+      });
+      if (partner && partner.isActive) {
+        referralPartnerId = partner.id;
+      }
+    }
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       if (existing.emailVerified) {
@@ -45,7 +55,8 @@ export async function POST(request) {
           verificationExpiresAt: verificationExpiry(),
           verificationAttempts: 0,
           onboardingStep: "verify",
-          lastLogin: new Date()
+          lastLogin: new Date(),
+          referralPartnerId: referralPartnerId || existing.referralPartnerId
         }
       });
       const delivery = await sendVerificationEmail({ to: email, code, name: user.fullName });
@@ -64,7 +75,8 @@ export async function POST(request) {
         verificationExpiresAt: verificationExpiry(),
         verificationAttempts: 0,
         onboardingStep: "verify",
-        lastLogin: new Date()
+        lastLogin: new Date(),
+        referralPartnerId
       }
     });
 

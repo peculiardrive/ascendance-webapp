@@ -91,7 +91,8 @@ export async function POST(request) {
         amount: product.amount,
         paymentReference: reference,
         paymentGateway: "Paystack",
-        paymentStatus: "Successful"
+        paymentStatus: "Successful",
+        referralPartnerId: metadata.referralPartnerId || null
       }
     });
   }

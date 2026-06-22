@@ -10,6 +10,16 @@ export async function POST(request) {
     const payload = await readJson(request);
     requireFields(payload, ["productType"]);
 
+    let referralPartnerId = null;
+    if (payload.referralCode) {
+      const partner = await prisma.referralPartner.findUnique({
+        where: { code: String(payload.referralCode).toLowerCase().trim() }
+      });
+      if (partner && partner.isActive) {
+        referralPartnerId = partner.id;
+      }
+    }
+
     let user;
     if (!userId) {
       const email = payload.email?.toLowerCase().trim();
@@ -24,7 +34,15 @@ export async function POST(request) {
         if (user.onboardingStep !== "signup-payment-pending") {
           user = await prisma.user.update({
             where: { id: user.id },
-            data: { onboardingStep: "signup-payment-pending" }
+            data: { 
+              onboardingStep: "signup-payment-pending",
+              referralPartnerId: referralPartnerId || user.referralPartnerId
+            }
+          });
+        } else if (referralPartnerId && !user.referralPartnerId) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { referralPartnerId }
           });
         }
         userId = user.id;
@@ -34,7 +52,8 @@ export async function POST(request) {
             email,
             fullName: "Guest Reader",
             emailVerified: false,
-            onboardingStep: "signup-payment-pending"
+            onboardingStep: "signup-payment-pending",
+            referralPartnerId
           }
         });
         userId = user.id;
@@ -42,6 +61,12 @@ export async function POST(request) {
     } else {
       user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) return json({ ok: false, error: "User not found." }, { status: 404 });
+      if (referralPartnerId && !user.referralPartnerId) {
+        user = await prisma.user.update({
+          where: { id: userId },
+          data: { referralPartnerId }
+        });
+      }
     }
 
     if (user.onboardingStep !== "signup-payment-pending" && !user.emailVerified) {
@@ -132,7 +157,8 @@ export async function POST(request) {
           bookId: product.bookId,
           sectionId: product.sectionId,
           product: product.product,
-          recipientEmail
+          recipientEmail,
+          referralPartnerId: user.referralPartnerId || null
         }
       })
     });
