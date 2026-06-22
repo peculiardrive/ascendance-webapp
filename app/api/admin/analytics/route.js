@@ -43,21 +43,28 @@ export async function GET(request) {
     });
 
     // Popular chapters view counts based on UserActivity
-    const chapterViews = await prisma.userActivity.groupBy({
-      by: ["details"],
+    const chapterViews = await prisma.userActivity.findMany({
       where: { action: "VIEW_CHAPTER" },
-      _count: { id: true }
+      select: { details: true }
     });
 
-    // Format chapter views
-    const formattedChapterViews = chapterViews.map(view => {
+    const chapterCounts = {};
+    for (const view of chapterViews) {
       const details = view.details;
-      return {
-        chapterTitle: details?.chapterTitle || "Unknown Chapter",
-        bookTitle: details?.bookTitle || "Unknown Book",
-        count: view._count.id
-      };
-    }).sort((a, b) => b.count - a.count).slice(0, 10);
+      const chapterId = details?.chapterId || "unknown";
+      if (!chapterCounts[chapterId]) {
+        chapterCounts[chapterId] = {
+          chapterTitle: details?.chapterTitle || "Unknown Chapter",
+          bookTitle: details?.bookTitle || "Unknown Book",
+          count: 0
+        };
+      }
+      chapterCounts[chapterId].count++;
+    }
+
+    const formattedChapterViews = Object.values(chapterCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
 
     // Recent 100 activities
     const recentActivities = await prisma.userActivity.findMany({
