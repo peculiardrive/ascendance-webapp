@@ -3298,8 +3298,8 @@ function ProfileView({ user, progress, purchases, gifts, onProfile, onChangePass
 
       <footer className="profile-footer" style={{ marginTop: '48px', paddingBlock: '24px 12px', borderTop: '1px solid rgba(128, 105, 90, 0.15)', textAlign: 'center', display: 'grid', gap: '8px' }}>
         <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--muted)' }}>For support, inquiries or assistance, email us at:</p>
-        <a href="mailto:ascendance-trilogy@gmail.com" style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--app-purple)', textDecoration: 'none', transition: 'opacity 0.2s' }} className="support-email-link">
-          ascendance-trilogy@gmail.com
+        <a href="mailto:ascendance.thetrilogy@gmail.com" style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--app-purple)', textDecoration: 'none', transition: 'opacity 0.2s' }} className="support-email-link">
+          ascendance.thetrilogy@gmail.com
         </a>
       </footer>
     </div>
