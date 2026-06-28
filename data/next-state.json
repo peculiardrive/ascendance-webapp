@@ -17485,57 +17485,7 @@
     }
   ],
   "notifications": [],
-  "partners": [
-    {
-      "id": "partner-ada",
-      "email": "ada@example.com",
-      "name": "AdaReads",
-      "country": "NG",
-      "circle": "Regent",
-      "amount": 450,
-      "currency": "USD",
-      "remark": {
-        "id": "remark-ada",
-        "title": "Reader reflection",
-        "content": "The opening feels cinematic. I like that the story asks spiritual questions without slowing the pace.",
-        "likes": 1,
-        "likedBy": [
-          "visitor-lwm4372"
-        ],
-        "comments": [
-          {
-            "id": "pc-1",
-            "user": "Chuks Asoegwu",
-            "country": "NG",
-            "avatar": "CA",
-            "text": "Agreed, it is extremely well written and visually inspiring!",
-            "createdAt": "2026-05-28T13:30:00.000Z"
-          }
-        ],
-        "createdAt": "2026-05-28T12:00:00.000Z"
-      },
-      "createdAt": "2026-05-28T12:00:00.000Z"
-    },
-    {
-      "id": "partner-chuks",
-      "email": "chuks@example.com",
-      "name": "Chuks Asoegwu",
-      "country": "NG",
-      "circle": "Ivory",
-      "amount": 250,
-      "currency": "USD",
-      "remark": {
-        "id": "remark-chuks",
-        "title": "Legacy Support",
-        "content": "Supporting this because of the message and quality of the production.",
-        "likes": 0,
-        "likedBy": [],
-        "comments": [],
-        "createdAt": "2026-05-28T12:30:00.000Z"
-      },
-      "createdAt": "2026-05-28T12:30:00.000Z"
-    }
-  ],
+  "partners": [],
   "settings": {
     "bookOnePrice": 3522,
     "bookTwoPrice": 4882,
