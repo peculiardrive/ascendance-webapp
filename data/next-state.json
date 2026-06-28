@@ -17487,25 +17487,6 @@
   "notifications": [],
   "partners": [
     {
-      "id": "partner-e49e8e41-85c6-4bf0-ad65-a8e1d288d7ef",
-      "email": "mykeverest@gmail.com",
-      "name": "Test Leaders",
-      "country": "NG",
-      "circle": "Regent",
-      "amount": 612000,
-      "currency": "NGN",
-      "remark": {
-        "id": "remark-29abaa9e-9690-4750-8e31-a91b861345cc",
-        "title": "Nice",
-        "content": "Very nice",
-        "likes": 0,
-        "likedBy": [],
-        "comments": [],
-        "createdAt": "2026-06-28T10:44:13.373Z"
-      },
-      "createdAt": "2026-06-28T10:43:46.010Z"
-    },
-    {
       "id": "partner-ada",
       "email": "ada@example.com",
       "name": "AdaReads",
