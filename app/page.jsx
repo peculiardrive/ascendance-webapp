@@ -4778,8 +4778,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                               </td>
                               <td style={{ padding: "12px" }}>
                                 <span className="admin-role-badge" style={{
-                                  background: act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" ? "var(--app-gold)" : act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
-                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" || act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" ? "white" : "var(--ink)"
+                                  background: act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" || act.action === "PARTNER_DONATION" ? "var(--app-gold)" : act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
+                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" || act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" || act.action === "PARTNER_DONATION" ? "white" : "var(--ink)"
                                 }}>
                                   {act.action}
                                 </span>

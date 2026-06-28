@@ -96,15 +96,19 @@ export async function GET(request) {
         }, {}),
         popularChapters: formattedChapterViews
       },
-      activities: recentActivities.map(a => ({
-        id: a.id,
-        email: a.email || (a.user ? a.user.email : "Guest"),
-        fullName: a.user ? a.user.fullName : "Guest Reader",
-        action: a.action,
-        details: a.details,
-        device: a.device,
-        createdAt: a.createdAt
-      }))
+      activities: recentActivities.map(a => {
+        const details = typeof a.details === 'object' && a.details !== null ? a.details : {};
+        const displayName = details.donorName || details.fullName || (a.user ? a.user.fullName : "Guest Reader");
+        return {
+          id: a.id,
+          email: a.email || (a.user ? a.user.email : "Guest"),
+          fullName: displayName,
+          action: a.action,
+          details: a.details,
+          device: a.device,
+          createdAt: a.createdAt
+        };
+      })
     });
   } catch (error) {
     console.error("Failed to fetch analytics:", error);

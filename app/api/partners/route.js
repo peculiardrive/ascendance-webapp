@@ -1,5 +1,6 @@
 import { json, readJson, readState, writeState, uid } from "@/lib/store";
 import { assertSameOrigin } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 
 const CIRCLE_ORDER = {
   "Regent": 1,
@@ -61,6 +62,29 @@ export async function POST(request) {
 
       state.partners.unshift(partner);
       await writeState(state);
+
+      // Log the activity to database
+      try {
+        const userAgent = request.headers.get("user-agent") || "";
+        const isMobile = /mobile|android|iphone|ipad|phone/i.test(userAgent);
+        const device = isMobile ? "Mobile" : "Desktop";
+        await prisma.userActivity.create({
+          data: {
+            action: "PARTNER_DONATION",
+            email: email.trim().toLowerCase(),
+            device,
+            details: {
+              donorName: fullName.trim(),
+              circle,
+              amount: Number(amount),
+              currency: currency || "NGN"
+            }
+          }
+        });
+      } catch (logErr) {
+        console.error("Failed to log partner donation activity:", logErr);
+      }
+
       return json({ ok: true, partner });
     }
 
