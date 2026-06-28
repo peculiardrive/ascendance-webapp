@@ -4010,7 +4010,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")}>Users</button>
             <button className={`admin-nav-btn ${activeTab === "referrals" ? "is-active" : ""}`} onClick={() => setActiveTab("referrals")}>Referrals</button>
             <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")}>Analytics</button>
-            <button className={`admin-nav-btn ${activeTab === "movie-partners" ? "is-active" : ""}`} onClick={() => setActiveTab("movie-partners")}>Movie Partners</button>
+            <button className={`admin-nav-btn ${activeTab === "movie-partners" ? "is-active" : ""}`} onClick={() => setActiveTab("movie-partners")}>Partners</button>
             <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")}>Recycle Bin</button>
           </nav>
           <div className="admin-sidebar-footer">
@@ -4019,7 +4019,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className="ghost-btn" onClick={onLogout} style={{ width: "100%" }}>Logout</button>
           </div>
         </aside>
-
+ 
       <main className="admin-content">
         <div className="admin-header-bar">
           <h1>
@@ -4036,7 +4036,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               : activeTab === "analytics"
               ? "Activity & Analytics"
               : activeTab === "movie-partners"
-              ? "Movie Partners"
+              ? "Partners"
               : "Community Moderation"}
           </h1>
           <button className="ghost-btn" onClick={onRefresh} style={{ background: "white" }}>Refresh Data</button>
