@@ -285,7 +285,10 @@ export default function Home() {
 
           window.setTimeout(() => {
             setSplashFade(true);
+            const queryParams = new URLSearchParams(window.location.search);
+            const viewParam = queryParams.get("view");
             if (onAdminRoute) setView("admin");
+            else if (viewParam) setView(viewParam);
             else if (data.user?.onboardingStep === "done") setView(savedView);
             else setShowTrailer(true);
 
@@ -2204,6 +2207,13 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
         </div>
         <a className="ghost-btn" href="mailto:brandzillatech@gmail.com?subject=Ascendance%20Hardcopy%20Order">Order</a>
       </section>
+      <section className="print-order">
+        <div>
+          <p className="eyebrow">Ascendance – The Movie</p>
+          <h2>Become a Partner</h2>
+        </div>
+        <a className="primary-btn" href="/partners" style={{ width: 'fit-content' }}>Donate</a>
+      </section>
     </div>
   );
 }
@@ -3927,30 +3937,44 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
     }
   }, [selectedBookId, activeBooks]);
 
+  const exitToView = (viewName) => {
+    localStorage.setItem(LAST_VIEW_KEY, viewName);
+    window.location.href = "/";
+  };
+
   return (
-    <div className="admin-layout" style={{ flexDirection: "column" }}>
-      <header className="admin-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 32px", background: "var(--ink)", color: "var(--bg)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <div>
-            <p className="eyebrow" style={{ margin: "0 0 4px 0", color: "rgba(255,255,255,0.5)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>BrandZilla</p>
-            <h2 style={{ margin: 0, color: "white", fontSize: "1.2rem" }}>Ascendance Admin</h2>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div className="admin-website-topnav" style={{ display: "flex", alignItems: "center", gap: "24px", padding: "0 32px", height: "48px", background: "var(--ink)", borderBottom: "1px solid rgba(255,255,255,0.15)", fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", position: "sticky", top: 0, zIndex: 1000 }}>
+        <span style={{ fontWeight: "600", color: "white" }}>Website Navigation:</span>
+        <button onClick={() => exitToView("home")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Home</button>
+        <button onClick={() => exitToView("books")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Store</button>
+        <button onClick={() => exitToView("community")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Community</button>
+        <button onClick={() => exitToView("notices")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Gift</button>
+        <button onClick={() => exitToView("profile")} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Profile</button>
+      </div>
+
+      <div className="admin-layout" style={{ flex: 1, minHeight: "auto" }}>
+        <aside className="admin-sidebar" style={{ height: "calc(100vh - 48px)", top: "48px", position: "sticky" }}>
+          <div className="admin-sidebar-header">
+            <p className="eyebrow">BrandZilla</p>
+            <h2>Ascendance Admin</h2>
+            <span className="admin-role-badge">{admin.role}</span>
           </div>
-          <div style={{ display: "flex", gap: "12px", marginLeft: "16px" }}>
-            <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")} style={{ padding: "8px 16px" }}>Overview</button>
-            <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")} style={{ padding: "8px 16px" }}>Library</button>
-            <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")} style={{ padding: "8px 16px" }}>Community</button>
-            <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")} style={{ padding: "8px 16px" }}>Users</button>
-            <button className={`admin-nav-btn ${activeTab === "referrals" ? "is-active" : ""}`} onClick={() => setActiveTab("referrals")} style={{ padding: "8px 16px" }}>Referrals</button>
-            <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px" }}>Analytics</button>
-            <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")} style={{ padding: "8px 16px" }}>Recycle Bin</button>
+          <nav className="admin-nav-links">
+            <button className={`admin-nav-btn ${activeTab === "overview" ? "is-active" : ""}`} onClick={() => setActiveTab("overview")}>Overview</button>
+            <button className={`admin-nav-btn ${activeTab === "library" ? "is-active" : ""}`} onClick={() => setActiveTab("library")}>Library</button>
+            <button className={`admin-nav-btn ${activeTab === "community" ? "is-active" : ""}`} onClick={() => setActiveTab("community")}>Community</button>
+            <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")}>Users</button>
+            <button className={`admin-nav-btn ${activeTab === "referrals" ? "is-active" : ""}`} onClick={() => setActiveTab("referrals")}>Referrals</button>
+            <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")}>Analytics</button>
+            <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")}>Recycle Bin</button>
+          </nav>
+          <div className="admin-sidebar-footer">
+            <p style={{ margin: "0 0 8px 0", color: "rgba(255,255,255,0.6)", fontSize: "0.85rem" }}>Logged in as:</p>
+            <p style={{ margin: "0 0 16px 0", fontWeight: "600", fontSize: "0.95rem" }}>{admin.name}</p>
+            <button className="ghost-btn" onClick={onLogout} style={{ width: "100%" }}>Logout</button>
           </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span className="admin-role-badge">{admin.role}</span>
-          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9rem" }}>{admin.name}</span>
-          <button className="ghost-btn" onClick={onLogout} style={{ color: "var(--bg)", borderColor: "rgba(255,255,255,0.3)", padding: "6px 12px", minHeight: "auto" }}>Logout</button>
-        </div>
-      </header>
+        </aside>
 
       <main className="admin-content">
         <div className="admin-header-bar">
@@ -4607,19 +4631,19 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               <div style={{ display: "grid", gap: "24px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
                   <div className="stat-card" style={{ background: "linear-gradient(135deg, #1e1e2f, #2d2d44)", color: "white" }}>
-                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.totalUsers}</strong>
+                    <strong style={{ fontSize: "2rem", color: "white" }}>{analyticsData.stats.totalUsers}</strong>
                     <span>Total Registered</span>
                   </div>
                   <div className="stat-card" style={{ background: "linear-gradient(135deg, #2d1b33, #4a2852)", color: "white" }}>
-                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.signupsToday}</strong>
+                    <strong style={{ fontSize: "2rem", color: "white" }}>{analyticsData.stats.signupsToday}</strong>
                     <span>Signups Today</span>
                   </div>
                   <div className="stat-card" style={{ background: "linear-gradient(135deg, #1b332d, #285246)", color: "white" }}>
-                    <strong style={{ fontSize: "2rem" }}>{analyticsData.stats.signupsWeek}</strong>
+                    <strong style={{ fontSize: "2rem", color: "white" }}>{analyticsData.stats.signupsWeek}</strong>
                     <span>Signups This Week</span>
                   </div>
                   <div className="stat-card" style={{ background: "linear-gradient(135deg, #332d1b, #524628)", color: "white" }}>
-                    <strong style={{ fontSize: "2rem" }}>
+                    <strong style={{ fontSize: "2rem", color: "white" }}>
                       {analyticsData.stats.actions["PLAY_AUDIO"] || 0}
                     </strong>
                     <span>Audio TTS Plays</span>
@@ -4708,8 +4732,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                               </td>
                               <td style={{ padding: "12px" }}>
                                 <span className="admin-role-badge" style={{
-                                  background: act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
-                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" ? "white" : "var(--ink)"
+                                  background: act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" ? "var(--app-gold)" : act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
+                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" || act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" ? "white" : "var(--ink)"
                                 }}>
                                   {act.action}
                                 </span>
@@ -4729,5 +4753,6 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
         )}
       </main>
     </div>
+  </div>
   );
 }

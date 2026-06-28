@@ -17485,6 +17485,76 @@
     }
   ],
   "notifications": [],
+  "partners": [
+    {
+      "id": "partner-e49e8e41-85c6-4bf0-ad65-a8e1d288d7ef",
+      "email": "mykeverest@gmail.com",
+      "name": "Test Leaders",
+      "country": "NG",
+      "circle": "Regent",
+      "amount": 612000,
+      "currency": "NGN",
+      "remark": {
+        "id": "remark-29abaa9e-9690-4750-8e31-a91b861345cc",
+        "title": "Nice",
+        "content": "Very nice",
+        "likes": 0,
+        "likedBy": [],
+        "comments": [],
+        "createdAt": "2026-06-28T10:44:13.373Z"
+      },
+      "createdAt": "2026-06-28T10:43:46.010Z"
+    },
+    {
+      "id": "partner-ada",
+      "email": "ada@example.com",
+      "name": "AdaReads",
+      "country": "NG",
+      "circle": "Regent",
+      "amount": 450,
+      "currency": "USD",
+      "remark": {
+        "id": "remark-ada",
+        "title": "Reader reflection",
+        "content": "The opening feels cinematic. I like that the story asks spiritual questions without slowing the pace.",
+        "likes": 1,
+        "likedBy": [
+          "visitor-lwm4372"
+        ],
+        "comments": [
+          {
+            "id": "pc-1",
+            "user": "Chuks Asoegwu",
+            "country": "NG",
+            "avatar": "CA",
+            "text": "Agreed, it is extremely well written and visually inspiring!",
+            "createdAt": "2026-05-28T13:30:00.000Z"
+          }
+        ],
+        "createdAt": "2026-05-28T12:00:00.000Z"
+      },
+      "createdAt": "2026-05-28T12:00:00.000Z"
+    },
+    {
+      "id": "partner-chuks",
+      "email": "chuks@example.com",
+      "name": "Chuks Asoegwu",
+      "country": "NG",
+      "circle": "Ivory",
+      "amount": 250,
+      "currency": "USD",
+      "remark": {
+        "id": "remark-chuks",
+        "title": "Legacy Support",
+        "content": "Supporting this because of the message and quality of the production.",
+        "likes": 0,
+        "likedBy": [],
+        "comments": [],
+        "createdAt": "2026-05-28T12:30:00.000Z"
+      },
+      "createdAt": "2026-05-28T12:30:00.000Z"
+    }
+  ],
   "settings": {
     "bookOnePrice": 3522,
     "bookTwoPrice": 4882,
@@ -17499,5 +17569,5 @@
     "giftLimit": 5,
     "autoApprovePosts": true
   },
-  "serverSavedAt": "2026-06-18T06:08:47.162Z"
+  "serverSavedAt": "2026-06-28T10:44:13.373Z"
 }

@@ -87,6 +87,22 @@ export async function POST(request) {
         }
       });
 
+      // Log GIFT_PURCHASE activity
+      await prisma.userActivity.create({
+        data: {
+          userId,
+          email: user.email,
+          action: "GIFT_PURCHASE",
+          details: {
+            giftId: savedGift.id,
+            recipientEmail: savedGift.recipientEmail,
+            amount: product.amount,
+            reference
+          },
+          device: "Web"
+        }
+      }).catch(err => console.error("Failed to log gift purchase activity:", err));
+
       // Construct baseUrl from request headers
       const protocol = request.headers.get("x-forwarded-proto") || "https";
       const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "www.ascendance-trilogy.com";
@@ -122,9 +138,27 @@ export async function POST(request) {
         amount: product.amount,
         paymentReference: reference,
         paymentGateway: "Paystack",
-        paymentStatus: "Successful"
+        paymentStatus: "Successful",
+        referralPartnerId: metadata.referralPartnerId || null
       }
     });
+
+    // Log PURCHASE activity
+    await prisma.userActivity.create({
+      data: {
+        userId,
+        email: user.email,
+        action: "PURCHASE",
+        details: {
+          purchaseId: savedPurchase.id,
+          productType: product.productType,
+          amount: product.amount,
+          reference
+        },
+        device: "Web"
+      }
+    }).catch(err => console.error("Failed to log purchase activity:", err));
+
     const purchase = {
       ...savedPurchase,
       amount: Number(savedPurchase.amount),

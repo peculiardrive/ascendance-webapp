@@ -61,6 +61,22 @@ export async function POST(request) {
       const senderUser = await prisma.user.findUnique({ where: { id: metadata.userId } });
       const senderName = senderUser ? senderUser.fullName : "A reader";
 
+      // Log GIFT_PURCHASE activity
+      await prisma.userActivity.create({
+        data: {
+          userId: metadata.userId,
+          email: senderUser?.email || null,
+          action: "GIFT_PURCHASE",
+          details: {
+            giftId: savedGift.id,
+            recipientEmail: savedGift.recipientEmail,
+            amount: product.amount,
+            reference
+          },
+          device: "Web"
+        }
+      }).catch(err => console.error("Failed to log gift purchase activity:", err));
+
       // Construct baseUrl from request headers
       const protocol = request.headers.get("x-forwarded-proto") || "https";
       const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "www.ascendance-trilogy.com";
@@ -82,7 +98,7 @@ export async function POST(request) {
 
   const existingPurchase = await prisma.purchase.findUnique({ where: { paymentReference: reference } });
   if (!existingPurchase) {
-    await prisma.purchase.create({
+    const newPurchase = await prisma.purchase.create({
       data: {
         userId: metadata.userId,
         productType: product.productType,
@@ -95,6 +111,25 @@ export async function POST(request) {
         referralPartnerId: metadata.referralPartnerId || null
       }
     });
+
+    // Retrieve the user to get their email
+    const user = await prisma.user.findUnique({ where: { id: metadata.userId } });
+
+    // Log PURCHASE activity
+    await prisma.userActivity.create({
+      data: {
+        userId: metadata.userId,
+        email: user?.email || null,
+        action: "PURCHASE",
+        details: {
+          purchaseId: newPurchase.id,
+          productType: product.productType,
+          amount: product.amount,
+          reference
+        },
+        device: "Web"
+      }
+    }).catch(err => console.error("Failed to log purchase activity:", err));
   }
 
   const state = await readState();
