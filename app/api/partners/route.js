@@ -140,6 +140,16 @@ export async function POST(request) {
       return json({ ok: true, partner });
     }
 
+    if (payload.action === "delete") {
+      const { partnerId } = payload;
+      if (!partnerId) {
+        return json({ ok: false, error: "Missing partnerId" }, { status: 400 });
+      }
+      state.partners = (state.partners || []).filter(p => p.id !== partnerId);
+      await writeState(state);
+      return json({ ok: true });
+    }
+
     return json({ ok: false, error: "Invalid action" }, { status: 400 });
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: 500 });

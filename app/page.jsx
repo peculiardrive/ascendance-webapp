@@ -3686,6 +3686,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [partners, setPartners] = useState([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
+  const [moviePartners, setMoviePartners] = useState([]);
+  const [loadingMoviePartners, setLoadingMoviePartners] = useState(false);
 
   const activeBooks = useMemo(() => books.filter(b => !b.deleted), [books]);
   const deletedBooks = useMemo(() => books.filter(b => b.deleted), [books]);
@@ -3824,6 +3826,47 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const fetchMoviePartners = () => {
+    setLoadingMoviePartners(true);
+    fetch("/api/partners")
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) setMoviePartners(data.partners || []);
+        setLoadingMoviePartners(false);
+      })
+      .catch(e => {
+        console.error("Failed to fetch movie partners", e);
+        setLoadingMoviePartners(false);
+      });
+  };
+
+  useEffect(() => {
+    if (activeTab === "movie-partners") {
+      fetchMoviePartners();
+    }
+  }, [activeTab]);
+
+  const handleDeleteMoviePartner = async (partnerId) => {
+    if (typeof window !== "undefined" && !window.confirm("Are you sure you want to delete this legacy partner entry?")) return;
+    try {
+      const res = await fetch("/api/partners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", partnerId })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (notify) notify("Legacy partner entry deleted successfully.");
+        fetchMoviePartners();
+      } else {
+        alert(data.error || "Failed to delete partner");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error deleting partner");
     }
   };
 
@@ -3967,6 +4010,7 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
             <button className={`admin-nav-btn ${activeTab === "users" ? "is-active" : ""}`} onClick={() => setActiveTab("users")}>Users</button>
             <button className={`admin-nav-btn ${activeTab === "referrals" ? "is-active" : ""}`} onClick={() => setActiveTab("referrals")}>Referrals</button>
             <button className={`admin-nav-btn ${activeTab === "analytics" ? "is-active" : ""}`} onClick={() => setActiveTab("analytics")}>Analytics</button>
+            <button className={`admin-nav-btn ${activeTab === "movie-partners" ? "is-active" : ""}`} onClick={() => setActiveTab("movie-partners")}>Movie Partners</button>
             <button className={`admin-nav-btn ${activeTab === "trash" ? "is-active" : ""}`} onClick={() => setActiveTab("trash")}>Recycle Bin</button>
           </nav>
           <div className="admin-sidebar-footer">
@@ -3991,6 +4035,8 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
               ? "Referral Partners"
               : activeTab === "analytics"
               ? "Activity & Analytics"
+              : activeTab === "movie-partners"
+              ? "Movie Partners"
               : "Community Moderation"}
           </h1>
           <button className="ghost-btn" onClick={onRefresh} style={{ background: "white" }}>Refresh Data</button>
@@ -4749,6 +4795,85 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "movie-partners" && (
+          <div className="admin-tab-pane">
+            <div className="admin-library-card" style={{ width: "100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h2>Movie Legacy Partners</h2>
+                <button className="primary-btn" onClick={() => fetchMoviePartners()} style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem" }}>
+                  Refresh List
+                </button>
+              </div>
+
+              {loadingMoviePartners ? (
+                <div style={{ textAlign: "center", padding: "20px", color: "var(--brand)" }}>Loading partners...</div>
+              ) : moviePartners.length === 0 ? (
+                <p className="muted">No partners registered yet.</p>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Partner</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Contact</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Circle</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Amount</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Remark / Comment</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {moviePartners.map(p => (
+                        <tr key={p.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                          <td style={{ padding: "12px" }}>
+                            <strong style={{ color: "var(--ink)", display: "block" }}>{p.name}</strong>
+                            <small style={{ color: "var(--muted)" }}>Registered: {new Date(p.createdAt).toLocaleDateString()}</small>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span style={{ fontSize: "0.9rem", color: "var(--ink)" }}>{p.email}</span>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span className="admin-role-badge" style={{ 
+                              background: p.circle === "Regent" ? "rgba(72, 0, 110, 0.1)" : p.circle === "Collectors" ? "rgba(201, 157, 66, 0.1)" : "rgba(0,0,0,0.06)", 
+                              color: p.circle === "Regent" ? "var(--app-purple)" : p.circle === "Collectors" ? "#c99d42" : "var(--ink)"
+                            }}>
+                              {p.circle}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <strong style={{ color: "var(--brand)" }}>
+                              {p.currency} {Number(p.amount || 0).toLocaleString()}
+                            </strong>
+                          </td>
+                          <td style={{ padding: "12px", maxWidth: "300px" }}>
+                            {p.remark ? (
+                              <div>
+                                <strong style={{ display: "block", fontSize: "0.85rem", color: "var(--app-purple)" }}>{p.remark.title}</strong>
+                                <span style={{ fontSize: "0.82rem", color: "var(--ink)" }}>{p.remark.content}</span>
+                              </div>
+                            ) : (
+                              <span style={{ color: "var(--muted)", fontStyle: "italic", fontSize: "0.85rem" }}>No remark</span>
+                            )}
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <button 
+                              className="danger-btn" 
+                              onClick={() => handleDeleteMoviePartner(p.id)} 
+                              style={{ minHeight: "auto", padding: "6px 12px", fontSize: "0.85rem", borderRadius: "6px" }}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>
