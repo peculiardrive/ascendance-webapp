@@ -2205,14 +2205,15 @@ function BooksView({ books, user, purchases, progress, onRead, onPurchase }) {
           <h2>Order Ascendance hardcopy</h2>
           <p>Prefer paper? Send a request and the publishing team will contact you.</p>
         </div>
-        <a className="ghost-btn" href="mailto:brandzillatech@gmail.com?subject=Ascendance%20Hardcopy%20Order">Order</a>
+        <a className="ghost-btn" href="mailto:brandzillatech@gmail.com?subject=Ascendance%20Hardcopy%20Order" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: '110px', height: '44px', boxSizing: 'border-box' }}>Order</a>
       </section>
       <section className="print-order">
         <div>
           <p className="eyebrow">Ascendance – The Movie</p>
           <h2>Become a Partner</h2>
+          <p>Make a donation and see who is supporting ASCENDANCE Movie Project.</p>
         </div>
-        <a className="primary-btn" href="/partners" style={{ width: 'fit-content' }}>Donate</a>
+        <a className="ghost-btn" href="/partners" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: '110px', height: '44px', boxSizing: 'border-box' }}>Donate</a>
       </section>
     </div>
   );

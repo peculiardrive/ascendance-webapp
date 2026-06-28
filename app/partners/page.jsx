@@ -56,10 +56,10 @@ export default function PartnersPage() {
   const handleCircleChange = (circle) => {
     setDonateCircle(circle);
     let usdAmount = 0;
-    if (circle === "Regent") usdAmount = 450;
-    else if (circle === "Collectors") usdAmount = 350;
-    else if (circle === "Ivory") usdAmount = 250;
-    else if (circle === "Scholars") usdAmount = 150;
+    if (circle === "Regent") usdAmount = 400;
+    else if (circle === "Collectors") usdAmount = 300;
+    else if (circle === "Ivory") usdAmount = 200;
+    else if (circle === "Scholars") usdAmount = 120;
     else if (circle === "Vision Partner") usdAmount = 50;
 
     if (donateCurrency === "USD") {
@@ -318,64 +318,7 @@ export default function PartnersPage() {
           </button>
         </section>
 
-        {/* Circle Tiers Overview (Interactive) */}
-        <section style={{ display: 'grid', gap: '16px' }}>
-          <h2 style={{ fontFamily: 'Georgia, serif', color: 'var(--app-purple)', fontSize: '1.3rem', margin: '0 0 4px 0', textAlign: 'center' }}>Emergence of the Remnant Generation</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-            
-            {/* Regent */}
-            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ background: CIRCLE_COLORS.Regent, color: '#white', color: '#fff', padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '12px' }}>
-                Regent Circle ($450 – $500)
-              </div>
-              <strong style={{ color: 'var(--app-gold)', fontSize: '0.8rem', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>GET</strong>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ink)', lineHeight: '1.4' }}>
-                <strong>Two Packs:</strong> Boxed set of Case-bound (with dust jacket) Ascendance Trilogy.<br />
-                <strong>One Couple's + 3 Offsprings</strong> set of premium quality branded Polo shirts.
-              </p>
-            </div>
 
-            {/* Collectors */}
-            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ background: CIRCLE_COLORS.Collectors, color: '#white', color: '#fff', padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '12px' }}>
-                Collectors Circle ($350 – $400)
-              </div>
-              <strong style={{ color: 'var(--app-gold)', fontSize: '0.8rem', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>GET</strong>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ink)', lineHeight: '1.4' }}>
-                <strong>One Pack:</strong> Boxed set of Case-bound (with dust jacket) Ascendance Trilogy.<br />
-                <strong>One Couple's</strong> set of premium quality branded Polo shirts.
-              </p>
-            </div>
-
-            {/* Ivory */}
-            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ background: CIRCLE_COLORS.Ivory, color: '#white', color: '#fff', padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '12px' }}>
-                Ivory Circle ($250 – $300)
-              </div>
-              <strong style={{ color: 'var(--app-gold)', fontSize: '0.8rem', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>GET</strong>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ink)', lineHeight: '1.4' }}>
-                <strong>One Pack:</strong> Set of Ascendance Trilogy Novel size, Small print, Perfect-bound.<br />
-                <strong>One Couple's</strong> set of premium quality Round-neck T-shirts.
-              </p>
-            </div>
-
-            {/* Scholars */}
-            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ background: CIRCLE_COLORS.Scholars, color: '#white', color: '#fff', padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '12px' }}>
-                Scholars Circle ($150 – $200)
-              </div>
-              <strong style={{ color: 'var(--app-gold)', fontSize: '0.8rem', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>GET</strong>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ink)', lineHeight: '1.4' }}>
-                <strong>One Pack:</strong> Set of Ascendance Trilogy Novel size, Small print, Perfect-bound.<br />
-                <strong>One premium quality</strong> Round-neck T-shirt.
-              </p>
-            </div>
-
-          </div>
-          <p style={{ margin: '8px 0 0 0', fontSize: '0.75rem', color: 'var(--muted)', textAlign: 'center', fontStyle: 'italic' }}>
-            Note: 1. Printed copies will be ready before the Launch Date and shipped to donors. 2. Donation includes cost of international Delivery of Book(s) and Shirt(s).
-          </p>
-        </section>
 
         {/* Partners / Donors Feed */}
         <section style={{ display: 'grid', gap: '16px' }}>
@@ -547,10 +490,6 @@ export default function PartnersPage() {
               <button onClick={() => setShowDonateForm(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '4px', color: 'var(--muted)' }}>&times;</button>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-              <img src="/assets/brand/ascendance-wordmark.png" alt="Ascendance The Trilogy" style={{ height: '22px', objectFit: 'contain' }} />
-            </div>
-
             <form onSubmit={handleDonateSubmit} style={{ display: 'grid', gap: '16px' }}>
               <div>
                 <input 
@@ -584,7 +523,8 @@ export default function PartnersPage() {
                 />
               </div>
 
-              <div>
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--brand)', marginBottom: '6px' }}>Select Circle</label>
                 <select 
                   name="circle" 
                   value={donateCircle}
@@ -593,34 +533,37 @@ export default function PartnersPage() {
                   style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand)', fontSize: '0.95rem', background: '#fffcf7' }}
                 >
                   <option value="" disabled>Select Circle</option>
-                  <option value="Regent">Regent ($450 – $500)</option>
-                  <option value="Collectors">Collectors ($350 – $400)</option>
-                  <option value="Ivory">Ivory ($250 – $300)</option>
-                  <option value="Scholars">Scholars ($150 – $200)</option>
+                  <option value="Regent">Regent ($400 - $500)</option>
+                  <option value="Collectors">Collectors ($300 - $350)</option>
+                  <option value="Ivory">Ivory ($200 - $250)</option>
+                  <option value="Scholars">Scholars ($120 - $150)</option>
                   <option value="Vision Partner">Vision Partner (Giving because I believe in the mission)</option>
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <select 
-                  name="currency" 
-                  value={donateCurrency}
-                  onChange={(e) => handleCurrencyChange(e.target.value)}
-                  style={{ width: '90px', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand)', fontSize: '0.95rem', background: '#fffcf7' }}
-                >
-                  <option value="NGN">NGN</option>
-                  <option value="USD">USD</option>
-                </select>
-                <input 
-                  type="number" 
-                  name="amount" 
-                  value={donateAmount}
-                  onChange={(e) => setDonateAmount(e.target.value)}
-                  placeholder="Amount" 
-                  required 
-                  min={1}
-                  style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid var(--brand)', fontSize: '0.95rem', background: '#fffcf7' }} 
-                />
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--brand)', marginBottom: '6px' }}>Donation Amount</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select 
+                    name="currency" 
+                    value={donateCurrency}
+                    onChange={(e) => handleCurrencyChange(e.target.value)}
+                    style={{ width: '90px', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand)', fontSize: '0.95rem', background: '#fffcf7' }}
+                  >
+                    <option value="NGN">NGN</option>
+                    <option value="USD">USD</option>
+                  </select>
+                  <input 
+                    type="number" 
+                    name="amount" 
+                    value={donateAmount}
+                    onChange={(e) => setDonateAmount(e.target.value)}
+                    placeholder="Amount" 
+                    required 
+                    min={1}
+                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid var(--brand)', fontSize: '0.95rem', background: '#fffcf7' }} 
+                  />
+                </div>
               </div>
 
               <button type="submit" className="primary-btn" style={{ width: '100%', minHeight: '48px', marginTop: '8px' }}>Submit</button>
