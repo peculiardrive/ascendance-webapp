@@ -66,8 +66,13 @@ export async function GET(request) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Recent 100 activities
+    // Recent 100 activities (excluding partner donations)
     const recentActivities = await prisma.userActivity.findMany({
+      where: {
+        action: {
+          not: "PARTNER_DONATION"
+        }
+      },
       take: 100,
       orderBy: { createdAt: "desc" },
       include: {

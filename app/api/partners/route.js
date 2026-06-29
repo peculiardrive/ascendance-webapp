@@ -26,7 +26,27 @@ export async function GET(request) {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
-    return json({ ok: true, partners: sorted });
+    const donationLogs = await prisma.userActivity.findMany({
+      where: { action: "PARTNER_DONATION" },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return json({
+      ok: true,
+      partners: sorted,
+      donationLogs: donationLogs.map(a => {
+        const details = typeof a.details === 'object' && a.details !== null ? a.details : {};
+        return {
+          id: a.id,
+          email: a.email || "Guest",
+          fullName: details.donorName || details.fullName || "Guest Reader",
+          action: a.action,
+          details,
+          device: a.device,
+          createdAt: a.createdAt
+        };
+      })
+    });
   } catch (error) {
     return json({ ok: false, error: error.message }, { status: 500 });
   }

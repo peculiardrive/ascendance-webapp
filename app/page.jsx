@@ -3685,10 +3685,12 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
   const [partners, setPartners] = useState([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [moviePartners, setMoviePartners] = useState([]);
   const [loadingMoviePartners, setLoadingMoviePartners] = useState(false);
+  const [donationLogs, setDonationLogs] = useState([]);
 
   const activeBooks = useMemo(() => books.filter(b => !b.deleted), [books]);
   const deletedBooks = useMemo(() => books.filter(b => b.deleted), [books]);
@@ -3735,14 +3737,20 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
   useEffect(() => {
     if (activeTab === "analytics") {
       setLoadingAnalytics(true);
+      setAnalyticsError("");
       fetch("/api/admin/analytics")
         .then(res => res.json())
         .then(data => {
-          if (data.ok) setAnalyticsData(data);
+          if (data.ok) {
+            setAnalyticsData(data);
+          } else {
+            setAnalyticsError(data.error || "Failed to fetch analytics data.");
+          }
           setLoadingAnalytics(false);
         })
         .catch(e => {
           console.error("Failed to fetch analytics", e);
+          setAnalyticsError(e.message || "Failed to fetch analytics data.");
           setLoadingAnalytics(false);
         });
     }
@@ -3835,7 +3843,10 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
     fetch("/api/partners")
       .then(res => res.json())
       .then(data => {
-        if (data.ok) setMoviePartners(data.partners || []);
+        if (data.ok) {
+          setMoviePartners(data.partners || []);
+          setDonationLogs(data.donationLogs || []);
+        }
         setLoadingMoviePartners(false);
       })
       .catch(e => {
@@ -4670,10 +4681,13 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
 
         {activeTab === "analytics" && (
           <div className="admin-tab-pane">
-            {loadingAnalytics ? (
+            {loadingAnalytics || (!analyticsData && !analyticsError) ? (
               <div style={{ textAlign: "center", padding: "40px", color: "var(--brand)" }}>Loading analytics...</div>
-            ) : !analyticsData ? (
-              <p className="muted">Failed to load analytics data.</p>
+            ) : analyticsError ? (
+              <div style={{ textAlign: "center", padding: "40px" }} className="muted">
+                <p>Failed to load analytics data.</p>
+                <small style={{ color: "var(--danger)" }}>{analyticsError}</small>
+              </div>
             ) : (
               <div style={{ display: "grid", gap: "24px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
@@ -4886,6 +4900,51 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                               Delete
                             </button>
                           </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="admin-library-card" style={{ width: "100%", marginTop: "24px" }}>
+              <h2>Live Partner Donation Activities Log</h2>
+              {donationLogs.length === 0 ? (
+                <p className="muted">No donation activities logged yet.</p>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Donor</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Email</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Circle</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Amount</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Device</th>
+                        <th style={{ padding: "12px", color: "var(--brand)" }}>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {donationLogs.map(log => (
+                        <tr key={log.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}><strong>{log.fullName}</strong></td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}>{log.email}</td>
+                          <td style={{ padding: "12px" }}>
+                            <span className="admin-role-badge" style={{ 
+                              background: log.details.circle === "Regent" ? "rgba(72, 0, 110, 0.1)" : log.details.circle === "Collectors" ? "rgba(201, 157, 66, 0.1)" : "rgba(0,0,0,0.06)", 
+                              color: log.details.circle === "Regent" ? "var(--app-purple)" : log.details.circle === "Collectors" ? "#c99d42" : "var(--ink)"
+                            }}>
+                              {log.details.circle}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <strong style={{ color: "var(--brand)" }}>
+                              {log.details.currency || "NGN"} {Number(log.details.amount || 0).toLocaleString()}
+                            </strong>
+                          </td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}>{log.device || "—"}</td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}>{new Date(log.createdAt).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
