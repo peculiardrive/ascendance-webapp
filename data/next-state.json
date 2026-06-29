@@ -17485,27 +17485,7 @@
     }
   ],
   "notifications": [],
-  "partners": [
-    {
-      "id": "partner-chuks",
-      "email": "chuks@example.com",
-      "name": "Chuks Asoegwu",
-      "country": "NG",
-      "circle": "Ivory",
-      "amount": 250,
-      "currency": "USD",
-      "remark": {
-        "id": "remark-chuks",
-        "title": "Legacy Support",
-        "content": "Supporting this because of the message and quality of the production.",
-        "likes": 0,
-        "likedBy": [],
-        "comments": [],
-        "createdAt": "2026-05-28T12:30:00.000Z"
-      },
-      "createdAt": "2026-05-28T12:30:00.000Z"
-    }
-  ],
+  "partners": [],
   "settings": {
     "bookOnePrice": 3522,
     "bookTwoPrice": 4882,
