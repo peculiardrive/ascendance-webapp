@@ -48,9 +48,12 @@ export async function GET(request) {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
+    // Filter public partners to only show entries with remarks/reflections
+    const publicPartners = sorted.filter(p => p.remark && p.remark.content && p.remark.content.trim() !== "");
+
     return json({
       ok: true,
-      partners: sorted,
+      partners: publicPartners,
       donationLogs: sorted
     });
   } catch (error) {
