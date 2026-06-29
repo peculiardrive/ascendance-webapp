@@ -4780,10 +4780,28 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                               <td style={{ padding: "12px" }}>
                                 <span className="admin-role-badge" style={{
                                   background: act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" || act.action === "PARTNER_DONATION" ? "var(--app-gold)" : act.action === "LOGIN" || act.action === "SIGNUP" ? "var(--app-green)" : act.action === "VIEW_CHAPTER" ? "var(--app-purple)" : "var(--line)",
-                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" || act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" || act.action === "PARTNER_DONATION" ? "white" : "var(--ink)"
+                                  color: act.action === "LOGIN" || act.action === "SIGNUP" || act.action === "VIEW_CHAPTER" || act.action === "PURCHASE" || act.action === "GIFT_PURCHASE" || act.action === "PARTNER_DONATION" ? "white" : "var(--ink)",
+                                  marginBottom: "4px",
+                                  display: "inline-block"
                                 }}>
                                   {act.action}
                                 </span>
+                                {act.action === "PARTNER_DONATION" && act.details && (
+                                  <div style={{ fontSize: "0.8rem", color: "var(--ink)", marginTop: "2px" }}>
+                                    <strong style={{ color: "var(--app-purple)" }}>{act.details.circle}</strong> • {act.details.currency || "NGN"} {Number(act.details.amount || 0).toLocaleString()}
+                                  </div>
+                                )}
+                                {act.action === "VIEW_CHAPTER" && act.details && (
+                                  <div style={{ fontSize: "0.8rem", color: "var(--muted)", marginTop: "2px" }}>
+                                    {act.details.bookTitle} — {act.details.chapterTitle || act.details.chapterId}
+                                  </div>
+                                )}
+                                {(act.action === "PURCHASE" || act.action === "GIFT_PURCHASE") && act.details && (
+                                  <div style={{ fontSize: "0.8rem", color: "var(--ink)", marginTop: "2px" }}>
+                                    {act.details.amount ? `${act.details.currency || "NGN"} ${Number(act.details.amount).toLocaleString()}` : ""}
+                                    {act.details.recipientEmail ? ` (for ${act.details.recipientEmail})` : ""}
+                                  </div>
+                                )}
                               </td>
                               <td style={{ padding: "12px", color: "var(--ink)" }}>{act.device || "—"}</td>
                               <td style={{ padding: "12px", color: "var(--ink)" }}>{new Date(act.createdAt).toLocaleString()}</td>
