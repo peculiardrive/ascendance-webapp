@@ -31,7 +31,8 @@ export async function GET(request) {
         amount: Number(details.amount || 0),
         currency: details.currency || "NGN",
         remark: details.remark || null,
-        createdAt: a.createdAt
+        createdAt: a.createdAt,
+        device: a.device || "—"
       };
     });
 

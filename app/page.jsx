@@ -4928,19 +4928,19 @@ function AdminView({ admin, books, posts, purchases, gifts, onLogout, onModerate
                     <tbody>
                       {donationLogs.map(log => (
                         <tr key={log.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                          <td style={{ padding: "12px", color: "var(--ink)" }}><strong>{log.fullName}</strong></td>
+                          <td style={{ padding: "12px", color: "var(--ink)" }}><strong>{log.name || log.fullName}</strong></td>
                           <td style={{ padding: "12px", color: "var(--ink)" }}>{log.email}</td>
                           <td style={{ padding: "12px" }}>
                             <span className="admin-role-badge" style={{ 
-                              background: log.details.circle === "Regent" ? "rgba(72, 0, 110, 0.1)" : log.details.circle === "Collectors" ? "rgba(201, 157, 66, 0.1)" : "rgba(0,0,0,0.06)", 
-                              color: log.details.circle === "Regent" ? "var(--app-purple)" : log.details.circle === "Collectors" ? "#c99d42" : "var(--ink)"
+                              background: log.circle === "Regent" ? "rgba(72, 0, 110, 0.1)" : log.circle === "Collectors" ? "rgba(201, 157, 66, 0.1)" : "rgba(0,0,0,0.06)", 
+                              color: log.circle === "Regent" ? "var(--app-purple)" : log.circle === "Collectors" ? "#c99d42" : "var(--ink)"
                             }}>
-                              {log.details.circle}
+                              {log.circle}
                             </span>
                           </td>
                           <td style={{ padding: "12px" }}>
                             <strong style={{ color: "var(--brand)" }}>
-                              {log.details.currency || "NGN"} {Number(log.details.amount || 0).toLocaleString()}
+                              {log.currency || "NGN"} {Number(log.amount || 0).toLocaleString()}
                             </strong>
                           </td>
                           <td style={{ padding: "12px", color: "var(--ink)" }}>{log.device || "—"}</td>
