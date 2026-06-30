@@ -10,7 +10,7 @@ const CIRCLE_COLORS = {
   "Regent": "linear-gradient(135deg, #48006e 0%, #30004a 100%)",
   "Collectors": "linear-gradient(135deg, #c99d42 0%, #a67c24 100%)",
   "Ivory": "linear-gradient(135deg, #a72c33 0%, #7c1a20 100%)",
-  "Scholars": "linear-gradient(135deg, #334155 0%, #1e293b 100%)",
+  "Remnant Circle": "linear-gradient(135deg, #334155 0%, #1e293b 100%)",
   "Vision Partner": "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
 };
 
@@ -59,7 +59,7 @@ export default function PartnersPage() {
     if (circle === "Regent") usdAmount = 400;
     else if (circle === "Collectors") usdAmount = 300;
     else if (circle === "Ivory") usdAmount = 200;
-    else if (circle === "Scholars") usdAmount = 120;
+    else if (circle === "Remnant Circle") usdAmount = 120;
     else if (circle === "Vision Partner") usdAmount = 50;
 
     if (donateCurrency === "USD") {
@@ -536,7 +536,7 @@ export default function PartnersPage() {
                   <option value="Regent">Regent ($400 - $500)</option>
                   <option value="Collectors">Collectors ($300 - $350)</option>
                   <option value="Ivory">Ivory ($200 - $250)</option>
-                  <option value="Scholars">Scholars ($120 - $150)</option>
+                  <option value="Remnant Circle">Remnant Circle ($120 - $150)</option>
                   <option value="Vision Partner">Vision Partner (Giving because I believe in the mission)</option>
                 </select>
               </div>
