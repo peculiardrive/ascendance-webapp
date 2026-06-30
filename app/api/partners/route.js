@@ -6,7 +6,7 @@ const CIRCLE_ORDER = {
   "Regent": 1,
   "Collectors": 2,
   "Ivory": 3,
-  "Remnant Circle": 4,
+  "Remnant": 4,
   "Vision Partner": 5
 };
 
@@ -37,7 +37,7 @@ export async function GET(request) {
 
     const allPartners = [...partners, ...dbPartners];
 
-    // Sort partners: Regent Circle > Collectors > Ivory > Remnant Circle > Vision Partner
+    // Sort partners: Regent Circle > Collectors > Ivory > Remnant > Vision Partner
     // For same circle, sort by createdAt (newest first)
     const sorted = allPartners.sort((a, b) => {
       const orderA = CIRCLE_ORDER[a.circle] || 99;
